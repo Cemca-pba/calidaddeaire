@@ -1201,22 +1201,29 @@ function renderizarVistaMensual(contam, datosFiltrados) {
     </table>`;
 }
 
-const urlScript = "https://script.google.com/macros/s/AKfycbyGO2Fu9yelBOcoSuySPTLPNdebxRZM172hLr_SiCR3pyHMBHvfy2cfu6jTevi1HTt1/exec";
+const urlScript = "https://script.google.com/macros/s/AKfycbwQuKxZtFy1Hz-cp-x9VCgNKhnu-S8q_EKUBeJpcW3FuZwhk5vkDkdRkCyxlxdpRFi4/exec"; 
 
-function enviarAGoogle(datos) {
-  fetch(urlScript, {
-    method: "POST",
-    body: JSON.stringify(datos)
-  })
-  .then(res => res.json())
-  .then(resultado => {
-    if(resultado.result === "success") {
-      alert("¡El Ministerio recibió tus datos!");
-    }
-  });
+async function cargarDatosIniciales() {
+  try {
+    // Llamamos al script pidiendo la acción "obtenerEstaciones"
+    const response = await fetch(`${urlScript}?action=obtenerEstaciones`);
+    const data = await response.json();
+    
+    // Llamamos a tu función original que dibuja todo
+    renderizarTodo(data); 
+    
+    // Ocultamos el cargando
+    document.getElementById('loading').style.display = 'none';
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
+
+// Ejecutar al cargar la página
+window.onload = cargarDatosIniciales;
 
     function cerrarPanel() { document.getElementById('details-panel').classList.remove('active'); }
   </script>
 </body>
+
 </html>
