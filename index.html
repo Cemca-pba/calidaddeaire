@@ -487,7 +487,7 @@ async function cargarEstacionesIniciales() {
 // 3. Ejecutamos la función al cargar la ventana
 window.onload = cargarEstacionesIniciales;
 
-function abrirDetalles(estacion) {
+async function abrirDetalles(estacion) {
   // 1. RESET DE PESTAÑAS Y ESTADO VISUAL
   document.querySelectorAll('.tab-pane').forEach(pane => pane.style.display = 'none');
   document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
@@ -509,7 +509,6 @@ function abrirDetalles(estacion) {
   // 4. CONFIGURAR PANEL DE DETALLES (GAUGE Y RECOMENDACIONES)
   document.getElementById('details-panel').classList.add('active');
   
-  // Dibujar Gauge y Recomendaciones con el mensaje de "Fuera de línea" si corresponde
   setTimeout(() => {
     dibujarGauge(estacion.calidad, infoICA.color);
     actualizarRecomendaciones(estacion.calidad);
@@ -524,34 +523,38 @@ function abrirDetalles(estacion) {
   sectionHistorico.style.display = 'none';
   areaCharts.innerHTML = ''; 
 
-  // Llamada al servidor para obtener las últimas 24hs
-  google.script.run.withSuccessHandler(function(datos) {
-      loader.style.display = 'none';
-      sectionHistorico.style.display = 'block';
+  // --- CAMBIO CLAVE: Sustitución de google.script.run por FETCH ---
+  try {
+    // Llamamos a tu URL de Google Script pasando la acción y el nombre de la estación
+    const response = await fetch(`${urlScript}?action=obtenerHistorico&estacion=${encodeURIComponent(nombrePuro)}`);
+    const datos = await response.json();
 
-      // VALIDACIÓN: Si el servidor no devuelve datos (Estación caída)
-      if (!datos || !datos.labels || datos.labels.length === 0 || esOffline) {
-        areaCharts.innerHTML = `
-          <div style="text-align:center; padding:30px; background:#f8f9fa; border-radius:10px; border:1px dashed #ced4da; margin-top:20px;">
-            <i class="fas fa-plug-circle-xmark" style="font-size:40px; color:#adb5bd; margin-bottom:15px; display:block;"></i>
-            <strong style="color:#495057; display:block; margin-bottom:5px;">SIN CONEXIÓN EN TIEMPO REAL</strong>
-            <p style="color:#6c757d; font-size:0.85em; margin:0;">
-              La estación no está transmitiendo datos en este momento. 
-              Las mediciones de las últimas 24 horas no están disponibles.
-            </p>
-          </div>`;
-        return;
-      }
+    loader.style.display = 'none';
+    sectionHistorico.style.display = 'block';
 
-      // Si hay datos, dibujar las barras normales
-      dibujarBarras(datos);
-    })
-    .withFailureHandler(function(err) {
-      loader.style.display = 'none';
-      areaCharts.innerHTML = '<p style="color:red; text-align:center; padding:20px;">Error de comunicación con el servidor.</p>';
-      console.error("Error al cargar histórico:", err);
-    })
-    .obtenerHistorico24h(nombrePuro);
+    // VALIDACIÓN: Si el servidor no devuelve datos (Estación caída)
+    if (!datos || !datos.labels || datos.labels.length === 0 || esOffline) {
+      areaCharts.innerHTML = `
+        <div style="text-align:center; padding:30px; background:#f8f9fa; border-radius:10px; border:1px dashed #ced4da; margin-top:20px;">
+          <i class="fas fa-plug-circle-xmark" style="font-size:40px; color:#adb5bd; margin-bottom:15px; display:block;"></i>
+          <strong style="color:#495057; display:block; margin-bottom:5px;">SIN CONEXIÓN EN TIEMPO REAL</strong>
+          <p style="color:#6c757d; font-size:0.85em; margin:0;">
+            La estación no está transmitiendo datos en este momento. 
+            Las mediciones de las últimas 24 horas no están disponibles.
+          </p>
+        </div>`;
+      return;
+    }
+
+    // Si hay datos, dibujar las barras normales
+    dibujarBarras(datos);
+
+  } catch (err) {
+    // Este bloque reemplaza al withFailureHandler
+    loader.style.display = 'none';
+    areaCharts.innerHTML = '<p style="color:red; text-align:center; padding:20px;">Error de comunicación con el servidor.</p>';
+    console.error("Error al cargar histórico:", err);
+  }
 }
 
 function actualizarRecomendaciones(valorICA) {
@@ -794,11 +797,15 @@ options: {
   });
 }
 
-function cargarPestanaMeteo(nombreEstacion) {
+async function cargarPestanaMeteo(nombreEstacion) {
   const area = document.getElementById('tab-meteo');
   area.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos meteorológicos...</div>';
 
-  google.script.run.withSuccessHandler(function(datos) {
+  try {
+    // CAMBIO CLAVE: Petición fetch al servidor externo
+    const response = await fetch(`${urlScript}?action=obtenerMeteo&estacion=${encodeURIComponent(nombreEstacion)}`);
+    const datos = await response.json();
+
     if (!datos.labels || datos.labels.length === 0) {
       area.innerHTML = '<p style="text-align:center; padding:20px;">No hay datos meteorológicos para esta estación.</p>';
       return;
@@ -824,17 +831,22 @@ function cargarPestanaMeteo(nombreEstacion) {
       { key: "Precipitacion", label: "Precipitación (mm)", color: "#0984e3", type: "bar" }
     ];
 
+    // Limpiamos los gráficos previos si existieran
+    if (window.meteoCharts) {
+        window.meteoCharts.forEach(c => c.destroy());
+        window.meteoCharts = [];
+    } else {
+        window.meteoCharts = [];
+    }
+
     config.forEach(m => {
       let valoresOriginales = datos.datasets[m.key];
       
-      // --- VALIDACIÓN ESTRICTA ---
-      // Solo procedemos si el dataset existe Y tiene algún valor distinto de 0 o nulo
       const tieneDatosReales = valoresOriginales && valoresOriginales.some(v => v !== 0 && v !== null && v !== "");
 
       if (tieneDatosReales) {
         const valoresInvertidos = [...valoresOriginales].reverse();
 
-        // Crear el contenedor solo si pasó la validación
         const box = document.createElement('div');
         box.className = 'chart-box';
         const canvasId = `canv-${m.key}`;
@@ -873,10 +885,13 @@ function cargarPestanaMeteo(nombreEstacion) {
             scales: { x: { ticks: { font: { size: 9 } } } }
           }
         });
-        meteoCharts.push(chart);
+        window.meteoCharts.push(chart);
       }
     });
-  }).obtenerMeteo24h(nombreEstacion);
+  } catch (error) {
+    console.error("Error cargando meteorología:", error);
+    area.innerHTML = '<p style="text-align:center; color:red; padding:20px;">Error al conectar con el servidor meteorológico.</p>';
+  }
 }
 
 
@@ -910,7 +925,7 @@ function switchTab(event, tabId) {
 /**
  * Función principal que se dispara al seleccionar la pestaña o cambiar el periodo
  */
-function cargarPestanaPromedio(nombreEstacion) {
+async function cargarPestanaPromedio(nombreEstacion) {
   const select = document.getElementById('select-periodo');
   const area = document.getElementById('promedio-charts-area');
   const loader = document.getElementById('promedio-loader');
@@ -931,7 +946,11 @@ function cargarPestanaPromedio(nombreEstacion) {
     area.innerHTML = '';
     loader.style.display = 'block';
     
-    google.script.run.withSuccessHandler(function(periodos) {
+    try {
+      // REEMPLAZO: google.script.run -> fetch (obtenerPeriodos)
+      const resP = await fetch(`${urlScript}?action=obtenerPeriodos&estacion=${encodeURIComponent(nombreEstacion)}`);
+      const periodos = await resP.json();
+
       if (periodos && periodos.length > 0) {
         periodos.forEach(p => {
           let opt = document.createElement('option');
@@ -944,7 +963,10 @@ function cargarPestanaPromedio(nombreEstacion) {
         loader.style.display = 'none';
         area.innerHTML = '<p style="text-align:center; padding:30px;">No hay periodos registrados para esta estación.</p>';
       }
-    }).obtenerPeriodosPorEstacion(nombreEstacion);
+    } catch (err) {
+      console.error("Error al obtener periodos:", err);
+      loader.style.display = 'none';
+    }
     return;
   }
 
@@ -953,12 +975,20 @@ function cargarPestanaPromedio(nombreEstacion) {
   area.innerHTML = '';
   loader.style.display = 'block';
 
-  google.script.run.withSuccessHandler(function(datos) {
+  try {
+    // REEMPLAZO: google.script.run -> fetch (obtenerPromedioDiario)
+    const resD = await fetch(`${urlScript}?action=obtenerPromedioDiario&estacion=${encodeURIComponent(nombreEstacion)}&periodo=${encodeURIComponent(periodo)}`);
+    const datos = await resD.json();
+
     loader.style.display = 'none';
     
     // Limpiar gráficos anteriores para liberar memoria
-    promedioCharts.forEach(c => c.destroy());
-    promedioCharts = [];
+    if (window.promedioCharts) {
+        window.promedioCharts.forEach(c => c.destroy());
+        window.promedioCharts = [];
+    } else {
+        window.promedioCharts = [];
+    }
 
     if (!datos.labels || datos.labels.length === 0) {
       area.innerHTML = '<p style="text-align:center; padding:20px;">No hay datos para el periodo seleccionado.</p>';
@@ -980,16 +1010,19 @@ function cargarPestanaPromedio(nombreEstacion) {
       datos.datasets[m.key] && datos.datasets[m.key].some(v => v > 0)
     );
 
-    // Renderizado progresivo (cada 50ms) para que la UI no se trabe
+    // Renderizado progresivo
     activos.forEach((m, index) => {
       setTimeout(() => {
         crearGraficoIndividual(m, datos, area);
       }, index * 50);
     });
 
-  }).obtenerDatosPromedioDiario(nombreEstacion, periodo);
+  } catch (err) {
+    console.error("Error al cargar promedios:", err);
+    loader.style.display = 'none';
+    area.innerHTML = '<p style="text-align:center; color:red; padding:20px;">Error de comunicación con el servidor.</p>';
+  }
 }
-
 
 function crearGraficoIndividual(m, datos, container) {
   const box = document.createElement('div');
@@ -1125,47 +1158,7 @@ function pluginLineaLimite(limite) {
 
 let datosMensualesGlobal = []; // Para filtrar sin volver al servidor
 
-function cargarPestanaMensual(nombreEstacion) {
-  const containerBotones = document.getElementById('contaminantes-list');
-  const selectorAño = document.getElementById('select-año-mensual');
-  const loader = document.getElementById('mensual-loader');
 
-  loader.style.display = 'block';
-  containerBotones.innerHTML = "";
-  selectorAño.innerHTML = "";
-
-  google.script.run.withSuccessHandler(function(res) {
-    loader.style.display = 'none';
-    if (!res || res.disponibles.length === 0) return;
-
-    datosMensualesGlobal = res.tabla;
-
-    // 1. Llenar Selector de Años
-    res.años.forEach(a => {
-      let opt = document.createElement('option');
-      opt.value = a; opt.innerText = a;
-      selectorAño.appendChild(opt);
-    });
-
-    // 2. Crear Botones (Ya vienen ordenados del servidor)
-    res.disponibles.forEach((contam, index) => {
-      let btn = document.createElement('button');
-      btn.innerText = contam;
-      btn.className = "btn-filtro-contam";
-      btn.dataset.contam = contam;
-      if (index === 0) btn.classList.add('active');
-      
-      btn.onclick = function() {
-        document.querySelectorAll('.btn-filtro-contam').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        actualizarVistaPorFiltros();
-      };
-      containerBotones.appendChild(btn);
-    });
-
-    actualizarVistaPorFiltros();
-  }).obtenerDatosMensualesFiltrados(nombreEstacion);
-}
 
 function actualizarVistaPorFiltros() {
   const añoSel = document.getElementById('select-año-mensual').value;
@@ -1226,5 +1219,6 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   </script>
 </body>
 </html>
+
 
 
