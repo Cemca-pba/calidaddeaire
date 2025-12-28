@@ -1158,7 +1158,67 @@ function pluginLineaLimite(limite) {
 
 let datosMensualesGlobal = []; // Para filtrar sin volver al servidor
 
+async function cargarPestanaMensual(nombreEstacion) {
+  const containerBotones = document.getElementById('contaminantes-list');
+  const selectorAño = document.getElementById('select-año-mensual');
+  const loader = document.getElementById('mensual-loader');
 
+  // Estado inicial visual
+  loader.style.display = 'block';
+  containerBotones.innerHTML = "";
+  selectorAño.innerHTML = "";
+
+  try {
+    // 1. LLAMADA AL SERVIDOR (Sustituye a google.script.run)
+    // Usamos encodeURIComponent por si el nombre de la estación tiene espacios o tildes
+    const respuesta = await fetch(`${urlScript}?action=obtenerMensuales&estacion=${encodeURIComponent(nombreEstacion)}`);
+    const res = await respuesta.json();
+
+    loader.style.display = 'none';
+
+    // Validación de datos recibidos
+    if (!res || !res.disponibles || res.disponibles.length === 0) {
+      containerBotones.innerHTML = "<p style='text-align:center; padding:10px;'>No hay datos mensuales para esta estación.</p>";
+      return;
+    }
+
+    // Guardamos en la variable global para que actualizarVistaPorFiltros() funcione
+    datosMensualesGlobal = res.tabla;
+
+    // 2. LLENAR SELECTOR DE AÑOS
+    res.años.forEach(a => {
+      let opt = document.createElement('option');
+      opt.value = a; 
+      opt.innerText = a;
+      selectorAño.appendChild(opt);
+    });
+
+    // 3. CREAR BOTONES DE CONTAMINANTES
+    res.disponibles.forEach((contam, index) => {
+      let btn = document.createElement('button');
+      btn.innerText = contam;
+      btn.className = "btn-filtro-contam";
+      btn.dataset.contam = contam;
+      
+      if (index === 0) btn.classList.add('active');
+      
+      btn.onclick = function() {
+        document.querySelectorAll('.btn-filtro-contam').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        actualizarVistaPorFiltros(); // Esta función debe existir en tu HTML
+      };
+      containerBotones.appendChild(btn);
+    });
+
+    // 4. ACTUALIZAR LA VISTA INICIAL
+    actualizarVistaPorFiltros();
+
+  } catch (error) {
+    console.error("Error en pestaña mensual:", error);
+    loader.style.display = 'none';
+    containerBotones.innerHTML = "<p style='color:red; text-align:center;'>Error al cargar los informes mensuales.</p>";
+  }
+}
 
 function actualizarVistaPorFiltros() {
   const añoSel = document.getElementById('select-año-mensual').value;
@@ -1219,6 +1279,7 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   </script>
 </body>
 </html>
+
 
 
 
