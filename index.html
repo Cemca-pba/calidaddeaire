@@ -1244,22 +1244,36 @@ async function cargarPestanaMensual(nombreEstacion) {
 }
 function renderizarVistaMensual(contam, datosFiltrados) {
   const areaTabla = document.getElementById('tabla-mensual-area');
+  const canvas = document.getElementById('canvas-mensual');
   
-  // Dibujar Gráfico
-  const ctx = document.getElementById('canvas-mensual').getContext('2d');
+  // Validamos que el canvas exista
+  if (!canvas) {
+    console.error("No se encontró el elemento canvas-mensual");
+    return;
+  }
+
+  // 1. DIBUJAR GRÁFICO
+  const ctx = canvas.getContext('2d');
   if (window.chartMensualInstance) window.chartMensualInstance.destroy();
 
+  // Ordenar datos por fecha si fuera necesario (opcional)
+  // datosFiltrados.sort((a, b) => new Date(a.periodo) - new Date(b.periodo));
+
   window.chartMensualInstance = new Chart(ctx, {
-    type: 'bar', // CAMBIO: De 'line' a 'bar'
+    type: 'bar', 
     data: {
-      labels: datosFiltrados.map(d => d.periodo.split(' ')[0]),
+      labels: datosFiltrados.map(d => {
+        // Formatear etiqueta: "enero 2016" -> "Enero"
+        const parte = d.periodo.split(' ')[0];
+        return parte.charAt(0).toUpperCase() + parte.slice(1);
+      }),
       datasets: [{
-        label: contam,
+        label: `Promedio Mensual ${contam}`,
         data: datosFiltrados.map(d => d.promedio),
         borderColor: '#0984e3',
-        backgroundColor: 'rgba(9, 132, 227, 0.6)', // Un poco más sólido para las barras
+        backgroundColor: 'rgba(9, 132, 227, 0.7)',
         borderWidth: 1,
-        borderRadius: 4 // Bordes redondeados en las barras para un look moderno
+        borderRadius: 5
       }]
     },
     options: { 
@@ -1267,43 +1281,53 @@ function renderizarVistaMensual(contam, datosFiltrados) {
       maintainAspectRatio: false,
       scales: {
         y: {
-          beginAtZero: true, // CAMBIO: Garantiza que el gráfico parta desde 0
-          ticks: {
-            stepSize: 1 // Opcional: define el salto entre números
-          }
+          beginAtZero: true,
+          title: { display: true, text: 'Concentración' }
+        },
+        x: {
+          grid: { display: false }
         }
       },
       plugins: {
-        legend: {
-          display: true,
-          position: 'top'
-        }
+        legend: { display: true, position: 'top' },
+        tooltip: { enabled: true }
       }
     }
   });
 
-  // Crear Tabla (se mantiene igual pero con toFixed para evitar decimales infinitos)
+  // 2. CREAR TABLA
+  if (datosFiltrados.length === 0) {
+    areaTabla.innerHTML = "<p style='text-align:center;'>No hay registros para este filtro.</p>";
+    return;
+  }
+
   areaTabla.innerHTML = `
-    <table class="report-table">
+    <table class="report-table" style="width:100%; border-collapse: collapse; margin-top: 20px;">
       <thead>
-        <tr>
-          <th>Periodo</th>
-          <th>Promedio</th>
-          <th>Máximo</th>
-          <th>Excedencias</th>
+        <tr style="background-color: #f8f9fa;">
+          <th style="padding: 10px; border: 1px solid #eee;">Periodo</th>
+          <th style="padding: 10px; border: 1px solid #eee;">Promedio</th>
+          <th style="padding: 10px; border: 1px solid #eee;">Máximo</th>
+          <th style="padding: 10px; border: 1px solid #eee;">Excedencias</th>
         </tr>
       </thead>
       <tbody>
-        ${datosFiltrados.map(d => `
-          <tr>
-            <td>${d.periodo}</td>
-            <td>${typeof d.promedio === 'number' ? d.promedio.toFixed(2) : d.promedio}</td>
-            <td>${typeof d.maximo === 'number' ? d.maximo.toFixed(2) : d.maximo}</td>
-            <td style="color:${d.excedencias > 0 ? '#d63031' : '#27ae60'}; font-weight: bold;">
-              ${d.excedencias}
-            </td>
-          </tr>
-        `).join('')}
+        ${datosFiltrados.map(d => {
+          const prom = Number(d.promedio);
+          const max = Number(d.maximo);
+          const exc = Number(d.excedencias);
+          
+          return `
+            <tr>
+              <td style="padding: 8px; border: 1px solid #eee; text-align: center;">${d.periodo}</td>
+              <td style="padding: 8px; border: 1px solid #eee; text-align: center;">${!isNaN(prom) ? prom.toFixed(2) : d.promedio}</td>
+              <td style="padding: 8px; border: 1px solid #eee; text-align: center;">${!isNaN(max) ? max.toFixed(2) : d.maximo}</td>
+              <td style="padding: 8px; border: 1px solid #eee; text-align: center; font-weight: bold; color:${exc > 0 ? '#d63031' : '#27ae60'};">
+                ${exc}
+              </td>
+            </tr>
+          `;
+        }).join('')}
       </tbody>
     </table>`;
 }
@@ -1311,6 +1335,7 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   </script>
 </body>
 </html>
+
 
 
 
