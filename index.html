@@ -283,14 +283,17 @@ chart-header {
 </div>
   
   
-   <div id="tab-mensual" class="tab-pane" style="display:none;">
+    <div id="tab-mensual" class="tab-pane" style="display:none;">
   <div style="padding: 15px;">
     <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
       <label style="font-weight: bold; font-size: 13px;">Filtrar por Año:</label>
       <select id="select-año-mensual" onchange="actualizarVistaPorFiltros()" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;"></select>
     </div>
-
-    <div id="contaminantes-list" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;"></div>
+<div class="selector-container">
+  <h4 style="margin-bottom: 10px; color: #2d3436;">Seleccionar Contaminante:</h4>
+  <div id="contaminantes-list" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;"></div>
+</div>
+    
 
     <div id="mensual-content">
       <div class="chart-box" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; height: 300px; border: 1px solid #eee;">
@@ -301,7 +304,6 @@ chart-header {
     <div id="mensual-loader" style="display:none; text-align: center; padding: 40px;"><div class="spinner"></div></div>
   </div>
 </div>
-
       <div id="tab-anual" class="tab-pane" style="display:none;"></div>
 
     </div>
@@ -1230,11 +1232,9 @@ function actualizarVistaPorFiltros() {
   // Filtrar la base global por ambas condiciones
   const filtrados = datosMensualesGlobal.filter(d => d.año === añoSel && d.contaminante === contamSel);
   
-  // Llamamos a la función de renderizado que ya tenías
   renderizarVistaMensual(contamSel, filtrados); 
 }
 
-// Nota: Asegúrate que renderizarVistaMensual use los datos que le pasas directamente
 function renderizarVistaMensual(contam, datosFiltrados) {
   const areaTabla = document.getElementById('tabla-mensual-area');
   
@@ -1243,42 +1243,68 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   if (window.chartMensualInstance) window.chartMensualInstance.destroy();
 
   window.chartMensualInstance = new Chart(ctx, {
-    type: 'line',
+    type: 'bar', // CAMBIO: De 'line' a 'bar'
     data: {
-      labels: datosFiltrados.map(d => d.periodo.split(' ')[0]), // Solo el mes para que no se vea el año repetido
+      labels: datosFiltrados.map(d => d.periodo.split(' ')[0]),
       datasets: [{
         label: contam,
         data: datosFiltrados.map(d => d.promedio),
         borderColor: '#0984e3',
-        backgroundColor: 'rgba(9, 132, 227, 0.1)',
-        fill: true,
-        tension: 0.3
+        backgroundColor: 'rgba(9, 132, 227, 0.6)', // Un poco más sólido para las barras
+        borderWidth: 1,
+        borderRadius: 4 // Bordes redondeados en las barras para un look moderno
       }]
     },
-    options: { responsive: true, maintainAspectRatio: false }
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true, // CAMBIO: Garantiza que el gráfico parta desde 0
+          ticks: {
+            stepSize: 1 // Opcional: define el salto entre números
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top'
+        }
+      }
+    }
   });
 
-  // Crear Tabla
+  // Crear Tabla (se mantiene igual pero con toFixed para evitar decimales infinitos)
   areaTabla.innerHTML = `
     <table class="report-table">
-      <thead><tr><th>Periodo</th><th>Promedio</th><th>Máximo</th><th>Excedencias</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Periodo</th>
+          <th>Promedio</th>
+          <th>Máximo</th>
+          <th>Excedencias</th>
+        </tr>
+      </thead>
       <tbody>
         ${datosFiltrados.map(d => `
           <tr>
             <td>${d.periodo}</td>
-            <td>${d.promedio.toFixed(2)}</td>
-            <td>${d.maximo.toFixed(2)}</td>
-            <td style="color:${d.excedencias > 0 ? 'red' : 'green'}">${d.excedencias}</td>
+            <td>${typeof d.promedio === 'number' ? d.promedio.toFixed(2) : d.promedio}</td>
+            <td>${typeof d.maximo === 'number' ? d.maximo.toFixed(2) : d.maximo}</td>
+            <td style="color:${d.excedencias > 0 ? '#d63031' : '#27ae60'}; font-weight: bold;">
+              ${d.excedencias}
+            </td>
           </tr>
         `).join('')}
       </tbody>
     </table>`;
 }
-
     function cerrarPanel() { document.getElementById('details-panel').classList.remove('active'); }
   </script>
 </body>
 </html>
+
 
 
 
