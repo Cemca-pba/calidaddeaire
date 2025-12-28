@@ -283,27 +283,36 @@ chart-header {
 </div>
   
   
-    <div id="tab-mensual" class="tab-pane" style="display:none;">
+  <div id="tab-mensual" class="tab-pane" style="display:none;">
   <div style="padding: 15px;">
-    <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-      <label style="font-weight: bold; font-size: 13px;">Filtrar por Año:</label>
-      <select id="select-año-mensual" onchange="actualizarVistaPorFiltros()" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;"></select>
-    </div>
-<div class="selector-container">
-  <h4 style="margin-bottom: 10px; color: #2d3436;">Seleccionar Contaminante:</h4>
-  <div id="contaminantes-list" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;"></div>
-</div>
     
+    <div id="mensual-loader" style="display:none; text-align: center; padding: 40px;">
+      <div class="spinner"></div>
+      <p style="font-size: 13px; color: #666; margin-top: 10px;">Cargando informes...</p>
+    </div>
 
-    <div id="mensual-content">
+    <div id="mensual-filtros" style="display:none;">
+      <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+        <label style="font-weight: bold; font-size: 13px;">Filtrar por Año:</label>
+        <select id="select-año-mensual" onchange="actualizarVistaPorFiltros()" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;"></select>
+      </div>
+
+      <div class="selector-container">
+        <h4 style="margin-bottom: 10px; color: #2d3436;">Seleccionar Contaminante:</h4>
+        <div id="contaminantes-list" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;"></div>
+      </div>
+    </div>
+
+    <div id="mensual-content" style="display:none;">
       <div class="chart-box" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; height: 300px; border: 1px solid #eee;">
         <canvas id="canvas-mensual"></canvas>
       </div>
       <div id="tabla-mensual-area"></div>
     </div>
-    <div id="mensual-loader" style="display:none; text-align: center; padding: 40px;"><div class="spinner"></div></div>
+
   </div>
 </div>
+      
       <div id="tab-anual" class="tab-pane" style="display:none;"></div>
 
     </div>
@@ -1160,34 +1169,41 @@ function pluginLineaLimite(limite) {
 
 let datosMensualesGlobal = []; // Para filtrar sin volver al servidor
 
-async function cargarPestanaMensual(nombreEstacion) {
+sync function cargarPestanaMensual(nombreEstacion) {
   const containerBotones = document.getElementById('contaminantes-list');
   const selectorAño = document.getElementById('select-año-mensual');
   const loader = document.getElementById('mensual-loader');
+  const filtros = document.getElementById('mensual-filtros');
+  const contenido = document.getElementById('mensual-content');
 
-  // Estado inicial visual
+  // Estado inicial: Mostramos loader, ocultamos TODO lo demás
   loader.style.display = 'block';
+  filtros.style.display = 'none';
+  contenido.style.display = 'none';
+  
   containerBotones.innerHTML = "";
   selectorAño.innerHTML = "";
 
   try {
-    // 1. LLAMADA AL SERVIDOR (Sustituye a google.script.run)
-    // Usamos encodeURIComponent por si el nombre de la estación tiene espacios o tildes
     const respuesta = await fetch(`${urlScript}?action=obtenerMensuales&estacion=${encodeURIComponent(nombreEstacion)}`);
     const res = await respuesta.json();
 
+    // Ocultamos loader
     loader.style.display = 'none';
 
-    // Validación de datos recibidos
     if (!res || !res.disponibles || res.disponibles.length === 0) {
+      filtros.style.display = 'block'; // Mostramos filtros para que pueda cambiar de año si quiere
       containerBotones.innerHTML = "<p style='text-align:center; padding:10px;'>No hay datos mensuales para esta estación.</p>";
       return;
     }
 
-    // Guardamos en la variable global para que actualizarVistaPorFiltros() funcione
+    // Mostramos los contenedores de datos
+    filtros.style.display = 'block';
+    contenido.style.display = 'block';
+
     datosMensualesGlobal = res.tabla;
 
-    // 2. LLENAR SELECTOR DE AÑOS
+    // Llenar Selector de Años
     res.años.forEach(a => {
       let opt = document.createElement('option');
       opt.value = a; 
@@ -1195,44 +1211,30 @@ async function cargarPestanaMensual(nombreEstacion) {
       selectorAño.appendChild(opt);
     });
 
-    // 3. CREAR BOTONES DE CONTAMINANTES
+    // Crear Botones de Contaminantes
     res.disponibles.forEach((contam, index) => {
       let btn = document.createElement('button');
       btn.innerText = contam;
       btn.className = "btn-filtro-contam";
       btn.dataset.contam = contam;
-      
       if (index === 0) btn.classList.add('active');
       
       btn.onclick = function() {
         document.querySelectorAll('.btn-filtro-contam').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
-        actualizarVistaPorFiltros(); // Esta función debe existir en tu HTML
+        actualizarVistaPorFiltros();
       };
       containerBotones.appendChild(btn);
     });
 
-    // 4. ACTUALIZAR LA VISTA INICIAL
     actualizarVistaPorFiltros();
 
   } catch (error) {
     console.error("Error en pestaña mensual:", error);
     loader.style.display = 'none';
+    filtros.style.display = 'block';
     containerBotones.innerHTML = "<p style='color:red; text-align:center;'>Error al cargar los informes mensuales.</p>";
   }
-}
-
-function actualizarVistaPorFiltros() {
-  const añoSel = document.getElementById('select-año-mensual').value;
-  const btnActivo = document.querySelector('.btn-filtro-contam.active');
-  if (!btnActivo) return;
-  
-  const contamSel = btnActivo.innerText;
-
-  // Filtrar la base global por ambas condiciones
-  const filtrados = datosMensualesGlobal.filter(d => d.año === añoSel && d.contaminante === contamSel);
-  
-  renderizarVistaMensual(contamSel, filtrados); 
 }
 
 function renderizarVistaMensual(contam, datosFiltrados) {
@@ -1304,6 +1306,7 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   </script>
 </body>
 </html>
+
 
 
 
