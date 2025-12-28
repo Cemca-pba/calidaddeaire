@@ -318,7 +318,7 @@ chart-header {
     </div>
   </div>
 </div>
-  </div>
+ </div>
 
     <footer style="background: #2d3436; color: white; text-align: center; padding: 12px; font-size: 0.85em; z-index: 1005;">
     CEMCA | <strong> Ministerio de Ambiente de la Provincia de Buenos Aires </strong>
@@ -1169,7 +1169,7 @@ function pluginLineaLimite(limite) {
 
 let datosMensualesGlobal = []; // Para filtrar sin volver al servidor
 
-sync function cargarPestanaMensual(nombreEstacion) {
+async function cargarPestanaMensual(nombreEstacion) {
   const containerBotones = document.getElementById('contaminantes-list');
   const selectorAño = document.getElementById('select-año-mensual');
   const loader = document.getElementById('mensual-loader');
@@ -1306,6 +1306,7 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   </script>
 </body>
 </html>
+
 
 
 
