@@ -1242,6 +1242,27 @@ async function cargarPestanaMensual(nombreEstacion) {
     containerBotones.innerHTML = "<p style='color:red; text-align:center;'>Error al procesar los datos recibidos.</p>";
   }
 }
+
+function actualizarVistaPorFiltros() {
+    const selector = document.getElementById('select-año-mensual');
+    const btnActivo = document.querySelector('.btn-filtro-contam.active');
+    
+    if (!selector || !btnActivo || !datosMensualesGlobal) return;
+
+    const añoSeleccionado = String(selector.value);
+    const contamSeleccionado = btnActivo.innerText.trim();
+
+    console.log("Filtrando datos para:", añoSeleccionado, contamSeleccionado);
+
+    // Filtramos asegurando que ambos sean tratados como String
+    const filtrados = datosMensualesGlobal.filter(d => 
+        String(d.año) === añoSeleccionado && 
+        String(d.contaminante).toUpperCase() === contamSeleccionado.toUpperCase()
+    );
+
+    renderizarVistaMensual(contamSeleccionado, filtrados);
+}
+    
 function renderizarVistaMensual(contam, datosFiltrados) {
   const areaTabla = document.getElementById('tabla-mensual-area');
   const canvas = document.getElementById('canvas-mensual');
@@ -1335,6 +1356,7 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   </script>
 </body>
 </html>
+
 
 
 
