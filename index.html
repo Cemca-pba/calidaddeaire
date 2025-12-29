@@ -435,7 +435,7 @@ chart-header {
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-const urlScript = "https://script.google.com/macros/s/AKfycbyjpc3MgDttvLZIQpAj2pLniyWl1GabqEQP2gY1abCulutuY5loI1UwN_uY86OR5dKc/exec";
+const urlScript = "https://script.google.com/macros/s/AKfycbyUWfLq4Lx6y0r79mi22Zwps4uFolhUNM4QTjanPzd6Z0nzSp3w99fEg_6q4zAQw2uq/exec";
 var map = L.map('map').setView([-36.60, -60.10], 6); // Coordenadas de la provincia
 
 // 2. Definimos el proveedor principal (OSM)
@@ -1535,14 +1535,23 @@ function renderizarVistaMensual(contam, datosFiltrados) {
      document.getElementById('btn-ayuda').style.right = "25px"; }
 
      // Función para abrir el modal y cargar la Hoja 9
-function abrirModalPreguntas() {
-  document.getElementById('modal-faq').style.display = 'block';
+async function abrirModalPreguntas() {
+  const modal = document.getElementById('modal-faq');
   const lista = document.getElementById('faq-lista');
-  lista.innerHTML = '<div class="spinner"></div>'; // Feedback de carga
 
-  google.script.run.withSuccessHandler(function(preguntas) {
+  modal.style.display = 'block';
+  lista.innerHTML = '<div class="spinner"></div>';
+
+  try {
+    // Usamos fetch en lugar de google.script.run
+    const response = await fetch(WEB_APP_URL);
+    
+    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+    
+    const preguntas = await response.json();
+
     let html = "";
-    preguntas.forEach((p, index) => {
+    preguntas.forEach((p) => {
       html += `
         <div class="accordion-item">
           <button class="accordion-header" onclick="toggleAccordion(this)">
@@ -1553,10 +1562,15 @@ function abrirModalPreguntas() {
           </div>
         </div>`;
     });
-    lista.innerHTML = html;
-  }).obtenerPreguntasHoja9();
-}
 
+    lista.innerHTML = html;
+
+  } catch (error) {
+    console.error("Error desde GitHub:", error);
+    lista.innerHTML = '<p>Error al conectar con Google Sheets.</p>';
+  }
+}
+    
 // Función para manejar la apertura/cierre
 function toggleAccordion(element) {
   // 1. Alternar clase activa para la flecha
@@ -1584,6 +1598,7 @@ function cerrarModalPreguntas() {
   </script>
 </body>
 </html>
+
 
 
 
