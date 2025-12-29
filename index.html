@@ -1553,7 +1553,15 @@ const PREGUNTAS_LOCALES = [
   {
     pregunta: "¿Qué es un Índice de Calidad de Aire?",
     respuesta: "Un índice de Calidad de aire es una herramienta usada por las agencias gubernamentales para comunicar a la población el nivel de contaminación en el aire de forma instantánea. Esta información es de suma importancia, debido a que a niveles altos del ICA se puede ver afectada la salud. En la actualidad, ante la falta de un índice nacional, se ha optado por utilizar la metodología de la USEPA (Agencia de Protección Ambiental de EE.UU.)."
-  }
+  },
+  {
+  pregunta: "¿Qué Informa un Índice de Calidad de Aire?",
+  respuesta: `<p>El <strong>ICA</strong> es un valor numérico que comunica de forma sencilla qué tan limpio o contaminado está el aire y qué efectos podría tener en la salud. Se divide en 6 categorías según el nivel de riesgo:</p><div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;text-align:left;margin:10px 0;"><thead><tr style="background-color:#f2f2f2;"><th style="padding:8px;border:1px solid #ddd;">Rango ICA</th><th style="padding:8px;border:1px solid #ddd;">Categoría</th><th style="padding:8px;border:1px solid #ddd;">Color</th></tr></thead><tbody><tr><td style="padding:8px;border:1px solid #ddd;">0 - 50</td><td style="padding:8px;border:1px solid #ddd;font-weight:bold;color:#008000;">Bueno</td><td style="padding:8px;border:1px solid #ddd;background-color:#00e400;"></td></tr><tr><td style="padding:8px;border:1px solid #ddd;">51 - 100</td><td style="padding:8px;border:1px solid #ddd;font-weight:bold;color:#b8860b;">Moderado</td><td style="padding:8px;border:1px solid #ddd;background-color:#ffff00;"></td></tr><tr><td style="padding:8px;border:1px solid #ddd;">101 - 150</td><td style="padding:8px;border:1px solid #ddd;font-weight:bold;color:#ff8c00;">Dañina para grupos sensibles</td><td style="padding:8px;border:1px solid #ddd;background-color:#ff7e00;"></td></tr><tr><td style="padding:8px;border:1px solid #ddd;">151 - 200</td><td style="padding:8px;border:1px solid #ddd;font-weight:bold;color:#ff0000;">Dañina a la salud</td><td style="padding:8px;border:1px solid #ddd;background-color:#ff0000;"></td></tr><tr><td style="padding:8px;border:1px solid #ddd;">201 - 300</td><td style="padding:8px;border:1px solid #ddd;font-weight:bold;color:#800080;">Muy dañina a la salud</td><td style="padding:8px;border:1px solid #ddd;background-color:#8f3f97;"></td></tr><tr><td style="padding:8px;border:1px solid #ddd;">301+</td><td style="padding:8px;border:1px solid #ddd;font-weight:bold;color:#800000;">Peligroso</td><td style="padding:8px;border:1px solid #ddd;background-color:#7e0023;"></td></tr></tbody></table></div><p><em>Cuanto mayor es el valor del ICA, mayor es el nivel de contaminación y el riesgo para la salud de la población.</em></p>`
+}, 
+{
+  pregunta: "¿Cómo se calcula el Índice de Calidad de Aire?",
+  respuesta: `<p>El cálculo del <strong>ICA</strong> se realiza mediante una fórmula matemática que convierte mediciones técnicas en una escala de 0 a 500. Es similar a pasar una calificación a una escala porcentual para que sea fácil de entender.</p><p>El proceso sigue estos puntos:</p><ul style="padding-left:20px;"><li><strong>Medición:</strong> Los sensores captan la concentración de contaminantes en el aire.</li><li><strong>Comparación:</strong> Se coteja el dato con los límites legales del Decreto 1074/18.</li><li><strong>Conversión:</strong> Se calcula en qué nivel de la escala cae dicha medición.</li></ul><div style="background-color:#f9f9f9;padding:10px;border-radius:5px;border-left:4px solid #00b1c9;margin:10px 0;"><strong>Dato clave:</strong> El valor de <strong>ICA 100</strong> es el límite máximo permitido por la normativa. Superar este valor indica que el aire empieza a ser poco saludable.</div><p>Si se miden varios contaminantes, el ICA final corresponde al <strong>valor más alto detectado</strong>, ya que representa el mayor riesgo para la salud en ese momento.</p>`
+}
   // Agrega las demás aquí siguiendo el mismo formato...
 ];
 
@@ -1601,6 +1609,7 @@ function cerrarModalPreguntas() {
   </script>
 </body>
 </html>
+
 
 
 
