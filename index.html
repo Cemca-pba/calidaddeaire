@@ -1534,18 +1534,32 @@ function renderizarVistaMensual(contam, datosFiltrados) {
     // VOLVER BOTÓN A POSICIÓN ORIGINAL
      document.getElementById('btn-ayuda').style.right = "25px"; }
 
-const PREGUNTAS_LOCALES = [
-  {
-    pregunta: "¿Cómo se miden los datos?",
-    respuesta: "Los datos se miden a través de sensores calibrados en tiempo real."
+{
+    pregunta: "¿Qué es el CEMCA?",
+    respuesta: "El Centro de Monitoreo de Calidad de Aire (CEMCA) es el centro operativo de la Dirección de Evaluación Ambiental en Calidad de Aire y Gestion de Emisiones de la Provincia de Buenos Aires. Su función principal es centralizar, procesar y difundir en tiempo real los datos de concentración de contaminantes (como PM10, PM2.5, SO2, NO2, CO y O3) provenientes de una red de estaciones públicas y privadas distribuidas en puntos estratégicos del territorio provincial.<br><br>A través de esta red, el CEMCA transforma mediciones técnicas en el Índice de Calidad de Aire (ICA), permitiendo a la ciudadanía conocer el estado del aire de forma sencilla."
   },
   {
-    pregunta: "¿Qué es el ICA?",
-    respuesta: "Es el Índice de Calidad del Aire que categoriza la pureza del aire."
+    pregunta: "¿Cuál es su Marco Regulatorio?",
+    respuesta: `<p>El <strong>CEMCA</strong> opera bajo el marco del <strong>Decreto 1074/18 (Anexo I, Art. 21)</strong>, el cual crea el Registro Provincial de Monitoreo (RPM-GECA).</p>
+                <p>Este marco legal establece que el Centro debe:</p>
+                <ul style="padding-left: 20px; margin-bottom: 15px;">
+                  <li><strong>Centralizar los datos</strong> de Monitoreo Continuo de toda la provincia.</li>
+                  <li><strong>Identificar y correlacionar</strong> el origen de la contaminación.</li>
+                  <li><strong>Integrar inventarios de emisiones</strong> para detectar "áreas críticas".</li>
+                </ul>
+                <p style="border-top: 1px solid #eee; padding-top: 10px;"><em>Es la herramienta jurídica que permite al <strong>Ministerio de Ambiente</strong> fiscalizar las emisiones gaseosas.</em></p>`
   },
   {
-    pregunta: "¿Cada cuánto se actualiza?",
-    respuesta: "La información se actualiza automáticamente cada 15 minutos."
+    pregunta: "¿Qué es un Índice de Calidad de Aire?",
+    respuesta: "Un índice de Calidad de aire es una herramienta usada por las agencias gubernamentales para comunicar a la población el nivel de contaminación en el aire de forma instantánea. Esta información es de suma importancia, debido a que a niveles altos del ICA se puede ver afectada la salud. En la actualidad, ante la falta de un índice nacional, se ha optado por utilizar la metodología de la USEPA (Agencia de Protección Ambiental de EE.UU.)."
+  },
+  {
+    pregunta: "¿Qué Informa un Índice de Calidad de Aire?",
+    respuesta: "El ICA es un número que informa el estado de la calidad del aire dividido en 6 categorías de salud. Un valor de 50 o menor representa calidad buena, mientras que un valor mayor a 300 indica peligro. De acuerdo al valor del ICA se informan recomendaciones específicas para la población.<br><br><strong>¡Descargá la lámina informativa desde nuestra sección de recursos!</strong>"
+  },
+  {
+    pregunta: "¿Cómo se calcula el Índice de Calidad de Aire?",
+    respuesta: "El cálculo se basa en los niveles de concentración y tiempo de exposición de los contaminantes criterios: Monóxido de Carbono, Dióxido de Azufre, Dióxido de Nitrógeno, Ozono y Material Particulado. El valor de ICA 100 corresponde exactamente al límite máximo permitido para cada contaminante según el <strong>Decreto 1074/18</strong>."
   }
 ];
 
@@ -1602,6 +1616,7 @@ function cerrarModalPreguntas() {
   </script>
 </body>
 </html>
+
 
 
 
