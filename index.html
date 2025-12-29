@@ -1568,20 +1568,21 @@ function abrirModalPreguntas() {
   const modal = document.getElementById('modal-faq');
   const lista = document.getElementById('faq-lista');
 
-  // Mostrar el modal
+  // Abrir el modal
   modal.style.display = 'block';
-  
-  // Opcional: un pequeño delay para simular carga o simplemente renderizar
+
+  // Generar el HTML desde los datos locales
   let html = "";
-  
   PREGUNTAS_LOCALES.forEach((p) => {
     html += `
-      <div class="accordion-item">
-        <button class="accordion-header" onclick="toggleAccordion(this)">
+      <div class="accordion-item" style="border-bottom: 1px solid #ddd; margin-bottom: 5px;">
+        <button class="accordion-header" onclick="toggleAccordion(this)" 
+                style="width: 100%; text-align: left; padding: 15px; background: #f8f9fa; border: none; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between;">
           ${p.pregunta}
+          <span>+</span>
         </button>
-        <div class="accordion-panel">
-          <p>${p.respuesta}</p>
+        <div class="accordion-panel" style="display: none; padding: 15px; background: white;">
+          ${p.respuesta}
         </div>
       </div>`;
   });
@@ -1591,23 +1592,22 @@ function abrirModalPreguntas() {
 
     
 // Función para manejar la apertura/cierre
-function toggleAccordion(element) {
-  // 1. Alternar clase activa para la flecha
-  element.classList.toggle("active");
+function toggleAccordion(elemento) {
+  // Cerramos todos los demás paneles antes de abrir el actual (opcional)
+  const todosLosPaneles = document.querySelectorAll('.accordion-panel');
+  const todosLosHeaders = document.querySelectorAll('.accordion-header span');
+  
+  const panel = elemento.nextElementSibling;
+  const icono = elemento.querySelector('span');
 
-  // 2. Obtener el panel (el siguiente elemento hermano)
-  var panel = element.nextElementSibling;
-
-  // 3. Si está abierto lo cierra, si está cerrado lo abre
-  if (panel.style.maxHeight) {
-    panel.style.maxHeight = null;
+  if (panel.style.display === "block") {
+    panel.style.display = "none";
+    icono.innerText = "+";
   } else {
-    // Cerramos otros paneles abiertos (opcional, para estilo acordeón puro)
-    document.querySelectorAll('.accordion-panel').forEach(p => p.style.maxHeight = null);
-    document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
-    
-    element.classList.add("active");
-    panel.style.maxHeight = panel.scrollHeight + "px";
+    // Si quieres que solo uno esté abierto a la vez, descomenta la línea de abajo:
+    // todosLosPaneles.forEach(p => p.style.display = "none"); 
+    panel.style.display = "block";
+    icono.innerText = "-";
   }
 }
 
@@ -1617,6 +1617,7 @@ function cerrarModalPreguntas() {
   </script>
 </body>
 </html>
+
 
 
 
