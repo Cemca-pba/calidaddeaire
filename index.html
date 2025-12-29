@@ -191,6 +191,103 @@ chart-header {
     .leaflet-popup-tip {
       background: white;
     }
+
+       .fab-btn {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  width: 60px;
+  height: 60px;
+  background-color: #00b1c9;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 2000; /* Por encima de los 1002 del panel y el footer */
+  transition: right 0.3s ease; /* Efecto de deslizamiento */
+}
+
+.fab-btn:hover { background-color: #008fa3; transform: scale(1.05); }
+
+/* Estilos básicos para el Modal de Preguntas */
+.faq-modal {
+  display: none;
+  position: fixed;
+  z-index: 3000;
+  left: 0; top: 0; width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.faq-content {
+  background-color: white;
+  margin: 5% auto;
+  padding: 20px;
+  width: 70%;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-radius: 10px;
+  position: relative;
+}
+
+.close-faq { float: right; font-size: 28px; cursor: pointer; }
+
+/* Contenedor de cada ítem del acordeón */
+.accordion-item {
+  border-bottom: 1px solid #eee;
+  width: 100%;
+}
+
+/* Encabezado (La Pregunta) */
+.accordion-header {
+  background-color: #f8f9fa;
+  color: #333;
+  cursor: pointer;
+  padding: 15px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.accordion-header:hover { background-color: #e9ecef; }
+
+/* Icono de flecha */
+.accordion-header::after {
+  content: '\25bc'; /* Flecha hacia abajo */
+  font-size: 12px;
+  color: #00b1c9;
+  transition: transform 0.3s ease;
+}
+
+.accordion-header.active::after {
+  transform: rotate(180deg); /* Gira la flecha al abrir */
+}
+
+/* Panel de respuesta (Escondido por defecto) */
+.accordion-panel {
+  padding: 0 15px;
+  background-color: white;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.accordion-panel p {
+  padding: 15px 0;
+  margin: 0;
+  line-height: 1.6;
+  color: #555;
+}
+    
   </style>
 </head>
 <body>
@@ -320,6 +417,17 @@ chart-header {
   </div>
 </div>
  </div>
+
+  <div id="btn-ayuda" class="fab-btn" onclick="abrirModalPreguntas()">
+  <i class="fas fa-question"></i>
+</div>
+
+<div id="modal-faq" class="faq-modal">
+  <div class="faq-content">
+    <span class="close-faq" onclick="cerrarModalPreguntas()">&times;</span>
+    <h3>Preguntas Frecuentes</h3>
+    <div id="faq-lista"></div> </div>
+</div>
 
     <footer style="background: #2d3436; color: white; text-align: center; padding: 12px; font-size: 0.85em; z-index: 1005;">
     CEMCA | <strong> Ministerio de Ambiente de la Provincia de Buenos Aires </strong>
@@ -537,6 +645,9 @@ async function abrirDetalles(estacion) {
 
   // 4. CONFIGURAR PANEL DE DETALLES (GAUGE Y RECOMENDACIONES)
   document.getElementById('details-panel').classList.add('active');
+  
+  // MOVIMIENTO DEL BOTÓN: 460px (ancho panel) + 25px (margen original)
+  document.getElementById('btn-ayuda').style.right = "485px";
   
   setTimeout(() => {
     dibujarGauge(estacion.calidad, infoICA.color);
@@ -1419,10 +1530,61 @@ function renderizarVistaMensual(contam, datosFiltrados) {
       </tbody>
     </table>`;
 }
-    function cerrarPanel() { document.getElementById('details-panel').classList.remove('active'); }
+    function cerrarPanel() { document.getElementById('details-panel').classList.remove('active');
+    // VOLVER BOTÓN A POSICIÓN ORIGINAL
+     document.getElementById('btn-ayuda').style.right = "25px"; }
+
+     // Función para abrir el modal y cargar la Hoja 9
+function abrirModalPreguntas() {
+  document.getElementById('modal-faq').style.display = 'block';
+  const lista = document.getElementById('faq-lista');
+  lista.innerHTML = '<div class="spinner"></div>'; // Feedback de carga
+
+  google.script.run.withSuccessHandler(function(preguntas) {
+    let html = "";
+    preguntas.forEach((p, index) => {
+      html += `
+        <div class="accordion-item">
+          <button class="accordion-header" onclick="toggleAccordion(this)">
+            ${p.pregunta}
+          </button>
+          <div class="accordion-panel">
+            <p>${p.respuesta}</p>
+          </div>
+        </div>`;
+    });
+    lista.innerHTML = html;
+  }).obtenerPreguntasHoja9();
+}
+
+// Función para manejar la apertura/cierre
+function toggleAccordion(element) {
+  // 1. Alternar clase activa para la flecha
+  element.classList.toggle("active");
+
+  // 2. Obtener el panel (el siguiente elemento hermano)
+  var panel = element.nextElementSibling;
+
+  // 3. Si está abierto lo cierra, si está cerrado lo abre
+  if (panel.style.maxHeight) {
+    panel.style.maxHeight = null;
+  } else {
+    // Cerramos otros paneles abiertos (opcional, para estilo acordeón puro)
+    document.querySelectorAll('.accordion-panel').forEach(p => p.style.maxHeight = null);
+    document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
+    
+    element.classList.add("active");
+    panel.style.maxHeight = panel.scrollHeight + "px";
+  }
+}
+
+function cerrarModalPreguntas() {
+  document.getElementById('modal-faq').style.display = 'none';
+}
   </script>
 </body>
 </html>
+
 
 
 
