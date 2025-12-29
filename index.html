@@ -1534,16 +1534,6 @@ function renderizarVistaMensual(contam, datosFiltrados) {
     // VOLVER BOTÓN A POSICIÓN ORIGINAL
      document.getElementById('btn-ayuda').style.right = "25px"; }
 
-Si quieres evitar la latitud de carga de Google Sheets y que la respuesta sea instantánea, lo ideal es declarar los datos directamente en tu archivo JavaScript de GitHub.
-
-Aquí tienes cómo quedaría el código refactorizado para trabajar de forma local:
-
-1. El código JavaScript (en GitHub)
-En este caso, ya no necesitas fetch ni async/await porque los datos están en el mismo archivo, pero podemos mantener la estructura para que no rompa el resto de tu lógica.
-
-JavaScript
-
-// 1. Declaras tus datos localmente
 const PREGUNTAS_LOCALES = [
   {
     pregunta: "¿Cómo se miden los datos?",
@@ -1612,6 +1602,7 @@ function cerrarModalPreguntas() {
   </script>
 </body>
 </html>
+
 
 
 
