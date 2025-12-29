@@ -828,34 +828,35 @@ options: {
 
 async function cargarPestanaMeteo(nombreEstacion) {
   const area = document.getElementById('tab-meteo');
-  // 1. Iniciamos con el spinner de carga
+  // Spinner de carga inicial
   area.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos meteorológicos...</div>';
 
   try {
     const response = await fetch(`${urlScript}?action=obtenerMeteo&estacion=${encodeURIComponent(nombreEstacion)}`);
     const datos = await response.json();
 
-    if (!datos.labels || datos.labels.length === 0) {
+    if (!datos || !datos.labels || datos.labels.length === 0) {
       area.innerHTML = '<p style="text-align:center; padding:20px;">No hay datos meteorológicos para esta estación.</p>';
       return;
     }
 
-    // 2. Definimos la estructura: Título -> Área de Gráficos -> Espacio para la Rosa
+    // Definimos la estructura: Título -> Área de Gráficos -> Contenedor Rosa al final
     area.innerHTML = `
-      <h3 style="text-align:center; margin-bottom:20px;">Meteorología (Últimas 24hs)</h3>
+      <h3 style="text-align:center; margin-bottom:20px;">Meteorología: ${nombreEstacion} (24hs)</h3>
       <div id="meteo-area"></div>
-      <div id="rosa-vientos-contenedor" style="width: 100%; height: 400px; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;"></div>
+      <div id="rosa-contenedor" style="width: 100%; height: 400px; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;"></div>
     `;
     
     const meteoArea = document.getElementById('meteo-area');
 
-    // Procesamiento de etiquetas de tiempo
+    // Procesar etiquetas de tiempo
     const labelsISOInvertidas = [...datos.labels].reverse();
     const labelsH = labelsISOInvertidas.map(l => {
         const d = new Date(l);
         return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
     });
 
+    // Configuración de gráficos estándar (Sin dirección)
     const config = [
       { key: "Temperatura", label: "Temperatura (°C)", color: "#ff7675", type: "line" },
       { key: "Humedad", label: "Humedad (%)", color: "#74b9ff", type: "line" },
@@ -865,16 +866,13 @@ async function cargarPestanaMeteo(nombreEstacion) {
       { key: "Precipitacion", label: "Precipitación (mm)", color: "#0984e3", type: "bar" }
     ];
 
-    // Limpiar Charts previos
     if (window.meteoCharts) { window.meteoCharts.forEach(c => c.destroy()); }
     window.meteoCharts = [];
 
-    // 3. Generar gráficos meteorológicos uno por uno
+    // 1. Renderizar gráficos de Chart.js
     config.forEach(m => {
       let valoresOriginales = datos.datasets[m.key];
-      const tieneDatosReales = valoresOriginales && valoresOriginales.some(v => v !== 0 && v !== null && v !== "");
-
-      if (tieneDatosReales) {
+      if (valoresOriginales && valoresOriginales.some(v => v !== 0 && v !== null)) {
         const valoresInvertidos = [...valoresOriginales].reverse();
         const box = document.createElement('div');
         box.className = 'chart-box';
@@ -901,43 +899,41 @@ async function cargarPestanaMeteo(nombreEstacion) {
       }
     });
 
-    // 4. AL FINAL: Graficar la Rosa de los Vientos si hay datos de Dirección
+    // 2. Finalmente, graficar la Rosa de los Vientos al fondo
     if (datos.datasets.Direccion) {
-        dibujarRosaVientos(datos.datasets.Direccion);
+        dibujarRosa(datos.datasets.Direccion);
     }
 
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error cargando meteorología:", error);
     area.innerHTML = '<p style="text-align:center; color:red; padding:20px;">Error al conectar con los datos meteorológicos.</p>';
   }
 }
 
-function generarRosaVientos(direcciones) {
+function dibujarRosa(direcciones) {
     const categorias = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-    let conteoRumbos = new Array(16).fill(0);
+    let conteo = new Array(16).fill(0);
 
     direcciones.forEach(deg => {
-        if (deg === null || deg === "") return;
-        let indice = Math.round(deg / 22.5) % 16;
-        conteoRumbos[indice]++;
+        if (deg !== null && deg !== "") {
+            let indice = Math.round(deg / 22.5) % 16;
+            conteo[indice]++;
+        }
     });
 
-    Highcharts.chart('rosa-vientos-container', {
-        chart: { polar: true, type: 'column', backgroundColor: 'transparent' },
-        title: { text: 'Rosa de los Vientos (Frecuencia 24hs)', style: { fontSize: '16px', fontWeight: 'bold' } },
+    Highcharts.chart('rosa-contenedor', {
+        chart: { polar: true, type: 'column' },
+        title: { text: 'Rosa de los Vientos (Frecuencia)', style: { fontSize: '16px', fontWeight: 'bold' } },
         pane: { size: '80%' },
         xAxis: {
             categories: categorias,
-            tickmarkPlacement: 'on',
-            labels: { style: { fontWeight: 'bold' } }
+            tickmarkPlacement: 'on'
         },
         yAxis: { min: 0, endOnTick: false, showLastLabel: true, title: { text: 'Frecuencia' } },
-        tooltip: { pointFormat: '<b>{point.y}</b> registros desde esta dirección' },
         series: [{
-            name: 'Frecuencia',
-            data: conteoRumbos,
-            color: '#00aec3', // Color turquesa institucional
-            showInLegend: false
+            name: 'Registros',
+            data: conteo,
+            color: '#00aec3'
         }],
         credits: { enabled: false }
     });
@@ -1393,6 +1389,7 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   </script>
 </body>
 </html>
+
 
 
 
