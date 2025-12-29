@@ -541,14 +541,18 @@ async function cargarEstacionesIniciales() {
       const info = getICAInfo(est.calidad);
       const tieneIca = !isNaN(parseFloat(est.calidad));
 
-      const marcador = L.circleMarker([est.lat, est.lng], { 
-        radius: 11, 
-        fillColor: info.color, 
-        color: "#fff", 
-        weight: 2, 
-        fillOpacity: 0.95,
-        zIndexOffset: tieneIca ? 1000 : 0 
-      });
+
+  const radioDinamic = tieneIca ? 11 : 5;
+
+  const marcador = L.circleMarker([est.lat, est.lng], { 
+    radius: radioDinamic, 
+    fillColor: tieneIca ? info.color : "#bdc3c7", // Gris si no tiene datos para diferenciarlo más
+    color: "#fff", 
+    weight: tieneIca ? 2 : 1, // Borde más fino para los pequeños
+    fillOpacity: tieneIca ? 0.95 : 0.6, // Más transparente si no tiene datos
+    zIndexOffset: tieneIca ? 1000 : 0 
+  });
+
 
       const resumenMeteo = `
         <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 8px; color: #2d3436; font-size: 0.9em;">
@@ -1609,6 +1613,7 @@ function cerrarModalPreguntas() {
   </script>
 </body>
 </html>
+
 
 
 
