@@ -828,6 +828,7 @@ options: {
 
 async function cargarPestanaMeteo(nombreEstacion) {
   const area = document.getElementById('tab-meteo');
+  // 1. Iniciamos con el spinner de carga
   area.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos meteorológicos...</div>';
 
   try {
@@ -839,22 +840,22 @@ async function cargarPestanaMeteo(nombreEstacion) {
       return;
     }
 
-    // ESTRUCTURA: Título -> Área de Gráficos -> Rosa de Vientos abajo
+    // 2. Definimos la estructura: Título -> Área de Gráficos -> Espacio para la Rosa
     area.innerHTML = `
-      <h3 style="text-align:center; margin-bottom:20px;">Meteorología (24hs)</h3>
+      <h3 style="text-align:center; margin-bottom:20px;">Meteorología (Últimas 24hs)</h3>
       <div id="meteo-area"></div>
-      <div id="rosa-vientos-container" style="width: 100%; height: 350px; margin-top: 30px; padding: 10px; border-top: 2px solid #eee;"></div>
+      <div id="rosa-vientos-contenedor" style="width: 100%; height: 400px; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;"></div>
     `;
     
     const meteoArea = document.getElementById('meteo-area');
 
+    // Procesamiento de etiquetas de tiempo
     const labelsISOInvertidas = [...datos.labels].reverse();
     const labelsH = labelsISOInvertidas.map(l => {
         const d = new Date(l);
         return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
     });
 
-    // Quitamos "Direccion" de aquí porque la graficaremos aparte en la Rosa
     const config = [
       { key: "Temperatura", label: "Temperatura (°C)", color: "#ff7675", type: "line" },
       { key: "Humedad", label: "Humedad (%)", color: "#74b9ff", type: "line" },
@@ -864,13 +865,14 @@ async function cargarPestanaMeteo(nombreEstacion) {
       { key: "Precipitacion", label: "Precipitación (mm)", color: "#0984e3", type: "bar" }
     ];
 
+    // Limpiar Charts previos
     if (window.meteoCharts) { window.meteoCharts.forEach(c => c.destroy()); }
     window.meteoCharts = [];
 
-    // Renderizamos los gráficos de Chart.js en el meteo-area
+    // 3. Generar gráficos meteorológicos uno por uno
     config.forEach(m => {
       let valoresOriginales = datos.datasets[m.key];
-      const tieneDatosReales = valoresOriginales && valoresOriginales.some(v => v !== 0 && v !== null);
+      const tieneDatosReales = valoresOriginales && valoresOriginales.some(v => v !== 0 && v !== null && v !== "");
 
       if (tieneDatosReales) {
         const valoresInvertidos = [...valoresOriginales].reverse();
@@ -899,14 +901,14 @@ async function cargarPestanaMeteo(nombreEstacion) {
       }
     });
 
-    // --- AL FINAL: CARGAMOS LA ROSA DE VIENTOS ---
+    // 4. AL FINAL: Graficar la Rosa de los Vientos si hay datos de Dirección
     if (datos.datasets.Direccion) {
-        generarRosaVientos(datos.datasets.Direccion);
+        dibujarRosaVientos(datos.datasets.Direccion);
     }
 
   } catch (error) {
     console.error("Error:", error);
-    area.innerHTML = '<p style="text-align:center; color:red; padding:20px;">Error al conectar con el servidor.</p>';
+    area.innerHTML = '<p style="text-align:center; color:red; padding:20px;">Error al conectar con los datos meteorológicos.</p>';
   }
 }
 
@@ -1391,6 +1393,7 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   </script>
 </body>
 </html>
+
 
 
 
