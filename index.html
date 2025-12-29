@@ -900,8 +900,8 @@ async function cargarPestanaMeteo(nombreEstacion) {
     });
 
     // 2. Finalmente, graficar la Rosa de los Vientos al fondo
-    if (datos.datasets.Direccion) {
-        dibujarRosa(datos.datasets.Direccion);
+    if (datos.datasets.Direccion && datos.datasets.Velocidad) {
+        dibujarRosa(datos.datasets.Direccion, datos.datasets.Velocidad);
     }
 
   } catch (error) {
@@ -910,31 +910,65 @@ async function cargarPestanaMeteo(nombreEstacion) {
   }
 }
 
-function dibujarRosa(direcciones) {
-    const categorias = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-    let conteo = new Array(16).fill(0);
+function dibujarRosa(direcciones, velocidades) {
+    const rumbos = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+    
+    // Definimos los rangos de velocidad (km/h)
+    const rangos = [
+        { label: '< 5 km/h', min: 0, max: 5, color: '#95e1d3' },
+        { label: '5-15 km/h', min: 5, max: 15, color: '#eaffd0' },
+        { label: '15-25 km/h', min: 15, max: 25, color: '#fce38a' },
+        { label: '> 25 km/h', min: 25, max: 999, color: '#f38181' }
+    ];
 
-    direcciones.forEach(deg => {
-        if (deg !== null && deg !== "") {
-            let indice = Math.round(deg / 22.5) % 16;
-            conteo[indice]++;
+    // Preparamos la matriz de datos: 4 rangos x 16 rumbos
+    let datosSeries = rangos.map(r => ({ name: r.label, data: new Array(16).fill(0), color: r.color }));
+
+    // Procesamos cada registro
+    direcciones.forEach((deg, i) => {
+        if (deg === null || deg === "" || velocidades[i] === null) return;
+        
+        let indiceRumbo = Math.round(deg / 22.5) % 16;
+        let v = velocidades[i];
+
+        // Buscamos a qué rango de velocidad pertenece este registro
+        for (let j = 0; j < rangos.length; j++) {
+            if (v >= rangos[j].min && v < rangos[j].max) {
+                datosSeries[j].data[indiceRumbo]++;
+                break;
+            }
         }
     });
 
     Highcharts.chart('rosa-contenedor', {
         chart: { polar: true, type: 'column' },
-        title: { text: 'Rosa de los Vientos (Frecuencia)', style: { fontSize: '16px', fontWeight: 'bold' } },
-        pane: { size: '80%' },
+        title: { text: 'Distribución de Viento (Dirección y Velocidad)', style: { fontSize: '16px' } },
+        subtitle: { text: 'Últimas 24 horas' },
+        pane: { size: '85%' },
         xAxis: {
-            categories: categorias,
+            categories: rumbos,
             tickmarkPlacement: 'on'
         },
-        yAxis: { min: 0, endOnTick: false, showLastLabel: true, title: { text: 'Frecuencia' } },
-        series: [{
-            name: 'Registros',
-            data: conteo,
-            color: '#00aec3'
-        }],
+        yAxis: {
+            min: 0,
+            endOnTick: false,
+            showLastLabel: true,
+            title: { text: 'Frecuencia (registros)' },
+            labels: { enabled: true }
+        },
+        tooltip: {
+            shared: true,
+            pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: <b>{point.y}</b><br/>'
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal', // Esto hace que las velocidades se apilen una sobre otra
+                shadow: false,
+                groupPadding: 0,
+                pointPlacement: 'on'
+            }
+        },
+        series: datosSeries.reverse(), // Invertimos para que la velocidad baja esté en el centro
         credits: { enabled: false }
     });
 }
@@ -1389,6 +1423,7 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   </script>
 </body>
 </html>
+
 
 
 
