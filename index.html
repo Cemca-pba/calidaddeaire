@@ -1534,7 +1534,7 @@ function renderizarVistaMensual(contam, datosFiltrados) {
     // VOLVER BOTÓN A POSICIÓN ORIGINAL
      document.getElementById('btn-ayuda').style.right = "25px"; }
 
-    const PREGUNTAS_LOCALES = [
+const PREGUNTAS_LOCALES = [
   {
     pregunta: "¿Qué es el CEMCA?",
     respuesta: "El Centro de Monitoreo de Calidad de Aire (CEMCA) es el centro operativo de la Dirección de Evaluación Ambiental en Calidad de Aire y Gestion de Emisiones de la Provincia de Buenos Aires. Su función principal es centralizar, procesar y difundir en tiempo real los datos de concentración de contaminantes (como PM10, PM2.5, SO2, NO2, CO y O3) provenientes de una red de estaciones públicas y privadas distribuidas en puntos estratégicos del territorio provincial.<br><br>A través de esta red, el CEMCA transforma mediciones técnicas en el Índice de Calidad de Aire (ICA), permitiendo a la ciudadanía conocer el estado del aire de forma sencilla."
@@ -1553,36 +1553,25 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   {
     pregunta: "¿Qué es un Índice de Calidad de Aire?",
     respuesta: "Un índice de Calidad de aire es una herramienta usada por las agencias gubernamentales para comunicar a la población el nivel de contaminación en el aire de forma instantánea. Esta información es de suma importancia, debido a que a niveles altos del ICA se puede ver afectada la salud. En la actualidad, ante la falta de un índice nacional, se ha optado por utilizar la metodología de la USEPA (Agencia de Protección Ambiental de EE.UU.)."
-  },
-  {
-    pregunta: "¿Qué Informa un Índice de Calidad de Aire?",
-    respuesta: "El ICA es un número que informa el estado de la calidad del aire dividido en 6 categorías de salud. Un valor de 50 o menor representa calidad buena, mientras que un valor mayor a 300 indica peligro. De acuerdo al valor del ICA se informan recomendaciones específicas para la población.<br><br><strong>¡Descargá la lámina informativa desde nuestra sección de recursos!</strong>"
-  },
-  {
-    pregunta: "¿Cómo se calcula el Índice de Calidad de Aire?",
-    respuesta: "El cálculo se basa en los niveles de concentración y tiempo de exposición de los contaminantes criterios: Monóxido de Carbono, Dióxido de Azufre, Dióxido de Nitrógeno, Ozono y Material Particulado. El valor de ICA 100 corresponde exactamente al límite máximo permitido para cada contaminante según el <strong>Decreto 1074/18</strong>."
   }
+  // Agrega las demás aquí siguiendo el mismo formato...
 ];
 
 function abrirModalPreguntas() {
   const modal = document.getElementById('modal-faq');
   const lista = document.getElementById('faq-lista');
 
-  // Abrir el modal
   modal.style.display = 'block';
 
-  // Generar el HTML desde los datos locales
   let html = "";
   PREGUNTAS_LOCALES.forEach((p) => {
     html += `
-      <div class="accordion-item" style="border-bottom: 1px solid #ddd; margin-bottom: 5px;">
-        <button class="accordion-header" onclick="toggleAccordion(this)" 
-                style="width: 100%; text-align: left; padding: 15px; background: #f8f9fa; border: none; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between;">
+      <div class="accordion-item">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
           ${p.pregunta}
-          <span>+</span>
         </button>
-        <div class="accordion-panel" style="display: none; padding: 15px; background: white;">
-          ${p.respuesta}
+        <div class="accordion-panel">
+          <p>${p.respuesta}</p>
         </div>
       </div>`;
   });
@@ -1590,24 +1579,18 @@ function abrirModalPreguntas() {
   lista.innerHTML = html;
 }
 
-    
-// Función para manejar la apertura/cierre
 function toggleAccordion(elemento) {
-  // Cerramos todos los demás paneles antes de abrir el actual (opcional)
-  const todosLosPaneles = document.querySelectorAll('.accordion-panel');
-  const todosLosHeaders = document.querySelectorAll('.accordion-header span');
-  
-  const panel = elemento.nextElementSibling;
-  const icono = elemento.querySelector('span');
+  // Toggle de la clase "active" para que la flecha gire (según tu CSS)
+  elemento.classList.toggle("active");
 
-  if (panel.style.display === "block") {
-    panel.style.display = "none";
-    icono.innerText = "+";
+  const panel = elemento.nextElementSibling;
+  
+  // En lugar de display: block, usamos max-height para la animación de tu CSS
+  if (panel.style.maxHeight) {
+    panel.style.maxHeight = null;
   } else {
-    // Si quieres que solo uno esté abierto a la vez, descomenta la línea de abajo:
-    // todosLosPaneles.forEach(p => p.style.display = "none"); 
-    panel.style.display = "block";
-    icono.innerText = "-";
+    // scrollHeight da la altura real del contenido interno
+    panel.style.maxHeight = panel.scrollHeight + "px";
   }
 }
 
@@ -1617,6 +1600,7 @@ function cerrarModalPreguntas() {
   </script>
 </body>
 </html>
+
 
 
 
