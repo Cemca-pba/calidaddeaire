@@ -435,7 +435,7 @@ chart-header {
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-const urlScript = "https://script.google.com/macros/s/AKfycbyUWfLq4Lx6y0r79mi22Zwps4uFolhUNM4QTjanPzd6Z0nzSp3w99fEg_6q4zAQw2uq/exec";
+const urlScript = "https://script.google.com/macros/s/AKfycbxWcXw-_yrsFKmoGjJ8WtgwTB-Z5yg-ZSf9OdZFHpSjSoW__Y41hhduv3o9a1yrKrQl/exec";
 var map = L.map('map').setView([-36.60, -60.10], 6); // Coordenadas de la provincia
 
 // 2. Definimos el proveedor principal (OSM)
@@ -1539,14 +1539,19 @@ async function abrirModalPreguntas() {
   const modal = document.getElementById('modal-faq');
   const lista = document.getElementById('faq-lista');
 
+  // URL de tu Web App (asegúrate de que termine en /exec)
+  const WEB_APP_URL = "https://script.google.com/macros/s/TU_ID_DE_SCRIPT/exec";
+
   modal.style.display = 'block';
   lista.innerHTML = '<div class="spinner"></div>';
 
   try {
-    // Usamos fetch en lugar de google.script.run
-    const response = await fetch(WEB_APP_URL);
+    // Construimos la URL con el parámetro 'action'
+    const urlConParametros = `${urlScript}?action=obtenerPreguntasHoja9`;
     
-    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+    const response = await fetch(urlConParametros);
+    
+    if (!response.ok) throw new Error("Error en la red");
     
     const preguntas = await response.json();
 
@@ -1566,8 +1571,8 @@ async function abrirModalPreguntas() {
     lista.innerHTML = html;
 
   } catch (error) {
-    console.error("Error desde GitHub:", error);
-    lista.innerHTML = '<p>Error al conectar con Google Sheets.</p>';
+    console.error("Error al cargar FAQ:", error);
+    lista.innerHTML = '<p>Error al cargar las preguntas. Intente de nuevo.</p>';
   }
 }
     
@@ -1598,6 +1603,7 @@ function cerrarModalPreguntas() {
   </script>
 </body>
 </html>
+
 
 
 
