@@ -1534,47 +1534,56 @@ function renderizarVistaMensual(contam, datosFiltrados) {
     // VOLVER BOTÓN A POSICIÓN ORIGINAL
      document.getElementById('btn-ayuda').style.right = "25px"; }
 
-     // Función para abrir el modal y cargar la Hoja 9
-async function abrirModalPreguntas() {
+Si quieres evitar la latitud de carga de Google Sheets y que la respuesta sea instantánea, lo ideal es declarar los datos directamente en tu archivo JavaScript de GitHub.
+
+Aquí tienes cómo quedaría el código refactorizado para trabajar de forma local:
+
+1. El código JavaScript (en GitHub)
+En este caso, ya no necesitas fetch ni async/await porque los datos están en el mismo archivo, pero podemos mantener la estructura para que no rompa el resto de tu lógica.
+
+JavaScript
+
+// 1. Declaras tus datos localmente
+const PREGUNTAS_LOCALES = [
+  {
+    pregunta: "¿Cómo se miden los datos?",
+    respuesta: "Los datos se miden a través de sensores calibrados en tiempo real."
+  },
+  {
+    pregunta: "¿Qué es el ICA?",
+    respuesta: "Es el Índice de Calidad del Aire que categoriza la pureza del aire."
+  },
+  {
+    pregunta: "¿Cada cuánto se actualiza?",
+    respuesta: "La información se actualiza automáticamente cada 15 minutos."
+  }
+];
+
+function abrirModalPreguntas() {
   const modal = document.getElementById('modal-faq');
   const lista = document.getElementById('faq-lista');
 
-  // URL de tu Web App (asegúrate de que termine en /exec)
-  const WEB_APP_URL = "https://script.google.com/macros/s/TU_ID_DE_SCRIPT/exec";
-
+  // Mostrar el modal
   modal.style.display = 'block';
-  lista.innerHTML = '<div class="spinner"></div>';
+  
+  // Opcional: un pequeño delay para simular carga o simplemente renderizar
+  let html = "";
+  
+  PREGUNTAS_LOCALES.forEach((p) => {
+    html += `
+      <div class="accordion-item">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          ${p.pregunta}
+        </button>
+        <div class="accordion-panel">
+          <p>${p.respuesta}</p>
+        </div>
+      </div>`;
+  });
 
-  try {
-    // Construimos la URL con el parámetro 'action'
-    const urlConParametros = `${urlScript}?action=obtenerPreguntasHoja9`;
-    
-    const response = await fetch(urlConParametros);
-    
-    if (!response.ok) throw new Error("Error en la red");
-    
-    const preguntas = await response.json();
-
-    let html = "";
-    preguntas.forEach((p) => {
-      html += `
-        <div class="accordion-item">
-          <button class="accordion-header" onclick="toggleAccordion(this)">
-            ${p.pregunta}
-          </button>
-          <div class="accordion-panel">
-            <p>${p.respuesta}</p>
-          </div>
-        </div>`;
-    });
-
-    lista.innerHTML = html;
-
-  } catch (error) {
-    console.error("Error al cargar FAQ:", error);
-    lista.innerHTML = '<p>Error al cargar las preguntas. Intente de nuevo.</p>';
-  }
+  lista.innerHTML = html;
 }
+
     
 // Función para manejar la apertura/cierre
 function toggleAccordion(element) {
@@ -1603,6 +1612,7 @@ function cerrarModalPreguntas() {
   </script>
 </body>
 </html>
+
 
 
 
