@@ -326,8 +326,29 @@ chart-header {
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-  var map = L.map('map').setView([-34.61, -58.42], 10);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  // 1. Creamos el mapa
+var map = L.map('map').setView([-34.6037, -58.3816], 10); // Coordenadas de ejemplo (Buenos Aires)
+
+// 2. Definimos el proveedor principal (OSM)
+var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+});
+
+// 3. Definimos el proveedor de respaldo (Esri)
+var esriLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri'
+});
+
+// 4. Intentamos cargar el principal
+osmLayer.addTo(map);
+
+// 5. Lógica de detección de error
+// Si una imagen del mapa (tile) falla al cargar, esperamos un momento y cambiamos la capa
+osmLayer.on('tileerror', function(error) {
+    console.warn("Falla en OSM, cambiando a servidor de respaldo Esri...");
+    map.removeLayer(osmLayer);
+    esriLayer.addTo(map);
+});
 let marcadoresEstaciones = {}; // <--- AGREGAR ESTO para guardar los marcadores
 let gaugeChart = null;
 let barCharts = [];
@@ -1356,6 +1377,7 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   </script>
 </body>
 </html>
+
 
 
 
