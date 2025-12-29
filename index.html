@@ -326,7 +326,7 @@ chart-header {
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-  // 1. Creamos el mapa
+const urlScript = "https://script.google.com/macros/s/AKfycbyjpc3MgDttvLZIQpAj2pLniyWl1GabqEQP2gY1abCulutuY5loI1UwN_uY86OR5dKc/exec";
 var map = L.map('map').setView([-34.6037, -58.3816], 10); // Coordenadas de ejemplo (Buenos Aires)
 
 // 2. Definimos el proveedor principal (OSM)
@@ -415,10 +415,6 @@ let chartMensualInstance = null; // Para destruir el gráfico anterior
       return { label: "Peligroso", color: COLORS.MAROON, rec: "Permanezca en interiores." };
     }
 
-    // 1. Definimos la URL de tu Web App (asegúrate de que sea la última versión "exec")
-const urlScript = "https://script.google.com/macros/s/AKfycbxkmdXuVjM7Og655MGlcnYHaJ1stX4eKJm6h_GXU5TelNKwiY8-6FTP-UJsjoFimvgA/exec";
-
-// 2. Creamos una función asíncrona para cargar los datos
 async function cargarEstacionesIniciales() {
   try {
     // Llamamos a la API de Google con el parámetro action=obtenerEstaciones
@@ -1377,6 +1373,7 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   </script>
 </body>
 </html>
+
 
 
 
