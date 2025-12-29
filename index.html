@@ -1580,16 +1580,17 @@ function abrirModalPreguntas() {
 }
 
 function toggleAccordion(elemento) {
-  // Toggle de la clase "active" para que la flecha gire (según tu CSS)
+  // Toggle de la clase "active" para la flecha
   elemento.classList.toggle("active");
 
   const panel = elemento.nextElementSibling;
   
-  // En lugar de display: block, usamos max-height para la animación de tu CSS
   if (panel.style.maxHeight) {
+    // Si está abierto, lo cerramos
     panel.style.maxHeight = null;
   } else {
-    // scrollHeight da la altura real del contenido interno
+    // Si está cerrado, calculamos la altura real + un pequeño margen de seguridad
+    // Usamos scrollHeight que mide el contenido total aunque no sea visible
     panel.style.maxHeight = panel.scrollHeight + "px";
   }
 }
@@ -1600,6 +1601,7 @@ function cerrarModalPreguntas() {
   </script>
 </body>
 </html>
+
 
 
 
