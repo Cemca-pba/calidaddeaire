@@ -9,8 +9,8 @@
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/highcharts-more.js"></script>
-<script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/highcharts-more.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -839,22 +839,22 @@ async function cargarPestanaMeteo(nombreEstacion) {
       return;
     }
 
-    // CREAMOS EL CONTENEDOR DE LA ROSA AL PRINCIPIO O AL FINAL
+    // ESTRUCTURA: Título -> Área de Gráficos -> Rosa de Vientos abajo
     area.innerHTML = `
       <h3 style="text-align:center; margin-bottom:20px;">Meteorología (24hs)</h3>
-      <div id="rosa-vientos-container" style="width: 100%; height: 300px; margin-bottom: 30px; border: 1px solid #eee; border-radius: 8px;"></div>
       <div id="meteo-area"></div>
+      <div id="rosa-vientos-container" style="width: 100%; height: 350px; margin-top: 30px; padding: 10px; border-top: 2px solid #eee;"></div>
     `;
     
     const meteoArea = document.getElementById('meteo-area');
 
-    // ... (Tu lógica de inversión de labels y config se mantiene igual)
     const labelsISOInvertidas = [...datos.labels].reverse();
     const labelsH = labelsISOInvertidas.map(l => {
         const d = new Date(l);
         return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
     });
 
+    // Quitamos "Direccion" de aquí porque la graficaremos aparte en la Rosa
     const config = [
       { key: "Temperatura", label: "Temperatura (°C)", color: "#ff7675", type: "line" },
       { key: "Humedad", label: "Humedad (%)", color: "#74b9ff", type: "line" },
@@ -864,11 +864,10 @@ async function cargarPestanaMeteo(nombreEstacion) {
       { key: "Precipitacion", label: "Precipitación (mm)", color: "#0984e3", type: "bar" }
     ];
 
-    // Limpiar gráficos previos
     if (window.meteoCharts) { window.meteoCharts.forEach(c => c.destroy()); }
     window.meteoCharts = [];
 
-    // Graficar cartas normales (Temperatura, Humedad, etc.)
+    // Renderizamos los gráficos de Chart.js en el meteo-area
     config.forEach(m => {
       let valoresOriginales = datos.datasets[m.key];
       const tieneDatosReales = valoresOriginales && valoresOriginales.some(v => v !== 0 && v !== null);
@@ -900,9 +899,9 @@ async function cargarPestanaMeteo(nombreEstacion) {
       }
     });
 
-    // --- NUEVA LÓGICA: ROSA DE LOS VIENTOS ---
-    if (datos.datasets.Direccion && datos.datasets.Velocidad) {
-        generarRosaVientos(datos.datasets.Direccion, datos.datasets.Velocidad);
+    // --- AL FINAL: CARGAMOS LA ROSA DE VIENTOS ---
+    if (datos.datasets.Direccion) {
+        generarRosaVientos(datos.datasets.Direccion);
     }
 
   } catch (error) {
@@ -911,8 +910,7 @@ async function cargarPestanaMeteo(nombreEstacion) {
   }
 }
 
-// Función auxiliar para procesar y dibujar la rosa
-function generarRosaVientos(direcciones, velocidades) {
+function generarRosaVientos(direcciones) {
     const categorias = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
     let conteoRumbos = new Array(16).fill(0);
 
@@ -923,23 +921,25 @@ function generarRosaVientos(direcciones, velocidades) {
     });
 
     Highcharts.chart('rosa-vientos-container', {
-        chart: { polar: true, type: 'column' },
-        title: { text: 'Distribución de Dirección del Viento (24hs)', style: { fontSize: '14px' } },
+        chart: { polar: true, type: 'column', backgroundColor: 'transparent' },
+        title: { text: 'Rosa de los Vientos (Frecuencia 24hs)', style: { fontSize: '16px', fontWeight: 'bold' } },
         pane: { size: '80%' },
         xAxis: {
             categories: categorias,
-            tickmarkPlacement: 'on'
+            tickmarkPlacement: 'on',
+            labels: { style: { fontWeight: 'bold' } }
         },
         yAxis: { min: 0, endOnTick: false, showLastLabel: true, title: { text: 'Frecuencia' } },
+        tooltip: { pointFormat: '<b>{point.y}</b> registros desde esta dirección' },
         series: [{
             name: 'Frecuencia',
             data: conteoRumbos,
-            color: '#a29bfe' // Color lila para que combine con el gráfico de velocidad
+            color: '#00aec3', // Color turquesa institucional
+            showInLegend: false
         }],
         credits: { enabled: false }
     });
 }
-
 
 
 
@@ -1391,6 +1391,7 @@ function renderizarVistaMensual(contam, datosFiltrados) {
   </script>
 </body>
 </html>
+
 
 
 
