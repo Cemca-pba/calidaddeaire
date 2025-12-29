@@ -1533,8 +1533,8 @@ function renderizarVistaMensual(contam, datosFiltrados) {
     function cerrarPanel() { document.getElementById('details-panel').classList.remove('active');
     // VOLVER BOTÓN A POSICIÓN ORIGINAL
      document.getElementById('btn-ayuda').style.right = "25px"; }
-
-{
+const PREGUNTAS_LOCALES = [
+  {
     pregunta: "¿Qué es el CEMCA?",
     respuesta: "El Centro de Monitoreo de Calidad de Aire (CEMCA) es el centro operativo de la Dirección de Evaluación Ambiental en Calidad de Aire y Gestion de Emisiones de la Provincia de Buenos Aires. Su función principal es centralizar, procesar y difundir en tiempo real los datos de concentración de contaminantes (como PM10, PM2.5, SO2, NO2, CO y O3) provenientes de una red de estaciones públicas y privadas distribuidas en puntos estratégicos del territorio provincial.<br><br>A través de esta red, el CEMCA transforma mediciones técnicas en el Índice de Calidad de Aire (ICA), permitiendo a la ciudadanía conocer el estado del aire de forma sencilla."
   },
@@ -1616,6 +1616,7 @@ function cerrarModalPreguntas() {
   </script>
 </body>
 </html>
+
 
 
 
