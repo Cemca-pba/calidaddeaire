@@ -192,27 +192,55 @@ chart-header {
       background: white;
     }
 
-       .fab-btn {
+/* Contenedor principal */
+.ayuda-wrapper {
   position: fixed;
-  bottom: 45px;
+  bottom: 25px;
   right: 25px;
-  width: 60px;
-  height: 60px;
-  background-color: #00b1c9;
-  color: white;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Columna de botones */
+.fab-btn-simple {
+  position: fixed;
+  right: 25px; /* Posición inicial */
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  color: white;
+  text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  z-index: 2000; /* Por encima de los 1002 del panel y el footer */
-  transition: right 0.3s ease; /* Efecto de deslizamiento */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
 }
 
-.fab-btn:hover { background-color: #008fa3; transform: scale(1.05); }
+/* Colores institucionales */
+#btn-ministerio { background-color: #00aec3; } /* Gris oscuro */
+#btn-email { background-color: #00aec3; }      /* Azul */
+#btn-ayuda { background-color: #00aec3; }      /* Turquesa */
 
+.fab-btn-simple:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+/* Ajuste del Pop-up para que no tape los botones nuevos */
+.faq-hover-card {
+  position: absolute;
+  bottom: 170px; /* Subimos el popup para que aparezca sobre la columna */
+  right: 0;
+  width: 230px;
+  /* ... resto de los estilos del popup se mantienen igual ... */
+}
 /* Estilos básicos para el Modal de Preguntas */
 .faq-modal {
   display: none;
@@ -469,10 +497,19 @@ chart-header {
 </div>
  </div>
 
-  <div id="btn-ayuda" class="fab-btn" onclick="abrirModalPreguntas()">
+<a href="https://www.ambiente.gba.gob.ar/" target="_blank" id="btn-ministerio" class="fab-btn-simple" title="Volver al Ministerio de Ambiente" style="bottom: 145px;">
+  <i class="fas fa-university"></i>
+</a>
+
+<a href="mailto:cemca@ambiente.gba.gob.ar" id="btn-email" class="fab-btn-simple" title="Contactar al CEMCA" style="bottom: 85px;">
+  <i class="fas fa-envelope"></i>
+</a>
+
+<div id="btn-ayuda" class="fab-btn-simple" onclick="abrirModalPreguntas()" title="Preguntas Frecuentes" style="bottom: 25px;">
   <i class="fas fa-question"></i>
 </div>
-
+ 
+</div>
 <div id="modal-faq" class="faq-modal">
   <div class="faq-content">
     <span class="close-faq" onclick="cerrarModalPreguntas()">&times;</span>
@@ -748,7 +785,9 @@ async function abrirDetalles(estacion) {
   document.getElementById('details-panel').classList.add('active');
   
   // MOVIMIENTO DEL BOTÓN: 460px (ancho panel) + 25px (margen original)
-  document.getElementById('btn-ayuda').style.right = "485px";
+    document.getElementById('btn-ministerio').style.right = "485px";
+    document.getElementById('btn-email').style.right = "485px";
+    document.getElementById('btn-ayuda').style.right = "485px";
   
   setTimeout(() => {
     dibujarGauge(estacion.calidad, infoICA.color);
@@ -1640,7 +1679,9 @@ function renderizarVistaMensual(contam, datosFiltrados) {
 }
     function cerrarPanel() { document.getElementById('details-panel').classList.remove('active');
     // VOLVER BOTÓN A POSICIÓN ORIGINAL
-     document.getElementById('btn-ayuda').style.right = "25px"; }
+     document.getElementById('btn-ministerio').style.right = "25px";
+    document.getElementById('btn-email').style.right = "25px";
+    document.getElementById('btn-ayuda').style.right = "25px" }
 
 const PREGUNTAS_LOCALES = [
  {
@@ -1854,6 +1895,7 @@ function actualizarTabInfo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
