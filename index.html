@@ -338,7 +338,15 @@ chart-header {
 </div>
     <div id="sidebar"><div style="padding: 10px; background: #f8f9fa; border-bottom: 1px solid #ddd;">
   <input type="text" id="search-partido" placeholder="🔍 Buscar partido..." 
-    style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; outline: none;">
+    style="
+      width: 100%; 
+      padding: 10px; 
+      box-sizing: border-box; /* Esto hace que el padding no aumente el ancho total */
+      border-radius: 8px; 
+      border: 1px solid #ccc; 
+      outline: none;
+      font-size: 14px;
+    ">
 </div><div id="station-list"></div>
 <div id="station-list">
   </div></div>
@@ -1826,6 +1834,7 @@ function actualizarTabInfo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
