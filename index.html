@@ -632,26 +632,36 @@ async function cargarEstacionesIniciales() {
     });
 
     // Crear la lista lateral por partidos
-    Object.keys(grupos).sort().forEach(partido => {
-      const gDiv = document.createElement('div');
-      gDiv.innerHTML = `<div class="partido-title">${partido}</div>`;
-      grupos[partido].forEach(est => {
-        const info = getICAInfo(est.calidad);
-        const card = document.createElement('div');
-        card.className = 'station-card'; 
-        card.style.borderLeftColor = info.color;
-        card.innerHTML = `<div><strong>${est.nombre}</strong></div><div class="ica-badge" style="background:${info.color}22; color:${info.color}">ICA ${est.calidad}</div>`;
-        card.onclick = () => { 
-          map.flyTo([est.lat, est.lng], 13); 
-          if (marcadoresEstaciones[est.nombre]) {
-            marcadoresEstaciones[est.nombre].openPopup();
-          }; 
-          abrirDetalles(est); 
-        };
-        gDiv.appendChild(card);
-      });
-      listDiv.appendChild(gDiv);
-    });
+Object.keys(grupos).sort().forEach(partido => {
+  const gDiv = document.createElement('div');
+  gDiv.innerHTML = `<div class="partido-title">${partido}</div>`;
+
+  // ORDENAR ALFABÉTICAMENTE LAS ESTACIONES DENTRO DEL PARTIDO
+  grupos[partido].sort((a, b) => {
+    return a.nombre.localeCompare(b.nombre);
+  });
+
+  grupos[partido].forEach(est => {
+    const info = getICAInfo(est.calidad);
+    const card = document.createElement('div');
+    card.className = 'station-card'; 
+    card.style.borderLeftColor = info.color;
+    card.innerHTML = `
+      <div><strong>${est.nombre}</strong></div>
+      <div class="ica-badge" style="background:${info.color}22; color:${info.color}">ICA ${est.calidad}</div>
+    `;
+    
+    card.onclick = () => { 
+      map.flyTo([est.lat, est.lng], 13); 
+      if (marcadoresEstaciones[est.nombre]) {
+        marcadoresEstaciones[est.nombre].openPopup();
+      }; 
+      abrirDetalles(est); 
+    };
+    gDiv.appendChild(card);
+  });
+  listDiv.appendChild(gDiv);
+});
 
     // --- ESTO QUITA EL CARTEL DE CARGANDO ---
     document.getElementById('main-loader').style.display = 'none';
@@ -1795,6 +1805,7 @@ function actualizarTabInfo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
