@@ -1693,6 +1693,21 @@ function actualizarTabInfo(estacion) {
         ` : ''}
       </div>
 
+            ${agradecimiento ? `
+        <div style="background: #f0f9ff; border: 1px solid #bae1ff; padding: 15px; border-radius: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <i class="fas fa-university" style="color: #1565c0; font-size: 1.2em;"></i>
+            <h4 style="margin: 0; color: #1565c0; font-size: 0.85em; text-transform: uppercase; font-weight: 700;">Convenio Institucional</h4>
+          </div>
+          <p style="margin: 0; font-size: 0.85em; color: #2c5282; line-height: 1.5;">
+            Esta estación fue adquirida en el marco de un trabajo conjunto con el <strong>COMIREC</strong> y se encuentra emplazada en 
+            <a href="${agradecimiento.url}" target="_blank" style="color: #1565c0; font-weight: bold; text-decoration: underline;">${agradecimiento.lugar}</a>.
+            Agradecemos a dicha institución por el compromiso compartido con el monitoreo ambiental.
+          </p>
+        </div>
+      ` : ''}
+    </div>
+
       <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
 
       <div style="margin-bottom: 25px;">
@@ -1709,20 +1724,7 @@ function actualizarTabInfo(estacion) {
         </div>
       </div>
 
-      ${agradecimiento ? `
-        <div style="background: #f0f9ff; border: 1px solid #bae1ff; padding: 15px; border-radius: 10px;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <i class="fas fa-university" style="color: #1565c0; font-size: 1.2em;"></i>
-            <h4 style="margin: 0; color: #1565c0; font-size: 0.85em; text-transform: uppercase; font-weight: 700;">Convenio Institucional</h4>
-          </div>
-          <p style="margin: 0; font-size: 0.85em; color: #2c5282; line-height: 1.5;">
-            Esta estación fue adquirida en el marco de un trabajo conjunto con el <strong>COMIREC</strong> y se encuentra emplazada en 
-            <a href="${agradecimiento.url}" target="_blank" style="color: #1565c0; font-weight: bold; text-decoration: underline;">${agradecimiento.lugar}</a>.
-            Agradecemos a dicha institución por el compromiso compartido con el monitoreo ambiental.
-          </p>
-        </div>
-      ` : ''}
-    </div>
+
   `;
 
   tabInfo.innerHTML = html;
@@ -1731,6 +1733,7 @@ function actualizarTabInfo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
