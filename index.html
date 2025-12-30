@@ -1634,11 +1634,27 @@ function cerrarModalPreguntas() {
 }
 
 const INFO_INSTITUCIONAL = {
-  agradecimientosEspeciales: {
-    "UNGS": { lugar: "la Universidad Nacional de General Sarmiento (UNGS)", agradecimiento: "a la Universidad Nacional de General Sarmiento" },
-    "Moreno": { lugar: "la Universidad Nacional de Moreno", agradecimiento: "a la Universidad Nacional de Moreno" },
-    "Tigre": { lugar: "la UTN sede Pacheco", agradecimiento: "a la Universidad Tecnológica Nacional (Sede Pacheco)" },
-    "Rodriguez": { lugar: "la Secretaría de Producción y Desarrollo", agradecimiento: "a la Secretaría de Producción y Desarrollo" }
+agradecimientosEspeciales: {
+    "San Miguel": { 
+        lugar: "la Universidad Nacional de General Sarmiento (UNGS)", 
+        agradecimiento: "a la Universidad Nacional de General Sarmiento",
+        url: "https://www.ungs.edu.ar/" 
+    },
+    "Moreno": { 
+        lugar: "la Universidad Nacional de Moreno", 
+        agradecimiento: "a la Universidad Nacional de Moreno",
+        url: "http://www.unm.edu.ar/" 
+    },
+    "Tigre": { 
+        lugar: "la UTN sede Pacheco", 
+        agradecimiento: "a la Universidad Tecnológica Nacional (Sede Pacheco)",
+        url: "https://www.frgp.utn.edu.ar/" 
+    },
+    "Gral. Rodriguez": { 
+        lugar: "la Secretaría de Producción y Desarrollo", 
+        agradecimiento: "a la Secretaría de Producción y Desarrollo",
+        url: "https://www.generalrodriguez.gob.ar/" 
+    }
   },
   administradores: {
     "YPF S.A.": { desc: "Empresa de energía que opera la red de monitoreo en el Gran La Plata.", url: "https://www.ypf.com/" },
@@ -1659,25 +1675,19 @@ function actualizarTabInfo(estacion) {
 
   const nombrePuro = estacion.nombre.replace(/Estación:|Estacion:/i, "").trim();
   const adminNombre = estacion.Administrador;
-  
-  const adminInfo = INFO_INSTITUCIONAL.administradores[adminNombre] || { 
-    desc: "Información de administración en proceso de actualización.", 
-    url: "#" 
-  };
+  const adminInfo = INFO_INSTITUCIONAL.administradores[adminNombre] || { desc: "Info en actualización.", url: "#" };
   const agradecimiento = INFO_INSTITUCIONAL.agradecimientosEspeciales[nombrePuro];
 
   let html = `
     <div style="padding: 15px; font-family: 'Segoe UI', sans-serif; color: #2d3436;">
       
       <div style="margin-bottom: 20px;">
-        <h4 style="color: #00aec3; border-bottom: 2px solid #00aec3; padding-bottom: 5px; margin-bottom: 12px; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px;">Gestión y Mantenimiento</h4>
+        <h4 style="color: #00aec3; border-bottom: 2px solid #00aec3; padding-bottom: 5px; margin-bottom: 12px; font-size: 0.9em; text-transform: uppercase;">Gestión y Mantenimiento</h4>
         <strong style="color: #2d3436; font-size: 1.2em; display: block; margin-bottom: 8px;">${adminNombre}</strong>
-        <p style="font-size: 0.95em; color: #636e72; line-height: 1.6; margin: 0 0 15px 0;">
-          ${adminInfo.desc}
-        </p>
+        <p style="font-size: 0.95em; color: #636e72; line-height: 1.6; margin: 0 0 15px 0;">${adminInfo.desc}</p>
         
         ${adminInfo.url !== "#" ? `
-          <a href="${adminInfo.url}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; color: white; background: #00aec3; text-decoration: none; font-weight: bold; font-size: 0.85em; padding: 8px 16px; border-radius: 20px; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,174,195,0.2);">
+          <a href="${adminInfo.url}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; color: white; background: #00aec3; text-decoration: none; font-weight: bold; font-size: 0.85em; padding: 8px 16px; border-radius: 20px;">
             <i class="fas fa-external-link-alt"></i> Sitio Web de ${adminNombre}
           </a>
         ` : ''}
@@ -1686,30 +1696,32 @@ function actualizarTabInfo(estacion) {
       <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
 
       <div style="margin-bottom: 25px;">
-        <h4 style="color: #636e72; font-size: 0.85em; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px;">Especificaciones de la Estación</h4>
-        
+        <h4 style="color: #636e72; font-size: 0.85em; text-transform: uppercase; margin-bottom: 15px;">Especificaciones Técnicas</h4>
         <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #edf2f7;">
-          <div style="margin-bottom: 12px;">
-            <small style="color: #00aec3; font-weight: 800; font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 2px;">Contaminantes Monitoreados</small>
-            <span style="font-size: 0.95em; color: #2d3436; font-weight: 500;">${estacion.Contaminantes}</span>
+          <div style="margin-bottom: 10px;">
+            <small style="color: #00aec3; font-weight: 800; font-size: 0.7em; text-transform: uppercase; display: block;">Contaminantes</small>
+            <span style="font-size: 0.95em; font-weight: 500;">${estacion.Contaminantes}</span>
           </div>
           <div>
-            <small style="color: #00aec3; font-weight: 800; font-size: 0.7em; text-transform: uppercase; display: block; margin-bottom: 2px;">Coordenadas Geográficas</small>
-            <span style="font-size: 0.95em; color: #2d3436;">${estacion.lat}, ${estacion.lng}</span>
+            <small style="color: #00aec3; font-weight: 800; font-size: 0.7em; text-transform: uppercase; display: block;">Ubicación</small>
+            <span style="font-size: 0.95em;">Lat: ${estacion.lat} | Long: ${estacion.lng}</span>
           </div>
         </div>
       </div>
 
       ${agradecimiento ? `
-        <div style="background: #f0f9ff; border: 1px solid #bae1ff; padding: 15px; border-radius: 10px; position: relative;">
-          <h4 style="margin: 0 0 8px 0; color: #0077cc; font-size: 0.85em; text-transform: uppercase; font-weight: 700;">Convenio Institucional</h4>
+        <div style="background: #f0f9ff; border: 1px solid #bae1ff; padding: 15px; border-radius: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <i class="fas fa-university" style="color: #1565c0; font-size: 1.2em;"></i>
+            <h4 style="margin: 0; color: #1565c0; font-size: 0.85em; text-transform: uppercase; font-weight: 700;">Convenio Institucional</h4>
+          </div>
           <p style="margin: 0; font-size: 0.85em; color: #2c5282; line-height: 1.5;">
-            Esta estación fue adquirida en el marco de un trabajo conjunto con el <strong>COMIREC</strong> y se encuentra emplazada en <strong>${agradecimiento.lugar}</strong>.
-            Agradecemos a dicha institución por el compromiso compartido con el monitoreo ambiental regional.
+            Esta estación fue adquirida en el marco de un trabajo conjunto con el <strong>COMIREC</strong> y se encuentra emplazada en 
+            <a href="${agradecimiento.url}" target="_blank" style="color: #1565c0; font-weight: bold; text-decoration: underline;">${agradecimiento.lugar}</a>.
+            Agradecemos a dicha institución por el compromiso compartido con el monitoreo ambiental.
           </p>
         </div>
       ` : ''}
-
     </div>
   `;
 
@@ -1719,6 +1731,7 @@ function actualizarTabInfo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
