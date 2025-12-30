@@ -311,8 +311,25 @@ chart-header {
   <div class="logo-img logo-cemca" title="CEMCA"></div>
 </header>
 
-  <div class="main-wrapper">
-    <div id="main-loader"><div class="spinner"></div><p style="margin-top:15px; color:#666;">Cargando estaciones...</p></div>
+ <div id="main-loader" style="
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: white;
+    display: flex;
+    flex-direction: column; /* Coloca la imagen sobre el loader */
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;">
+
+    <img src="https://lh3.googleusercontent.com/d/1E9BU-seji6PRCrmVUC368s8rJrkqY7-q" 
+         alt="Logo" 
+         style="width: 100px; height: auto; margin-bottom: 20px; border-radius: 50%;">
+
+    <div class="spinner"></div>
+    
+    <p style="margin-top: 15px; color: #666; font-family: sans-serif;">Cargando estaciones...</p>
+</div>
     <div id="sidebar"><div id="station-list"></div></div>
     <div id="map"></div>
    
@@ -1772,6 +1789,7 @@ function actualizarTabInfo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
