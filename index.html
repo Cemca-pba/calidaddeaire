@@ -1689,11 +1689,19 @@ function actualizarTabInfo(estacion) {
       </div>
 
       <h4 style="color: #2d3436; border-bottom: 2px solid #00aec3; padding-bottom: 5px; margin-bottom: 10px; font-size: 1em;">Gestión y Mantenimiento</h4>
-      <p style="font-size: 0.9em; color: #636e72; line-height: 1.6;">${adminInfo.desc}</p>
+      
+      <div style="margin-bottom: 10px;">
+        <strong style="color: #2d3436; font-size: 0.95em; display: block; margin-bottom: 4px;">
+          ${adminNombre}
+        </strong>
+        <p style="font-size: 0.9em; color: #636e72; line-height: 1.6; margin: 0;">
+          ${adminInfo.desc}
+        </p>
+      </div>
       
       ${adminInfo.url !== "#" ? `
-        <a href="${adminInfo.url}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; color: #00aec3; text-decoration: none; font-weight: bold; font-size: 0.9em; margin-top: 5px;">
-          <i class="fas fa-external-link-alt"></i> Visitar sitio web del Administrador
+        <a href="${adminInfo.url}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; color: #00aec3; text-decoration: none; font-weight: bold; font-size: 0.85em; margin-top: 5px;">
+          <i class="fas fa-external-link-alt"></i> Visitar sitio web de ${adminNombre}
         </a>
       ` : ''}
 
@@ -1717,6 +1725,7 @@ function actualizarTabInfo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
