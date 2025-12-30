@@ -676,18 +676,38 @@ Object.keys(grupos).sort().forEach(partido => {
   listDiv.appendChild(gDiv);
 });
    const searchInput = document.getElementById('search-partido');
-searchInput.addEventListener('input', function(e) {
-  const term = e.target.value.toLowerCase(); // Lo que el usuario escribe
-  const todosLosPartidos = document.querySelectorAll('#station-list > div');
 
-  todosLosPartidos.forEach(divPartido => {
-    // El título del partido suele ser el primer hijo o estar dentro de .partido-title
-    const titulo = divPartido.querySelector('.partido-title').innerText.toLowerCase();
-    
-    if (titulo.includes(term)) {
-      divPartido.style.display = 'block'; // Mostrar si coincide
-    } else {
-      divPartido.style.display = 'none';  // Ocultar si no coincide
+searchInput.addEventListener('input', (e) => {
+  const term = e.target.value.toLowerCase().trim();
+  const bloquesPartidos = document.querySelectorAll('#station-list > div');
+
+  // 1. Filtrar la Lista Lateral
+  bloquesPartidos.forEach(bloque => {
+    const tituloElemento = bloque.querySelector('.partido-title');
+    if (tituloElemento) {
+      const nombrePartido = tituloElemento.innerText.toLowerCase();
+      const coincide = nombrePartido.includes(term);
+      
+      bloque.style.display = coincide ? 'block' : 'none';
+    }
+  });
+
+  // 2. Filtrar los Marcadores en el Mapa
+  // Recorremos todas las estaciones que cargaste originalmente
+  estaciones.forEach(est => {
+    const marcador = marcadoresEstaciones[est.nombre];
+    if (marcador) {
+      const nombrePartido = est.partido.toLowerCase();
+      
+      if (nombrePartido.includes(term)) {
+        // Si el partido coincide o el buscador está vacío, asegurar que esté en el mapa
+        if (!map.hasLayer(marcador)) {
+          marcador.addTo(map);
+        }
+      } else {
+        // Si no coincide, quitarlo del mapa
+        map.removeLayer(marcador);
+      }
     }
   });
 });
@@ -1834,6 +1854,7 @@ function actualizarTabInfo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
