@@ -1638,7 +1638,7 @@ const INFO_INSTITUCIONAL = {
     "UNGS": { lugar: "la Universidad Nacional de General Sarmiento (UNGS)", agradecimiento: "a la Universidad Nacional de General Sarmiento" },
     "Moreno": { lugar: "la Universidad Nacional de Moreno", agradecimiento: "a la Universidad Nacional de Moreno" },
     "Tigre": { lugar: "la UTN sede Pacheco", agradecimiento: "a la Universidad Tecnológica Nacional (Sede Pacheco)" },
-    "Rodriguez": { lugar: "la Secretaría de Industrias y Ambiente", agradecimiento: "a la Secretaría de Industrias y Ambiente de General Rodríguez" }
+    "Rodriguez": { lugar: "la Secretaría de Producción y Desarrollo", agradecimiento: "a la Secretaría de Producción y Desarrollo", }
   },
   administradores: {
     "YPF S.A.": { desc: "Empresa de energía que opera la red de monitoreo en el Gran La Plata.", url: "https://www.ypf.com/" },
@@ -1652,12 +1652,6 @@ const INFO_INSTITUCIONAL = {
     "PurpleAir": { desc: "Red distribuida de sensores de bajo costo que proporcionan datos de calidad del aire.", url: "https://www2.purpleair.com/" }
   }
 };
-
-Entendido, he reorganizado el flujo para que la jerarquía sea administrativa primero y técnica después. He optimizado los espacios y el peso visual de las fuentes para que el nombre del administrador sea lo primero que impacte al abrir la pestaña.
-
-Aquí tienes el código emprolijado con ese orden específico:
-
-JavaScript
 
 function actualizarTabInfo(estacion) {
   const tabInfo = document.getElementById('tab-info');
@@ -1725,6 +1719,7 @@ function actualizarTabInfo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
