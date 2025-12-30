@@ -336,7 +336,12 @@ chart-header {
     
     <p style="margin-top: 15px; color: #666; font-family: sans-serif;">Cargando estaciones...</p>
 </div>
-    <div id="sidebar"><div id="station-list"></div></div>
+    <div id="sidebar"><div id="station-list"></div><div style="padding: 10px; background: #f8f9fa; border-bottom: 1px solid #ddd;">
+  <input type="text" id="search-partido" placeholder="🔍 Buscar partido..." 
+    style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; outline: none;">
+</div>
+<div id="station-list">
+  </div></div>
     <div id="map"></div>
    
 <div id="details-panel">
@@ -661,6 +666,22 @@ Object.keys(grupos).sort().forEach(partido => {
     gDiv.appendChild(card);
   });
   listDiv.appendChild(gDiv);
+});
+   const searchInput = document.getElementById('search-partido');
+searchInput.addEventListener('input', function(e) {
+  const term = e.target.value.toLowerCase(); // Lo que el usuario escribe
+  const todosLosPartidos = document.querySelectorAll('#station-list > div');
+
+  todosLosPartidos.forEach(divPartido => {
+    // El título del partido suele ser el primer hijo o estar dentro de .partido-title
+    const titulo = divPartido.querySelector('.partido-title').innerText.toLowerCase();
+    
+    if (titulo.includes(term)) {
+      divPartido.style.display = 'block'; // Mostrar si coincide
+    } else {
+      divPartido.style.display = 'none';  // Ocultar si no coincide
+    }
+  });
 });
 
     // --- ESTO QUITA EL CARTEL DE CARGANDO ---
@@ -1805,6 +1826,7 @@ function actualizarTabInfo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
