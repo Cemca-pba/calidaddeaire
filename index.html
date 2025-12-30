@@ -287,6 +287,21 @@ chart-header {
   line-height: 1.6;
   color: #555;
 }
+
+#tab-info img {
+    max-height: 180px;
+    object-fit: cover;
+}
+
+.btn-web:hover {
+    background: #008fa1;
+    transition: 0.3s;
+}
+
+#tab-info {
+    max-height: 80vh; /* Para que tenga scroll si el texto es largo */
+    overflow-y: auto;
+}
     
   </style>
 </head>
@@ -666,6 +681,13 @@ async function abrirDetalles(estacion) {
   loader.style.display = 'block';
   sectionHistorico.style.display = 'none';
   areaCharts.innerHTML = ''; 
+  
+  // 6. ACTUALIZAR PESTAÑA DE INFORMACIÓN (DATOS LOCALES)
+  try {
+    actualizarTabInfo(estacion);
+  } catch (e) {
+    console.error("Error al cargar Tab Info:", e);
+  }
 
   // --- CAMBIO CLAVE: Sustitución de google.script.run por FETCH ---
   try {
@@ -1610,9 +1632,92 @@ function toggleAccordion(elemento) {
 function cerrarModalPreguntas() {
   document.getElementById('modal-faq').style.display = 'none';
 }
+
+const INFO_INSTITUCIONAL = {
+  agradecimientosEspeciales: {
+    "San Miguel": { lugar: "la Universidad Nacional de General Sarmiento (UNGS)", agradecimiento: "a la Universidad Nacional de General Sarmiento" },
+    "Moreno": { lugar: "la Universidad Nacional de Moreno", agradecimiento: "a la Universidad Nacional de Moreno" },
+    "Tigre": { lugar: "la UTN sede Pacheco", agradecimiento: "a la Universidad Tecnológica Nacional (Sede Pacheco)" },
+    "Gral. Rodriguez": { lugar: "la Secretaría de Industrias y Ambiente", agradecimiento: "a la Secretaría de Industrias y Ambiente de General Rodríguez" }
+  },
+  administradores: {
+    "YPF S.A.": { desc: "Empresa de energía que opera la red de monitoreo en el Gran La Plata.", url: "https://www.ypf.com/" },
+    "Acumar": { desc: "La Autoridad de Cuenca Matanza Riachuelo (ACUMAR) es un ente autónomo e interjurisdiccional.", url: "https://www.acumar.gob.ar/" },
+    "Cicacz": { desc: "Comité Interindustrial de Conservación del Ambiente Campana-Zárate, conformado por 22 empresas del sector.", url: "https://www.cicacz.com.ar/" },
+    "Ministerio de Ambiente de la Provincia de Buenos Aires": { desc: "Organismo responsable de la política ambiental provincial, encargado de fiscalizar y preservar la biodiversidad.", url: "https://www.ambiente.gba.gob.ar/" },
+    "CTE (Municipalidad de Bahía Blanca)": { desc: "Comité Técnico Ejecutivo encargado del control y monitoreo de las industrias del Polo Petroquímico.", url: "https://www.bahia.gob.ar/cte/" },
+    "Oxbow S.A.": { desc: "Empresa que opera estaciones de monitoreo continuo en el sector de Berisso y Ensenada.", url: "https://www.oxbow.com/" },
+    "Parex Klaukol S.A.": { desc: "Empresa fabricante de materiales de construcción con estaciones de monitoreo de material particulado.", url: "https://klaukol.com.ar/" },
+    "AQI": { desc: "Plataforma global que recopila y presenta datos del Índice de Calidad del Aire (AQI).", url: "https://aqicn.org" },
+    "PurpleAir": { desc: "Red distribuida de sensores de bajo costo que proporcionan datos de calidad del aire.", url: "https://www2.purpleair.com/" }
+  }
+};
+
+function actualizarTabInfo(estacion) {
+  const tabInfo = document.getElementById('tab-info');
+  if (!tabInfo) return;
+
+  const nombrePuro = estacion.nombre.replace(/Estación:|Estacion:/i, "").trim();
+  const adminNombre = estacion.Administrador;
+  
+  // Buscar datos en el objeto local (INFO_INSTITUCIONAL debe estar declarado arriba)
+  const adminInfo = INFO_INSTITUCIONAL.administradores[adminNombre] || { 
+    desc: "Información de administración en proceso de actualización.", 
+    url: "#" 
+  };
+  const agradecimiento = INFO_INSTITUCIONAL.agradecimientosEspeciales[nombrePuro];
+
+  let html = `
+    <div style="padding: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+      <div style="position: relative; overflow: hidden; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <img src="${estacion.Imagen}" style="width:100%; height: 200px; object-fit: cover; display: block;">
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 15px; color: white;">
+          <h3 style="margin:0; font-size: 1.2em;">${nombrePuro}</h3>
+          <p style="margin:0; font-size: 0.9em; opacity: 0.9;">${estacion.Partido}</p>
+        </div>
+      </div>
+
+      <div style="display: grid; gap: 10px; margin-bottom: 20px;">
+        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+          <small style="color: #636e72; display: block; text-transform: uppercase; font-size: 0.7em; font-weight: bold;">Contaminantes</small>
+          <span style="color: #2d3436; font-size: 0.9em;">${estacion.Contaminantes}</span>
+        </div>
+        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+          <small style="color: #636e72; display: block; text-transform: uppercase; font-size: 0.7em; font-weight: bold;">Ubicación Geográfica</small>
+          <span style="color: #2d3436; font-size: 0.9em;">Lat: ${estacion.lat} | Long: ${estacion.lng}</span>
+        </div>
+      </div>
+
+      <h4 style="color: #2d3436; border-bottom: 2px solid #00aec3; padding-bottom: 5px; margin-bottom: 10px; font-size: 1em;">Gestión y Mantenimiento</h4>
+      <p style="font-size: 0.9em; color: #636e72; line-height: 1.6;">${adminInfo.desc}</p>
+      
+      ${adminInfo.url !== "#" ? `
+        <a href="${adminInfo.url}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; color: #00aec3; text-decoration: none; font-weight: bold; font-size: 0.9em; margin-top: 5px;">
+          <i class="fas fa-external-link-alt"></i> Visitar sitio web del Administrador
+        </a>
+      ` : ''}
+
+      ${agradecimiento ? `
+        <div style="margin-top: 25px; background: #e3f2fd; border: 1px solid #bbdefb; padding: 15px; border-radius: 10px; position: relative; overflow: hidden;">
+          <i class="fas fa-handshake" style="position: absolute; right: -10px; bottom: -10px; font-size: 4em; color: rgba(0,0,0,0.05);"></i>
+          <h4 style="margin: 0 0 8px 0; color: #1565c0; font-size: 0.95em;">Convenio Institucional</h4>
+          <p style="margin: 0; font-size: 0.85em; color: #1e88e5; line-height: 1.5; position: relative; z-index: 1;">
+            Esta estación fue adquirida en el marco de un trabajo conjunto con el <strong>COMIREC</strong> 
+            y está emplazada en <strong>${agradecimiento.lugar}</strong>. 
+            Agradecemos especialmente ${agradecimiento.agradecimiento} por el compromiso compartido con el monitoreo ambiental.
+          </p>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  tabInfo.innerHTML = html;
+}
+    
   </script>
 </body>
 </html>
+
 
 
 
