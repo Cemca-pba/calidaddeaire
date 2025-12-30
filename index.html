@@ -1715,10 +1715,10 @@ function actualizarTabInfo(estacion) {
   const agradecimiento = INFO_INSTITUCIONAL.agradecimientosEspeciales[nombrePuro];
 
   let html = `
-    <div style="padding: 15px; font-family: 'Segoe UI', sans-serif; color: #2d3436;">
+    <div style="padding: 5px 15px 15px 15px; font-family: 'Segoe UI', sans-serif; color: #2d3436;">
       
-      <div style="margin-bottom: 20px;">
-        <h4 style="color: #00aec3; border-bottom: 2px solid #00aec3; padding-bottom: 5px; margin-bottom: 15px; font-size: 0.9em; text-transform: uppercase;">Gestión y Mantenimiento</h4>
+      <div style="margin-bottom: 15px;">
+        <h4 style="color: #00aec3; border-bottom: 2px solid #00aec3; padding-bottom: 5px; margin: 0 0 12px 0; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px;">Gestión y Mantenimiento</h4>
         
         <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
           ${adminInfo.logo ? `<img src="${adminInfo.logo}" style="max-width: 80px; max-height: 50px; object-fit: contain;">` : ''}
@@ -1771,6 +1771,7 @@ function actualizarTabInfo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
