@@ -1668,27 +1668,7 @@ function actualizarTabInfo(estacion) {
   const agradecimiento = INFO_INSTITUCIONAL.agradecimientosEspeciales[nombrePuro];
 
   let html = `
-    <div style="padding: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-      <div style="position: relative; overflow: hidden; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-        <img src="${estacion.Imagen}" style="width:100%; height: 200px; object-fit: cover; display: block;">
-        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 15px; color: white;">
-          <h3 style="margin:0; font-size: 1.2em;">${nombrePuro}</h3>
-          <p style="margin:0; font-size: 0.9em; opacity: 0.9;">${estacion.Partido}</p>
-        </div>
-      </div>
-
-      <div style="display: grid; gap: 10px; margin-bottom: 20px;">
-        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
-          <small style="color: #636e72; display: block; text-transform: uppercase; font-size: 0.7em; font-weight: bold;">Contaminantes</small>
-          <span style="color: #2d3436; font-size: 0.9em;">${estacion.Contaminantes}</span>
-        </div>
-        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
-          <small style="color: #636e72; display: block; text-transform: uppercase; font-size: 0.7em; font-weight: bold;">Ubicación Geográfica</small>
-          <span style="color: #2d3436; font-size: 0.9em;">Lat: ${estacion.lat} | Long: ${estacion.lng}</span>
-        </div>
-      </div>
-
-      <h4 style="color: #2d3436; border-bottom: 2px solid #00aec3; padding-bottom: 5px; margin-bottom: 10px; font-size: 1em;">Gestión y Mantenimiento</h4>
+        <h4 style="color: #2d3436; border-bottom: 2px solid #00aec3; padding-bottom: 5px; margin-bottom: 10px; font-size: 1em;">Gestión y Mantenimiento</h4>
       
       <div style="margin-bottom: 10px;">
         <strong style="color: #2d3436; font-size: 0.95em; display: block; margin-bottom: 4px;">
@@ -1704,6 +1684,18 @@ function actualizarTabInfo(estacion) {
           <i class="fas fa-external-link-alt"></i> Visitar sitio web de ${adminNombre}
         </a>
       ` : ''}
+
+      <div style="display: grid; gap: 10px; margin-bottom: 20px;">
+        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+          <small style="color: #636e72; display: block; text-transform: uppercase; font-size: 0.7em; font-weight: bold;">Contaminantes</small>
+          <span style="color: #2d3436; font-size: 0.9em;">${estacion.Contaminantes}</span>
+        </div>
+        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+          <small style="color: #636e72; display: block; text-transform: uppercase; font-size: 0.7em; font-weight: bold;">Ubicación Geográfica</small>
+          <span style="color: #2d3436; font-size: 0.9em;">Lat: ${estacion.lat} | Long: ${estacion.lng}</span>
+        </div>
+      </div>
+
 
       ${agradecimiento ? `
         <div style="margin-top: 25px; background: #e3f2fd; border: 1px solid #bbdefb; padding: 15px; border-radius: 10px; position: relative; overflow: hidden;">
@@ -1725,6 +1717,7 @@ function actualizarTabInfo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
