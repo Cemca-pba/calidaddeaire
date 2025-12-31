@@ -2028,16 +2028,33 @@ function abrirContacto() {
             document.getElementById('modal-contacto').style.display = 'none';
         }
 
-        document.getElementById('form-cemca').addEventListener('submit', function(e) {
-            e.preventDefault();
-            cerrarContacto();
-            const notificacion = document.getElementById('notificacion-exito');
-            notificacion.classList.add('mostrar');
-            setTimeout(() => {
-                notificacion.classList.remove('mostrar');
-            }, 4000);
-            this.reset();
-        });
+      document.getElementById('form-cemca').addEventListener('submit', function(e) {
+    e.preventDefault(); // Detiene el envío normal
+
+    // 1. Capturamos los datos que escribió el usuario
+    const nombre = this.querySelector('input[type="text"]').value;
+    const emailUsuario = this.querySelector('input[type="email"]').value;
+    const asunto = document.getElementById('asunto-mail').value;
+    const mensaje = this.querySelector('textarea').value;
+
+    // 2. Construimos el enlace de envío
+    const mailtoLink = `mailto:cemca@ambiente.gba.gob.ar`
+        + `?subject=${encodeURIComponent(asunto)}`
+        + `&body=${encodeURIComponent("Nombre: " + nombre + "\nEmail: " + emailUsuario + "\n\nConsulta:\n" + mensaje)}`;
+
+    // 3. Abrimos el gestor de correo del usuario con los datos cargados
+    window.location.href = mailtoLink;
+
+    // 4. Cerramos el modal y mostramos tu cartel de éxito
+    cerrarContacto();
+    const notificacion = document.getElementById('notificacion-exito');
+    notificacion.classList.add('mostrar');
+    setTimeout(() => {
+        notificacion.classList.remove('mostrar');
+    }, 4000);
+
+    this.reset();
+});
 
         // Cerrar al hacer clic afuera
         window.onclick = function(event) {
@@ -2052,6 +2069,7 @@ function abrirContacto() {
   </script>
 </body>
 </html>
+
 
 
 
