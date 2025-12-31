@@ -387,6 +387,41 @@ chart-header {
 .btn-enviar:hover { background: #023e8a; }
 
 .close-modal { font-size: 28px; cursor: pointer; color: #666; }
+
+.toast-notificacion {
+    position: fixed;
+    top: -100px; /* Empieza fuera de la pantalla */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #2d3436; /* Gris institucional */
+    color: white;
+    padding: 15px 25px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 3000;
+    transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    align-items: center;
+    border-left: 5px solid #00aec3; /* Turquesa CEMCA */
+}
+
+.toast-contenido {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 500;
+}
+
+.toast-contenido i {
+    color: #00aec3;
+    font-size: 1.2em;
+}
+
+/* Clase para mostrarlo */
+.toast-notificacion.mostrar {
+    top: 30px; /* Se desplaza hacia abajo */
+}
     
   </style>
 </head>
@@ -599,6 +634,13 @@ chart-header {
             </div>
             <button type="submit" class="btn-enviar">Enviar Mensaje</button>
         </form>
+    </div>
+</div>
+
+ <div id="notificacion-exito" class="toast-notificacion">
+    <div class="toast-contenido">
+        <i class="fas fa-check-circle"></i>
+        <span>¡Gracias! Tu consulta ha sido enviada al equipo del CEMCA.</span>
     </div>
 </div>
 
@@ -1979,23 +2021,38 @@ function actualizarTabInfo(estacion) {
 }
 
 function abrirContacto() {
-    document.getElementById('modal-contacto').style.display = 'flex';
-}
+            document.getElementById('modal-contacto').style.display = 'flex';
+        }
 
-function cerrarContacto() {
-    document.getElementById('modal-contacto').style.display = 'none';
-}
+        function cerrarContacto() {
+            document.getElementById('modal-contacto').style.display = 'none';
+        }
 
-// Cerrar si hacen clic fuera de la caja blanca
-window.onclick = function(event) {
-    let modal = document.getElementById('modal-contacto');
-    if (event.target == modal) {
-        cerrarContacto();
-    }
-}
+        document.getElementById('form-cemca').addEventListener('submit', function(e) {
+            e.preventDefault();
+            cerrarContacto();
+            const notificacion = document.getElementById('notificacion-exito');
+            notificacion.classList.add('mostrar');
+            setTimeout(() => {
+                notificacion.classList.remove('mostrar');
+            }, 4000);
+            this.reset();
+        });
+
+        // Cerrar al hacer clic afuera
+        window.onclick = function(event) {
+            let modal = document.getElementById('modal-contacto');
+            if (event.target == modal) {
+                cerrarContacto();
+            }
+        }
+   
+
+
   </script>
 </body>
 </html>
+
 
 
 
