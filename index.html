@@ -21,32 +21,49 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 110px;            /* Altura fija para que los logos sean grandes */
+    height: 110px; 
     background-color: #ffffff;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     width: 100%;
-    padding: 0;               /* Sin padding para alinear con la sidebar */
+    padding: 0;
 }
 
-.logo-img {
-    height: 80px;             /* Altura de las imágenes dentro del header */
+/* Contenedor Izquierdo: Debe medir lo mismo que tu sidebar */
+.header-izq {
+    width: 300px; /* Ajusta este valor al ancho de tu sidebar */
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Contenedor Derecho: Ocupa el resto y pega el logo al final */
+.header-der {
+    flex-grow: 1;
+    height: 100%;
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center;
+    padding-right: 5%; /* Margen de cortesía a la derecha */
+}
+
+/* Clase general para los logos */
+.logo-cemca, .logo-ministerio {
+    height: 90px; /* Aumentamos a 90px para que se vean imponentes */
     background-repeat: no-repeat;
-    background-size: contain; /* La imagen se ajusta sin cortarse */
+    background-size: contain;
 }
 
-/* Este div debe medir lo mismo que tu sidebar para quedar justo arriba */
 .logo-cemca {
-    width: 300px;             /* Ajusta este valor al ancho exacto de tu sidebar */
+    width: 100%; /* Ocupa el ancho de .header-izq (los 300px) */
     background-image: url("https://lh3.googleusercontent.com/d/1E9BU-seji6PRCrmVUC368s8rJrkqY7-q");
-    background-position: center; 
+    background-position: center;
 }
 
-/* Este div se empuja hacia la derecha */
 .logo-ministerio {
-    width: 400px;             /* Le damos mucho ancho para que el logo estire bien */
+    width: 450px; /* Ancho suficiente para que el logo del ministerio no se corte */
     background-image: url("https://lh3.googleusercontent.com/d/1d7U3yQ6OGAORYFk762nozJW8_YbsMYRE");
-    background-position: right center; /* Pegado al borde derecho */
-    margin-right: 5%;         /* Espacio de cortesía al final */
+    background-position: right center;
 }
 
 /* Ajuste para que el mapa no se pegue */
@@ -2085,6 +2102,7 @@ function abrirContacto() {
   </script>
 </body>
 </html>
+
 
 
 
