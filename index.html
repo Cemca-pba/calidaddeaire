@@ -764,6 +764,7 @@ osmLayer.on('tileerror', function(error) {
     esriLayer.addTo(map);
 });
 let marcadoresEstaciones = {}; // <--- AGREGAR ESTO para guardar los marcadores
+let estacionesGlobal = [];
 let gaugeChart = null;
 let barCharts = [];
 let meteoCharts = [];
@@ -929,7 +930,7 @@ Object.keys(grupos).sort().forEach(partido => {
   });
   listDiv.appendChild(gDiv);
 });
-   const const searchInput = document.getElementById('search-input');
+   const searchInput = document.getElementById('search-input');
 
 searchInput.addEventListener('input', (e) => {
   const term = e.target.value.toLowerCase().trim();
@@ -2159,6 +2160,7 @@ function abrirContacto() {
   </script>
 </body>
 </html>
+
 
 
 
