@@ -330,6 +330,63 @@ chart-header {
     max-height: 80vh; /* Para que tenga scroll si el texto es largo */
     overflow-y: auto;
 }
+
+/* Fondo oscuro detrás del modal */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none; /* Se activa con JS */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+/* Caja del formulario */
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #00aec3;
+    padding-bottom: 10px;
+}
+
+.input-group { margin-bottom: 15px; }
+.input-group label { display: block; font-weight: 600; margin-bottom: 5px; }
+.input-group input, .input-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+}
+
+.btn-enviar {
+    width: 100%;
+    padding: 12px;
+    background: #0077b6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-enviar:hover { background: #023e8a; }
+
+.close-modal { font-size: 28px; cursor: pointer; color: #666; }
     
   </style>
 </head>
@@ -501,7 +558,7 @@ chart-header {
   <i class="fas fa-university" style="font-size: 1.6em;"></i>
 </a>
 
-<a href="mailto:cemca@ambiente.gba.gob.ar" id="btn-email" class="fab-btn-simple" title="Contactar al CEMCA" style="bottom: 130px;">
+<a href="mailto:cemca@ambiente.gba.gob.ar" id="btn-email" onclick="abrirContacto()"  class="fab-btn-simple" title="Contactar al CEMCA" style="bottom: 130px;">
   <i class="fas fa-envelope" style="font-size: 1.6em;"></i>
 </a>
 
@@ -515,6 +572,34 @@ chart-header {
     <span class="close-faq" onclick="cerrarModalPreguntas()">&times;</span>
     <h3>Preguntas Frecuentes</h3>
     <div id="faq-lista"></div> </div>
+</div>
+ 
+ <div id="modal-contacto" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-envelope"></i> Contactar al CEMCA</h3>
+            <span class="close-modal" onclick="cerrarContacto()">&times;</span>
+        </div>
+        <form id="form-cemca">
+            <div class="input-group">
+                <label>Nombre y Apellido</label>
+                <input type="text" placeholder="Tu nombre..." required>
+            </div>
+            <div class="input-group">
+                <label>Correo Electrónico</label>
+                <input type="email" placeholder="ejemplo@correo.com" required>
+            </div>
+            <div class="input-group">
+                <label>Asunto</label>
+                <input type="text" id="asunto-mail" value="Consulta sobre Calidad del Aire">
+            </div>
+            <div class="input-group">
+                <label>Mensaje</label>
+                <textarea rows="4" placeholder="Escribe tu consulta aquí..."></textarea>
+            </div>
+            <button type="submit" class="btn-enviar">Enviar Mensaje</button>
+        </form>
+    </div>
 </div>
 
     <footer style="background: #2d3436; color: white; text-align: center; padding: 12px; font-size: 0.85em; z-index: 1005;">
@@ -1892,9 +1977,26 @@ function actualizarTabInfo(estacion) {
 
   tabInfo.innerHTML = html;
 }
+
+function abrirContacto() {
+    document.getElementById('modal-contacto').style.display = 'flex';
+}
+
+function cerrarContacto() {
+    document.getElementById('modal-contacto').style.display = 'none';
+}
+
+// Cerrar si hacen clic fuera de la caja blanca
+window.onclick = function(event) {
+    let modal = document.getElementById('modal-contacto');
+    if (event.target == modal) {
+        cerrarContacto();
+    }
+}
   </script>
 </body>
 </html>
+
 
 
 
