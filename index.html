@@ -614,20 +614,26 @@ chart-header {
     }
 
 #details-panel {
+        display: none; /* Se activa con .active-mobile */
         width: 100% !important;
-        height: calc(100% - 80px) !important; /* Resta el alto del header móvil */
-        top: 80px !important; /* Posición debajo del header móvil */
-        left: 0 !important;
-        right: auto !important;
         position: fixed !important;
-        z-index: 1500;
-    }
-    
-    #details-panel.active-mobile {
-        display: flex !important;
+        left: 0 !important;
+        background: white !important;
+        z-index: 3000 !important;
+        
+        /* ESTO HABILITA EL SCROLL */
+        top: 80px !important; /* Altura del header */
+        height: calc(100vh - 80px) !important; /* Altura total menos el header */
+        overflow-y: auto !important; /* Habilita scroll vertical */
+        -webkit-overflow-scrolling: touch; /* Suavidad en iPhone/iOS */
+        
         flex-direction: column;
+        padding-bottom: 40px; /* Espacio extra al final para que respire */
     }
 
+    #details-panel.active-mobile {
+        display: flex !important;
+    }
     /* Botón de volver específico para el panel */
     .btn-volver-panel {
         display: block;
@@ -2364,6 +2370,7 @@ function abrirContacto() {
   </script>
 </body>
 </html>
+
 
 
 
