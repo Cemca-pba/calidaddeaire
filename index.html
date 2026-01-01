@@ -548,6 +548,7 @@ chart-header {
         display: flex !important;
         gap: 20px; /* Más espacio entre los botones */
         align-items: center;
+        margin-right: 20px;
     }
 
     /* Estilo de los iconos en Celeste Institucional */
@@ -566,18 +567,8 @@ chart-header {
     }
 
     /* Contenedor para los nuevos botones en el header */
-    .header-buttons-mobile {
-        display: flex !important;
-        gap: 15px;
-        margin-right: 10px;
-    }
+ 
 
-    .header-btn-icon {
-        color: #2d3436;
-        font-size: 1.2rem;
-        cursor: pointer;
-    }
-  
     .main-container {
         position: relative;
         height: calc(100vh - 120px); /* Ajusta según el alto de tu header */
@@ -674,7 +665,7 @@ chart-header {
  <div class="header-buttons-mobile">
         <i class="fas fa-envelope header-btn-icon" onclick="abrirContacto()" title="Mensaje"></i>
         <i class="fas fa-question-circle header-btn-icon" onclick="abrirModalPreguntas()" title="Ayuda"></i>
-        <i class="fas fa-arrow-left header-btn-icon-" onclick="window.open('https://www.ambiente.gba.gob.ar/', '_blank')" title="Ministerio"></i>
+        <i class="fas fa-arrow-left header-btn-icon" onclick="window.open('https://www.ambiente.gba.gob.ar/', '_blank')" title="Ministerio"></i>
     </div>
     <div class="header-der">
         <div class="logo-ministerio"></div>
@@ -2362,6 +2353,7 @@ function abrirContacto() {
   </script>
 </body>
 </html>
+
 
 
 
