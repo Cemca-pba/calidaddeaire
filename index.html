@@ -521,8 +521,8 @@ chart-header {
         display: flex !important;
         justify-content: space-between !important; /* CEMCA izquierda, Botones derecha */
         align-items: center !important;
-        padding: 0 15px !important;
-        height: 75px !important;
+        padding: 0 px !important;
+        height: 80px !important;
     }
 
     .header-izq {
@@ -538,7 +538,7 @@ chart-header {
 
     .logo-cemca {
         width: 130px; /* Ajustado para dar espacio a los botones */
-        height: 45px;
+        height: 79px;
         background-size: contain;
         background-repeat: no-repeat;
     }
@@ -554,6 +554,8 @@ chart-header {
     .header-btn-icon {
         color: #00acc1 !important; /* Celeste institucional */
         font-size: 1.5rem; /* Tamaño cómodo para el dedo */
+        fill: #00acc1 !important;  /* Por si el navegador lo interpreta como SVG */
+        font-size: 1.5rem;
         cursor: pointer;
     }
 }
@@ -670,9 +672,9 @@ chart-header {
         <div class="logo-cemca"></div>
     </div>
  <div class="header-buttons-mobile">
-        <i class="fas fa-arrow-left header-btn-icon-" onclick="window.open('https://www.ambiente.gba.gob.ar/', '_blank')" title="Ministerio"></i>
         <i class="fas fa-envelope header-btn-icon" onclick="abrirContacto()" title="Mensaje"></i>
         <i class="fas fa-question-circle header-btn-icon" onclick="abrirModalPreguntas()" title="Ayuda"></i>
+        <i class="fas fa-arrow-left header-btn-icon-" onclick="window.open('https://www.ambiente.gba.gob.ar/', '_blank')" title="Ministerio"></i>
     </div>
     <div class="header-der">
         <div class="logo-ministerio"></div>
@@ -2360,6 +2362,7 @@ function abrirContacto() {
   </script>
 </body>
 </html>
+
 
 
 
