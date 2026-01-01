@@ -515,7 +515,7 @@ chart-header {
         overflow: hidden;
     }
 
-    .sidebar {
+    #sidebar {
         width: 100% !important;
         height: 100%;
         position: absolute;
@@ -535,7 +535,7 @@ chart-header {
     }
 
     /* Clase para "minimizar" la sidebar y mostrar el mapa */
-    .sidebar.hidden-mobile {
+    #sidebar.hidden-mobile {
         transform: translateX(-100%);
     }
 
@@ -785,7 +785,7 @@ chart-header {
         <span>¡Gracias! Tu consulta ha sido enviada al equipo del CEMCA.</span>
     </div>
 </div>
-<button id="btn-volver" onclick="volverAListafa()">← Volver a la lista</button>
+<button id="btn-volver" onclick="volverALista()">← Volver a la lista</button>
     <footer style="background: #2d3436; color: white; text-align: center; padding: 12px; font-size: 0.85em; z-index: 1005;">
     CEMCA | <strong> Ministerio de Ambiente de la Provincia de Buenos Aires </strong>
   </footer>
@@ -971,22 +971,20 @@ Object.keys(grupos).sort().forEach(partido => {
       <div class="ica-badge" style="background:${info.color}22; color:${info.color}">ICA ${est.calidad}</div>
     `;
     
-card.onclick = () => { 
-  // --- ESTO ES LO NUEVO PARA MÓVILES ---
+card.onclick = () => {
+  // --- Lógica para móviles ---
   if (window.innerWidth <= 768) {
-      document.querySelector('.sidebar').classList.add('hidden-mobile');
+      document.getElementById('sidebar').classList.add('hidden-mobile'); // Usa ID
       document.body.classList.add('view-map');
   }
-  // -------------------------------------
-
-  map.flyTo([est.lat, est.lng], 13); 
   
+  // --- Lógica de mapa (existente) ---
+  map.flyTo([est.lat, est.lng], 13);
   if (marcadoresEstaciones[est.nombre]) {
     marcadoresEstaciones[est.nombre].openPopup();
   }
-  
-  abrirDetalles(est); 
-};;
+  abrirDetalles(est);
+};;;
     gDiv.appendChild(card);
   });
   listDiv.appendChild(gDiv);
@@ -2233,7 +2231,7 @@ function abrirContacto() {
 
 // Función para volver a la lista de partidos
 function volverALista() {
-    document.querySelector('.sidebar').classList.remove('hidden-mobile');
+    document.getElementById('sidebar').classList.remove('hidden-mobile');
     document.body.classList.remove('view-map');
 }
    
@@ -2242,6 +2240,7 @@ function volverALista() {
   </script>
 </body>
 </html>
+
 
 
 
