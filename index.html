@@ -1084,9 +1084,9 @@ const contenidoPopup = `
             ICA: ${est.calidad}
         </div>
         ${resumenMeteo}
-        <button class="btn-detalle-mobile" 
-               onclick="abrirDetalleDesdeMapa('${est.nombre.replace(/'/g, "\\'")}')"> 
-                style="background: #00acc1; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 5px;">
+       <button class="btn-detalle-mobile" 
+                onclick="abrirDetalleDesdeMapa('${est.nombre.replace(/'/g, "\\'")}')" 
+                style="background: #00acc1; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px;">
             <i class="fas fa-chart-bar"></i> Ver Detalles
         </button>
     </div>
@@ -2463,6 +2463,7 @@ function abrirDetalleDesdeMapa(nombreEstacion) {
   </script>
 </body>
 </html>
+
 
 
 
