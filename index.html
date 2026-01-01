@@ -747,11 +747,11 @@ chart-header {
 </div>
       
       <div id="tab-anual" class="tab-pane" style="display:none;"></div>
-
+<button class="btn-volver-panel" onclick="cerrarDetallesMovil()">
+        <i class="fas fa-arrow-left"></i> Volver a la lista</button>
     </div>
-     <button class="btn-volver-panel" onclick="cerrarDetallesMovil()">
-        <i class="fas fa-arrow-left"></i> Volver a la lista
-    </button>
+     
+    
   </div>
 </div>
  </div>
@@ -1980,11 +1980,24 @@ function renderizarVistaMensual(contam, datosFiltrados) {
       </tbody>
     </table>`;
 }
-    function cerrarPanel() { document.getElementById('details-panel').classList.remove('active');
-    // VOLVER BOTÓN A POSICIÓN ORIGINAL
-     document.getElementById('btn-ministerio').style.right = "25px";
-    document.getElementById('btn-email').style.right = "25px";
-    document.getElementById('btn-ayuda').style.right = "25px" }
+function cerrarPanel() {
+    const panel = document.getElementById('details-panel');
+    
+    // 1. Quitamos las clases de activación (tanto para PC como para móvil)
+    panel.classList.remove('active');
+    panel.classList.remove('active-mobile');
+    
+    // Ocultamos el panel (esto sirve para ambos)
+    panel.style.display = 'none';
+
+    // 2. Solo movemos los botones si NO es móvil
+    // Si el ancho de pantalla es mayor a 768px, ejecutamos el movimiento
+    if (window.innerWidth > 768) {
+        document.getElementById('btn-ministerio').style.right = "25px";
+        document.getElementById('btn-email').style.right = "25px";
+        document.getElementById('btn-ayuda').style.right = "25px";
+    }
+}
 
 const PREGUNTAS_LOCALES = [
  {
@@ -2261,16 +2274,10 @@ function volverALista() {
     document.body.classList.remove('view-map');
 }
    
-function cerrarDetallesMovil() {
-    const panel = document.getElementById('details-panel');
-    panel.classList.remove('active-mobile');
-    
-    // Opcional: si el panel se abría con display block/none en tu lógica vieja
-    panel.style.display = 'none'; 
-}
   </script>
 </body>
 </html>
+
 
 
 
