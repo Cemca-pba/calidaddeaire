@@ -85,6 +85,9 @@ header { background-color: #ffffff; padding: 10px 10px; border-bottom: 3px solid
   flex-direction: column;
   gap: 20px;
 }
+   .btn-detalle-mobile {
+    display: none !important;
+}
 
     .station-menu {
   display: flex;
@@ -524,9 +527,6 @@ chart-header {
     top: 30px; /* Se desplaza hacia abajo */
 }
 
-   .btn-detalle-mobile {
-    display: none !important;
-}
 
  @media (max-width: 768px) {
   header {
@@ -553,6 +553,10 @@ chart-header {
         height: 79px;
         background-size: contain;
         background-repeat: no-repeat;
+    }
+
+    .btn-detalle-mobile {
+        display: block !important;
     }
 
     /* Contenedor de iconos */
@@ -630,7 +634,7 @@ chart-header {
         position: fixed !important;
         left: 0 !important;
         background: white !important;
-        z-index: 3000 !important;
+        z-index: 10000 !important;
         
         /* ESTO HABILITA EL SCROLL */
         top: 80px !important; /* Altura del header */
@@ -675,10 +679,10 @@ chart-header {
     }
   #btn-volver-lista {
     position: fixed;
-    bottom: 20px;
+    bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 2000;
+    z-index: 10001;
     background: #2d3436;
     color: white;
     padding: 12px 25px;
@@ -1072,19 +1076,19 @@ async function cargarEstacionesIniciales() {
         </div>
       `;
 
-      const contenidoPopup = `
-        <div style="text-align: center; font-family: 'Segoe UI', sans-serif; min-width: 160px;">
-          <strong style="font-size: 1.1em; color: #2d3436;">${est.nombre}</strong><br>
-          <div style="margin-top: 8px; padding: 4px; background: ${info.color}; color: white; border-radius: 4px; font-weight: bold; font-size: 0.9em;">
+const contenidoPopup = `
+    <div style="text-align: center; font-family: 'Segoe UI', sans-serif; min-width: 160px;">
+        <strong style="font-size: 1.1em; color: #2d3436;">${est.nombre}</strong><br>
+        <div style="margin: 8px 0; padding: 6px; background: ${info.color}; color: white; border-radius: 4px; font-weight: bold; font-size: 0.9em;">
             ICA: ${est.calidad}
-          </div>
-          ${resumenMeteo}
-       <button onclick='abrirDetalles(${JSON.stringify(est)})' 
+        </div>
+        <button class="btn-detalle-mobile" 
+                onclick="abrirDetalleDesdeMapa('${est.nombre}')" 
                 style="background: #00acc1; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 5px;">
             <i class="fas fa-chart-bar"></i> Ver Detalles
         </button>
-        </div>
-      `;
+    </div>
+`;
       
       marcador.bindPopup(contenidoPopup);
       marcadoresEstaciones[est.nombre] = marcador; 
@@ -2439,10 +2443,27 @@ function toggleVistaMapa() {
         }, 300);
     }
 }
+
+   function abrirDetalleDesdeMapa(nombreEstacion) {
+    // Buscamos el objeto completo de la estación en el array global que ya tienes
+    const estacion = estacionesGlobal.find(e => e.nombre === nombreEstacion);
+    
+    if (estacion) {
+        if (window.innerWidth <= 768) {
+            const panel = document.getElementById('details-panel');
+            panel.classList.add('active-mobile');
+            // IMPORTANTE: Asegúrate de llamar a abrirDetalles(estacion)
+            abrirDetalles(estacion);
+        } else {
+            abrirDetalles(estacion);
+        }
+    }
+}
    
   </script>
 </body>
 </html>
+
 
 
 
