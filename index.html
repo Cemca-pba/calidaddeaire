@@ -1087,20 +1087,25 @@ Object.keys(grupos).sort().forEach(partido => {
     `;
     
 card.onclick = () => {
+    const panel = document.getElementById('details-panel');
+    
     if (window.innerWidth <= 768) {
-        // En móvil: Solo abrimos el panel a pantalla completa
-        const panel = document.getElementById('details-panel');
+        // MÓVIL
         panel.classList.add('active-mobile');
-        abrirDetalles(est); // Tu función existente que llena los datos
+        panel.classList.remove('active'); // Limpiamos la clase de PC
+        abrirDetalles(est); 
     } else {
-        // En escritorio: Lógica normal (Mapa + Panel)
+        // ESCRITORIO
+        panel.classList.add('active'); // Esta es la clase que lo desliza desde la derecha
+        panel.classList.remove('active-mobile'); // Limpiamos la clase de móvil
+        
         map.flyTo([est.lat, est.lng], 13);
         if (marcadoresEstaciones[est.nombre]) {
             marcadoresEstaciones[est.nombre].openPopup();
         }
         abrirDetalles(est);
     }
-};;;
+};;;;
     gDiv.appendChild(card);
   });
   listDiv.appendChild(gDiv);
@@ -2364,6 +2369,7 @@ function abrirContacto() {
   </script>
 </body>
 </html>
+
 
 
 
