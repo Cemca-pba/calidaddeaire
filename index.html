@@ -507,6 +507,58 @@ chart-header {
 .toast-notificacion.mostrar {
     top: 30px; /* Se desplaza hacia abajo */
 }
+
+ @media (max-width: 768px) {
+    .main-container {
+        position: relative;
+        height: calc(100vh - 120px); /* Ajusta según el alto de tu header */
+        overflow: hidden;
+    }
+
+    .sidebar {
+        width: 100% !important;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+        background: white;
+        transition: transform 0.3s ease;
+    }
+
+    #map {
+        width: 100% !important;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    /* Clase para "minimizar" la sidebar y mostrar el mapa */
+    .sidebar.hidden-mobile {
+        transform: translateX(-100%);
+    }
+
+    /* Botón para volver a la lista (agrégalo al mapa o al header) */
+    #btn-volver {
+        display: none; /* Oculto en PC */
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 1001;
+        background: #00acc1;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    body.view-map #btn-volver {
+        display: block;
+    }
+}
     
   </style>
 </head>
@@ -733,7 +785,7 @@ chart-header {
         <span>¡Gracias! Tu consulta ha sido enviada al equipo del CEMCA.</span>
     </div>
 </div>
-
+<button id="btn-volver" onclick="volverAListafa()">← Volver a la lista</button>
     <footer style="background: #2d3436; color: white; text-align: center; padding: 12px; font-size: 0.85em; z-index: 1005;">
     CEMCA | <strong> Ministerio de Ambiente de la Provincia de Buenos Aires </strong>
   </footer>
@@ -919,13 +971,22 @@ Object.keys(grupos).sort().forEach(partido => {
       <div class="ica-badge" style="background:${info.color}22; color:${info.color}">ICA ${est.calidad}</div>
     `;
     
-    card.onclick = () => { 
-      map.flyTo([est.lat, est.lng], 13); 
-      if (marcadoresEstaciones[est.nombre]) {
-        marcadoresEstaciones[est.nombre].openPopup();
-      }; 
-      abrirDetalles(est); 
-    };
+card.onclick = () => { 
+  // --- ESTO ES LO NUEVO PARA MÓVILES ---
+  if (window.innerWidth <= 768) {
+      document.querySelector('.sidebar').classList.add('hidden-mobile');
+      document.body.classList.add('view-map');
+  }
+  // -------------------------------------
+
+  map.flyTo([est.lat, est.lng], 13); 
+  
+  if (marcadoresEstaciones[est.nombre]) {
+    marcadoresEstaciones[est.nombre].openPopup();
+  }
+  
+  abrirDetalles(est); 
+};;
     gDiv.appendChild(card);
   });
   listDiv.appendChild(gDiv);
@@ -2154,12 +2215,34 @@ function abrirContacto() {
                 cerrarContacto();
             }
         }
+
+   function mostrarEnMapa(est) {
+    if (window.innerWidth <= 768) {
+        // 1. Ocultamos la sidebar en móvil
+        document.querySelector('.sidebar').classList.add('hidden-mobile');
+        document.body.classList.add('view-map');
+    }
+
+    // 2. Lógica normal de Leaflet
+    map.flyTo([est.lat, est.lng], 15);
+    if (marcadoresEstaciones[est.nombre]) {
+        marcadoresEstaciones[est.nombre].openPopup();
+    }
+    abrirDetalles(est); // Tu función que abre el panel de detalles
+}
+
+// Función para volver a la lista de partidos
+function volverALista() {
+    document.querySelector('.sidebar').classList.remove('hidden-mobile');
+    document.body.classList.remove('view-map');
+}
    
 
 
   </script>
 </body>
 </html>
+
 
 
 
