@@ -72,19 +72,12 @@ header {
 }
 
 /* Ajuste para que el mapa no se pegue */
-#map-container {
-    height: calc(100vh - 110px);
-}
-
+#map-container {height: calc(100vh - 110px);}
 body, html { height: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; overflow: hidden; }
 header { background-color: #ffffff; padding: 10px 10px; border-bottom: 3px solid #00b1c9; display: flex; justify-content: space-between; align-items: center; height: 150px; z-index: 1001; }
     .main-wrapper { display: flex; flex: 1; position: relative; overflow: hidden; }
 
-    #meteo-area {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
+    #meteo-area {display: flex; flex-direction: column; gap: 20px; }
    .btn-detalle-mobile {
     display: none !important;
 }
@@ -556,6 +549,7 @@ chart-header {
     }
 
     .btn-detalle-mobile {
+        display: block !important; /* Forzamos la aparición solo en móvil */
         width: 100%;
         padding: 12px;
         margin-top: 10px;
@@ -2471,6 +2465,7 @@ function toggleVistaMapa() {
   </script>
 </body>
 </html>
+
 
 
 
