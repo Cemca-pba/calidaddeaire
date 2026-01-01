@@ -206,7 +206,9 @@ chart-header {
     padding-bottom: 5px;
     border-bottom: 1px solid #eee;
 }
-
+.btn-detalle-mobile {
+    display: none !important;
+}
 .status-badge {
     display: flex;
     align-items: center;
@@ -738,7 +740,7 @@ chart-header {
         </div>
         <input type="text" id="search-input" placeholder="Buscar partido...">
     </div>
-      <button id="btn-ver-mapa-mobile" class="btn-mobile-only" onclick="toggleVistaMapa()">
+      <button id="btn-ver-mapa-mobile" class="btn-detalle-mobile" onclick="toggleVistaMapa()">
         <i class="fas fa-map-marked-alt"></i> Buscar en el mapa
     </button>
 </div><div id="station-list"></div>
@@ -2437,6 +2439,7 @@ function toggleVistaMapa() {
   </script>
 </body>
 </html>
+
 
 
 
