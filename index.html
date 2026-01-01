@@ -614,9 +614,10 @@ chart-header {
     /* Clase para "minimizar" la sidebar y mostrar el mapa */
     #sidebar.hidden-mobile {
         display: none !important;
-        transform: translateX(-100%);
+        visibility: hidden !important;
+        pointer-events: none !important;
     }
-
+  
 #details-panel {
         display: none; /* Se activa con .active-mobile */
         width: 100% !important;
@@ -1072,8 +1073,8 @@ async function cargarEstacionesIniciales() {
             ICA: ${est.calidad}
           </div>
           ${resumenMeteo}
-          <button onclick='abrirDetalles(${JSON.stringify(est)})' 
-                style="background: #00acc1; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 5px;">
+       <button onclick='abrirDetalles(${JSON.stringify(est)})' 
+                style="background: #00acc1; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 5px;">
             <i class="fas fa-chart-bar"></i> Ver Detalles
         </button>
         </div>
@@ -2436,6 +2437,7 @@ function toggleVistaMapa() {
   </script>
 </body>
 </html>
+
 
 
 
