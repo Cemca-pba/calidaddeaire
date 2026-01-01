@@ -598,6 +598,19 @@ chart-header {
         font-size: 16px;
         cursor: pointer;
     }
+  footer {
+        flex-direction: column !important; /* Apila los elementos */
+        height: auto !important;           /* Permite que crezca según el texto */
+        padding: 15px 10px !important;
+        text-align: center;
+        gap: 8px;                          /* Espacio entre los dos renglones */
+    }
+
+    footer p {
+        margin: 0;
+        font-size: 13px;                   /* Ajuste de tamaño para móviles */
+        line-height: 1.4;
+    }
 }
 
 @media (min-width: 769px) {
@@ -837,8 +850,9 @@ chart-header {
 </div>
 
     <footer style="background: #2d3436; color: white; text-align: center; padding: 12px; font-size: 0.85em; z-index: 1005;">
-    CEMCA | <strong> Ministerio de Ambiente de la Provincia de Buenos Aires </strong>
-  </footer>
+    <p><strong>CEMCA</strong></p>
+    <p>Ministerio de Ambiente de la Provincia de Buenos Aires</p>
+</footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
@@ -2299,6 +2313,7 @@ function abrirContacto() {
   </script>
 </body>
 </html>
+
 
 
 
