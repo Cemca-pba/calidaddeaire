@@ -599,19 +599,17 @@ chart-header {
         transform: translateX(-100%);
     }
 
-    #details-panel {
+#details-panel {
         width: 100% !important;
-        height: 100% !important;
+        /* Restamos el alto del header para que no se oculte el footer ni sobresalga */
+        height: calc(100% - 75px) !important; 
         position: fixed;
-        top: 0;
+        top: 75px; /* Altura exacta de tu header móvil */
         left: 0;
-        z-index: 2000; /* Por encima de todo */
+        z-index: 1500; /* Suficiente para estar sobre el mapa, pero bajo el toast si es necesario */
         background: white;
-        display: none; /* Se activa con JS */
-        flex-direction: column;
-        padding: 20px;
-        box-sizing: border-box;
         overflow-y: auto;
+        display: none;
     }
 
     #details-panel.active-mobile {
@@ -2353,6 +2351,7 @@ function abrirContacto() {
   </script>
 </body>
 </html>
+
 
 
 
