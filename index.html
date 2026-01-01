@@ -2390,28 +2390,53 @@ function abrirContacto() {
 
 // Función para volver a la lista de partidos
 function toggleVistaMapa() {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.add('hidden-mobile');
-    
-    // Agregamos un botón flotante temporal para volver a la lista
-    if (!document.getElementById('btn-volver-lista')) {
-        const btnVolver = document.createElement('button');
-        btnVolver.id = 'btn-volver-lista';
-        btnVolver.innerHTML = '<i class="fas fa-list"></i> Ver Lista';
-        btnVolver.onclick = () => {
-            sidebar.classList.remove('hidden-mobile');
-            btnVolver.remove();
-        };
-        document.body.appendChild(btnVolver);
+    const sidebar = document.getElementById('sidebar'); // Cambiado de querySelector a getElementById
+    const btnVolver = document.getElementById('btn-volver-lista-flotante');
+
+    if (sidebar) {
+        sidebar.classList.add('hidden-mobile');
+        
+        // Mostrar el botón de volver si no existe
+        if (!btnVolver) {
+            const nuevoBtn = document.createElement('button');
+            nuevoBtn.id = 'btn-volver-lista-flotante';
+            nuevoBtn.innerHTML = '<i class="fas fa-list"></i> Ver Lista de Partidos';
+            
+            // Estilo directo para asegurar que se vea sobre el mapa
+            nuevoBtn.style.cssText = `
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 5000;
+                background: #2d3436;
+                color: white;
+                padding: 12px 25px;
+                border-radius: 30px;
+                border: none;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+                font-family: sans-serif;
+                font-weight: bold;
+            `;
+
+            nuevoBtn.onclick = function() {
+                sidebar.classList.remove('hidden-mobile');
+                nuevoBtn.remove();
+            };
+            document.body.appendChild(nuevoBtn);
+        }
+
+        // Refrescar el mapa para que ocupe todo el espacio
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 300);
     }
-    
-    // Forzamos a Leaflet a recalcular el tamaño del mapa
-    setTimeout(() => { map.invalidateSize(); }, 200);
 }
    
   </script>
 </body>
 </html>
+
 
 
 
