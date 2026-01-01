@@ -514,15 +514,20 @@ chart-header {
 }
 
  @media (max-width: 768px) {
+  header {
+        justify-content: space-between !important; /* Logo a la izquierda, botones a la derecha */
+        padding: 0 15px !important;
+        height: 80px !important;
+    }
 .header-der {
         display: none !important;
     }
 
     /* Hacemos que el contenedor del CEMCA ocupe todo el ancho */
     .header-izq {
-        width: 100% !important;
-        display: flex;
-        justify-content: center; /* Centra el logo */
+         width: auto !important; /* Ya no ocupa el 100% para dejar espacio a los iconos */
+        justify-content: flex-start !important;
+        display: flex
         align-items: center;
     }
 
@@ -533,10 +538,23 @@ chart-header {
         background-size: contain;
     }
 
-    /* Opcional: Reducir el alto del header en móvil para ganar espacio */
-    header {
-        height: 80px !important;
-        padding: 0;
+ 
+  /* Ocultar botones flotantes originales */
+    #btn-ministerio, #btn-email, #btn-ayuda {
+        display: none !important;
+    }
+
+    /* Contenedor para los nuevos botones en el header */
+    .header-buttons-mobile {
+        display: flex !important;
+        gap: 15px;
+        margin-right: 10px;
+    }
+
+    .header-btn-icon {
+        color: #2d3436;
+        font-size: 1.2rem;
+        cursor: pointer;
     }
   
     .main-container {
@@ -631,6 +649,11 @@ chart-header {
 <header>
     <div class="header-izq">
         <div class="logo-cemca"></div>
+    </div>
+ <div class="header-buttons-mobile">
+        <i class="fas fa-university header-btn-icon" onclick="window.open('https://www.ambiente.gba.gob.ar/', '_blank')" title="Ministerio"></i>
+        <i class="fas fa-envelope header-btn-icon" onclick="abrirContacto()" title="Mensaje"></i>
+        <i class="fas fa-question-circle header-btn-icon" onclick="abrirModalPreguntas()" title="Ayuda"></i>
     </div>
     <div class="header-der">
         <div class="logo-ministerio"></div>
@@ -2318,6 +2341,7 @@ function abrirContacto() {
   </script>
 </body>
 </html>
+
 
 
 
