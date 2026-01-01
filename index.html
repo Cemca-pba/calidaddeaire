@@ -264,6 +264,7 @@ chart-header {
    .btn-volver-panel {
     display: none !important;
 }
+   .btn-mobile-only { display: none; }
   
 
     .gauge-wrapper { margin-top: 0px; position: relative; width: 260px; margin: 0 auto 20px auto; }
@@ -597,9 +598,22 @@ chart-header {
         top: 0;
         left: 0;
     }
+  
+  .btn-mobile-only {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        background-color: #00acc1;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+    }
 
     /* Clase para "minimizar" la sidebar y mostrar el mapa */
     #sidebar.hidden-mobile {
+        display: none !important;
         transform: translateX(-100%);
     }
 
@@ -652,6 +666,19 @@ chart-header {
         font-size: 13px;                   /* Ajuste de tamaño para móviles */
         line-height: 1.4;
     }
+  #btn-volver-lista {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    background: #2d3436;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 30px;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
 }
 
 
@@ -709,6 +736,9 @@ chart-header {
             </svg>
         </div>
         <input type="text" id="search-input" placeholder="Buscar partido...">
+        <button id="btn-ver-mapa-mobile" class="btn-mobile-only" onclick="toggleVistaMapa()">
+        <i class="fas fa-map-marked-alt"></i> Buscar en el mapa
+    </button>
     </div>
 </div><div id="station-list"></div>
 <div id="station-list">
@@ -1042,6 +1072,10 @@ async function cargarEstacionesIniciales() {
             ICA: ${est.calidad}
           </div>
           ${resumenMeteo}
+          <button onclick='abrirDetalles(${JSON.stringify(est)})' 
+                style="background: #00acc1; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 5px;">
+            <i class="fas fa-chart-bar"></i> Ver Detalles
+        </button>
         </div>
       `;
       
@@ -2355,11 +2389,30 @@ function abrirContacto() {
 }
 
 // Función para volver a la lista de partidos
-
+function toggleVistaMapa() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.add('hidden-mobile');
+    
+    // Agregamos un botón flotante temporal para volver a la lista
+    if (!document.getElementById('btn-volver-lista')) {
+        const btnVolver = document.createElement('button');
+        btnVolver.id = 'btn-volver-lista';
+        btnVolver.innerHTML = '<i class="fas fa-list"></i> Ver Lista';
+        btnVolver.onclick = () => {
+            sidebar.classList.remove('hidden-mobile');
+            btnVolver.remove();
+        };
+        document.body.appendChild(btnVolver);
+    }
+    
+    // Forzamos a Leaflet a recalcular el tamaño del mapa
+    setTimeout(() => { map.invalidateSize(); }, 200);
+}
    
   </script>
 </body>
 </html>
+
 
 
 
