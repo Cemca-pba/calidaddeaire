@@ -509,6 +509,31 @@ chart-header {
 }
 
  @media (max-width: 768px) {
+.header-der {
+        display: none !important;
+    }
+
+    /* Hacemos que el contenedor del CEMCA ocupe todo el ancho */
+    .header-izq {
+        width: 100% !important;
+        display: flex;
+        justify-content: center; /* Centra el logo */
+        align-items: center;
+    }
+
+    /* Ajustamos el tamaño del logo para que no se vea gigante */
+    .logo-cemca {
+        width: 80%; 
+        height: 60px; /* Un alto más adecuado para celulares */
+        background-size: contain;
+    }
+
+    /* Opcional: Reducir el alto del header en móvil para ganar espacio */
+    header {
+        height: 80px !important;
+        padding: 0;
+    }
+  
     .main-container {
         position: relative;
         height: calc(100vh - 120px); /* Ajusta según el alto de tu header */
@@ -747,8 +772,8 @@ chart-header {
 </div>
       
       <div id="tab-anual" class="tab-pane" style="display:none;"></div>
-<button class="btn-volver-panel" onclick="cerrarDetallesMovil()">
-        <i class="fas fa-arrow-left"></i> Volver a la lista</button>
+<button class="btn-volver-panel" onclick="cerrarPanel()">
+        <i class="fas fa-arrow-left"></i> Volver a Estaciones</button>
     </div>
      
     
@@ -2274,6 +2299,7 @@ function abrirContacto() {
   </script>
 </body>
 </html>
+
 
 
 
