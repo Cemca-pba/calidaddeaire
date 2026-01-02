@@ -2344,7 +2344,7 @@ function actualizarTabInfo(estacion) {
           </div>
           <div>
             <small style="color: #00aec3; font-weight: 800; font-size: 0.65em; text-transform: uppercase; display: block;">Ubicación</small>
-            <span style="font-size: 0.9em;">Lat: ${estacion.lat} | Long: ${estacion.lng}</span>
+            <span style="font-size: 0.9em;">Lat: ${parseFloat(estacion.lat).toFixed(2)} | Long: ${parseFloat(estacion.lng).toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -2482,6 +2482,7 @@ function abrirDetalleDesdeMapa(nombreRecibido) {
   </script>
 </body>
 </html>
+
 
 
 
