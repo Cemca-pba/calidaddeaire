@@ -1036,6 +1036,9 @@ async function cargarEstacionesIniciales() {
     const response = await fetch(`${urlScript}?action=obtenerEstaciones`);
     const estaciones = await response.json();
 
+   // 2. GUARDAR LOS DATOS EN LA VARIABLE GLOBAL
+    window.estacionesGlobal = estaciones;
+
     // --- AQUÍ EMPIEZA TU LÓGICA ORIGINAL ---
     const listDiv = document.getElementById('station-list');
     const grupos = {};
@@ -2469,3 +2472,4 @@ function abrirDetalleDesdeMapa(nombreEstacion) {
   </script>
 </body>
 </html>
+
