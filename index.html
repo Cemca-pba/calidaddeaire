@@ -95,8 +95,6 @@ body, html { height: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', sans-
   margin: 10px 0;
 }
 
-
-
 .menu-item {
   cursor: pointer;
   padding: 10px;
@@ -1044,7 +1042,7 @@ let chartMensualInstance = null; // Para destruir el gráfico anterior
       let valor = parseFloat(v);
       if (isNaN(valor)) return { label: "Sin Datos", color: COLORS.GRAY, rec: "No disponible." };
       if (valor <= 50) return { label: "Bueno", color: COLORS.GREEN, rec: "Se pueden realizar actividades al aire libre con normalidad" };
-      if (valor <= 100) return { label: "Moderado", color: COLORS.YELLOW, rec: "Se recomienda a las personas sensibles reducir el esfuerzo." };
+      if (valor <= 100) return { label: "Moderado", color: COLORS.YELLOW, rec: "Se recomienda a las personas sensibles deben reducir el esfuerzo al aire libre." };
       if (valor <= 150) return { label: "Insalubre Para Grupos Sensibles", color: COLORS.ORANGE, rec: "Ancianos, niños y personas con dificultades respiratorias deben evitar realizar actividades al aire libre" };
       if (valor <= 200) return { label: "Insalubre", color: COLORS.RED, rec: "Toda la población debe evitar realizar actividades al aire libre" };
       if (valor <= 300) return { label: "Muy Insalubre", color: COLORS.PURPLE, rec: "se recomienda permanecer en el interior" };
@@ -1311,6 +1309,9 @@ function actualizarRecomendaciones(valorICA) {
   const recCard = document.getElementById('rec-card');
   const catText = document.getElementById('rec-cat-text');
   const descText = document.getElementById('rec-desc-text');
+
+ descText.style.fontSize = "1.2rem"; 
+  catText.style.fontSize = "1.4rem";
 
   // Si el valor es "Sin Datos" o similar
   if (valorICA === "Sin Datos" || isNaN(parseFloat(valorICA))) {
@@ -2481,6 +2482,7 @@ function abrirDetalleDesdeMapa(nombreRecibido) {
   </script>
 </body>
 </html>
+
 
 
 
