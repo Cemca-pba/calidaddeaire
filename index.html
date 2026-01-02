@@ -2447,225 +2447,25 @@ function toggleVistaMapa() {
 }
    
 function abrirDetalleDesdeMapa(nombreEstacion) {
-    // Buscamos la estación por su nombre en el array global
-    const est = estaciones.find(e => e.nombre === nombreEstacion);
+    // 1. Buscamos el objeto de la estación en el array global
+    // Importante: asegúrate que la variable 'estaciones' sea accesible
+    const estacion = estaciones.find(e => e.nombre === nombreEstacion);
     
-    if (est) {
-        // Si estamos en móvil, activamos el panel antes de llenarlo
+    if (estacion) {
+        const panel = document.getElementById('details-panel');
+        
+        // 2. Activamos la clase de móvil para que ocupe toda la pantalla
         if (window.innerWidth <= 768) {
-            document.getElementById('details-panel').classList.add('active-mobile');
+            panel.classList.add('active-mobile');
+            // Aseguramos que el body no haga scroll atrás
+            document.body.style.overflow = 'hidden';
         }
-        // Llamamos a tu función principal que ya carga los gráficos
-        abrirDetalles(est);
+        
+        // 3. Llamamos a tu función original para cargar gráficos y datos
+        abrirDetalles(estacion);
     }
 }
    
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
