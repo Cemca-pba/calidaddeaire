@@ -651,18 +651,26 @@ chart-header {
         display: flex !important;
     }
     /* Botón de volver específico para el panel */
-    .btn-volver-panel {
-        display: block;
-        width: 100%;
-        padding: 15px;
-        margin-top: 20px;
-        background-color: #00acc1;
-        color: white;
+#btn-volver-lista {
+        display: block !important;
+        position: fixed !important; /* Lo saca del flujo y lo fija a la pantalla */
+        bottom: 30px !important;    /* Distancia desde abajo (sobre el footer) */
+        left: 50% !important;
+        transform: translateX(-50%) !important; /* Lo centra perfectamente */
+        
+        width: 80% !important;      /* Ancho responsivo */
+        max-width: 300px;
+        padding: 12px 20px !important;
+        
+        background-color: #2d3436 !important; /* Gris oscuro para contrastar con el mapa */
+        color: white !important;
+        border-radius: 50px !important; /* Estilo píldora/moderno */
         border: none;
-        border-radius: 8px;
-        font-family: 'Encode Sans', sans-serif;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+        z-index: 9999 !important; /* Por encima de los controles del mapa */
+        
         font-weight: bold;
-        font-size: 16px;
+        text-align: center;
         cursor: pointer;
     }
   footer {
@@ -2475,5 +2483,6 @@ function abrirDetalleDesdeMapa(nombreRecibido) {
   </script>
 </body>
 </html>
+
 
 
