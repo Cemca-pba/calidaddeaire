@@ -647,7 +647,7 @@ chart-header {
         
         height: auto !important; /* Ya no depende de calc(100vh) */
         background: white !important;
-        z-index: 2000 !important; /* Suficiente para estar sobre el mapa */
+        z-index: 3000 !important; /* Suficiente para estar sobre el mapa */
         
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch;
@@ -665,7 +665,7 @@ chart-header {
     left: 50%;               /* Lo mueve al centro horizontal */
     transform: translateX(-50%); /* Ajuste perfecto para centrarlo */
     
-    z-index: 5000;           /* Valor alto para estar sobre el mapa y botones de Leaflet */
+    z-index: 2900;           /* Valor alto para estar sobre el mapa y botones de Leaflet */
     
     background-color: #2d3436; /* Color oscuro institucional (contrasta bien con el mapa) */
     color: white;
@@ -1219,8 +1219,6 @@ searchInput.addEventListener('input', (e) => {
 window.onload = cargarEstacionesIniciales;
 
 async function abrirDetalles(estacion) {
- const btnFlotante = document.getElementById('btn-volver-lista-flotante');
-  if (btnFlotante) btnFlotante.remove();
   // 1. RESET DE PESTAÑAS Y ESTADO VISUAL
   document.querySelectorAll('.tab-pane').forEach(pane => pane.style.display = 'none');
   document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
@@ -2478,6 +2476,7 @@ function abrirDetalleDesdeMapa(nombreRecibido) {
   </script>
 </body>
 </html>
+
 
 
 
