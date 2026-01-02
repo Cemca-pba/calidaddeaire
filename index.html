@@ -650,29 +650,41 @@ chart-header {
     #details-panel.active-mobile {
         display: flex !important;
     }
-    /* Botón de volver específico para el panel */
-#btn-volver-lista {
-        display: block !important;
-        position: fixed !important; /* Lo saca del flujo y lo fija a la pantalla */
-        bottom: 30px !important;    /* Distancia desde abajo (sobre el footer) */
-        left: 50% !important;
-        transform: translateX(-50%) !important; /* Lo centra perfectamente */
-        
-        width: 80% !important;      /* Ancho responsivo */
-        max-width: 300px;
-        padding: 12px 20px !important;
-        
-        background-color: #2d3436 !important; /* Gris oscuro para contrastar con el mapa */
-        color: white !important;
-        border-radius: 50px !important; /* Estilo píldora/moderno */
-        border: none;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
-        z-index: 9999 !important; /* Por encima de los controles del mapa */
-        
-        font-weight: bold;
-        text-align: center;
-        cursor: pointer;
-    }
+
+#btn-volver-lista-flotante {
+    position: fixed;         /* Se queda fijo en la pantalla */
+    bottom: 30px;            /* Distancia desde el borde inferior */
+    left: 50%;               /* Lo mueve al centro horizontal */
+    transform: translateX(-50%); /* Ajuste perfecto para centrarlo */
+    
+    z-index: 5000;           /* Valor alto para estar sobre el mapa y botones de Leaflet */
+    
+    background-color: #2d3436; /* Color oscuro institucional (contrasta bien con el mapa) */
+    color: white;
+    padding: 12px 25px;
+    border-radius: 30px;     /* Forma de "píldora" moderna */
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4); /* Sombra para dar profundidad */
+    
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    
+    display: flex;           /* Alinea el icono y el texto */
+    align-items: center;
+    gap: 10px;               /* Espacio entre el icono de lista y el texto */
+    
+    white-space: nowrap;     /* Evita que el texto se parta en dos renglones */
+    transition: all 0.3s ease;
+}
+
+/* Efecto al presionar (opcional) */
+#btn-volver-lista-flotante:active {
+    transform: translateX(-50%) scale(0.95);
+    background-color: #000;
+}
+   
   footer {
         flex-direction: column !important; /* Apila los elementos */
         height: auto !important;           /* Permite que crezca según el texto */
@@ -686,19 +698,7 @@ chart-header {
         font-size: 13px;                   /* Ajuste de tamaño para móviles */
         line-height: 1.4;
     }
-  #btn-volver-lista {
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10001;
-    background: #2d3436;
-    color: white;
-    padding: 12px 25px;
-    border-radius: 30px;
-    border: none;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
+
 }
 
 
@@ -2483,6 +2483,7 @@ function abrirDetalleDesdeMapa(nombreRecibido) {
   </script>
 </body>
 </html>
+
 
 
 
