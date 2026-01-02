@@ -2449,27 +2449,31 @@ function toggleVistaMapa() {
     }
 }
    
-function abrirDetalleDesdeMapa(nombreEstacion) {
-    // 1. Buscamos el objeto de la estación en el array global
-    // Importante: asegúrate que la variable 'estaciones' sea accesible
-    const estacion = estaciones.find(e => e.nombre === nombreEstacion);
+// 3. LA FUNCIÓN QUE USA EL BOTÓN DEL MAPA
+function abrirDetalleDesdeMapa(nombreRecibido) {
+    // Buscamos en la variable global que ahora sí existe
+    const est = window.estacionesGlobal.find(e => e.nombre === nombreRecibido);
     
-    if (estacion) {
+    if (est) {
         const panel = document.getElementById('details-panel');
         
-        // 2. Activamos la clase de móvil para que ocupe toda la pantalla
         if (window.innerWidth <= 768) {
             panel.classList.add('active-mobile');
-            // Aseguramos que el body no haga scroll atrás
-            document.body.style.overflow = 'hidden';
+            panel.classList.remove('active');
+        } else {
+            panel.classList.add('active');
+            panel.classList.remove('active-mobile');
         }
         
-        // 3. Llamamos a tu función original para cargar gráficos y datos
-        abrirDetalles(estacion);
+        // Llamamos a tu función original para cargar los gráficos
+        abrirDetalles(est);
+    } else {
+        console.error("No se encontró la estación:", nombreRecibido);
     }
 }
    
   </script>
 </body>
 </html>
+
 
