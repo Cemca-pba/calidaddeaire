@@ -583,8 +583,14 @@ chart-header {
     }
 
     /* Contenedor para los nuevos botones en el header */
- 
+ .main-wrapper {
+    position: relative; /* Esto es vital */
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
 
+  
     .main-container {
         position: relative;
         height: calc(100vh - 120px); /* Ajusta según el alto de tu header */
@@ -630,26 +636,28 @@ chart-header {
     }
   
 #details-panel {
-        display: none; /* Se activa con .active-mobile */
+        display: none; 
         width: 100% !important;
-        position: fixed !important;
+        
+        /* CAMBIO CLAVE: position absolute respecto al contenedor padre */
+        position: absolute !important; 
         left: 0 !important;
+        top: 0 !important;
+        bottom: 0 !important; /* Se estira hasta donde empieza el footer */
+        
+        height: auto !important; /* Ya no depende de calc(100vh) */
         background: white !important;
-        z-index: 10000 !important;
+        z-index: 2000 !important; /* Suficiente para estar sobre el mapa */
         
-        /* ESTO HABILITA EL SCROLL */
-        top: 80px !important; /* Altura del header */
-        height: calc(100vh - 80px) !important; /* Altura total menos el header */
-        overflow-y: auto !important; /* Habilita scroll vertical */
-        -webkit-overflow-scrolling: touch; /* Suavidad en iPhone/iOS */
-        
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
         flex-direction: column;
-        padding-bottom: 40px; /* Espacio extra al final para que respire */
     }
 
     #details-panel.active-mobile {
         display: flex !important;
     }
+}
 
 #btn-volver-lista-flotante {
     position: fixed;         /* Se queda fijo en la pantalla */
@@ -2468,6 +2476,7 @@ function abrirDetalleDesdeMapa(nombreRecibido) {
   </script>
 </body>
 </html>
+
 
 
 
