@@ -1153,20 +1153,23 @@ card.onclick = () => {
     
     if (window.innerWidth <= 768) {
         // MÓVIL
+        panel.style.display = 'flex'; // Aseguramos que sea visible
         panel.classList.add('active-mobile');
-        panel.classList.remove('active'); // Limpiamos la clase de PC
+        panel.classList.remove('active');
         abrirDetalles(est); 
     } else {
         // ESCRITORIO
-        panel.classList.add('active'); // Esta es la clase que lo desliza desde la derecha
-        panel.classList.remove('active-mobile'); // Limpiamos la clase de móvil
+        panel.style.display = 'block'; // Aseguramos que sea visible en PC
+        panel.classList.add('active'); 
+        panel.classList.remove('active-mobile'); 
         
         map.flyTo([est.lat, est.lng], 13);
         if (marcadoresEstaciones[est.nombre]) {
             marcadoresEstaciones[est.nombre].openPopup();
+        }
         abrirDetalles(est);
     }
-}};;;;
+};
     gDiv.appendChild(card);
   });
   listDiv.appendChild(gDiv);
@@ -2143,8 +2146,6 @@ function cerrarPanel() {
     panel.classList.remove('active');
     panel.classList.remove('active-mobile');
     
-    // Ocultamos el panel (esto sirve para ambos)
-    panel.style.display = 'none';
 
     // 2. Solo movemos los botones si NO es móvil
     // Si el ancho de pantalla es mayor a 768px, ejecutamos el movimiento
@@ -2479,6 +2480,7 @@ function abrirDetalleDesdeMapa(nombreRecibido) {
   </script>
 </body>
 </html>
+
 
 
 
