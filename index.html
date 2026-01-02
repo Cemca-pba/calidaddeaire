@@ -2145,6 +2145,7 @@ function cerrarPanel() {
     // 1. Quitamos las clases de activación (tanto para PC como para móvil)
     panel.classList.remove('active');
     panel.classList.remove('active-mobile');
+    if (window.innerWidth < 768) panel.style.display = 'none';
     
 
     // 2. Solo movemos los botones si NO es móvil
@@ -2480,6 +2481,7 @@ function abrirDetalleDesdeMapa(nombreRecibido) {
   </script>
 </body>
 </html>
+
 
 
 
