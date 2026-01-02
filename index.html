@@ -1219,6 +1219,8 @@ searchInput.addEventListener('input', (e) => {
 window.onload = cargarEstacionesIniciales;
 
 async function abrirDetalles(estacion) {
+ const btnFlotante = document.getElementById('btn-volver-lista-flotante');
+  if (btnFlotante) btnFlotante.remove();
   // 1. RESET DE PESTAÑAS Y ESTADO VISUAL
   document.querySelectorAll('.tab-pane').forEach(pane => pane.style.display = 'none');
   document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
@@ -2476,6 +2478,7 @@ function abrirDetalleDesdeMapa(nombreRecibido) {
   </script>
 </body>
 </html>
+
 
 
 
