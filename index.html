@@ -577,6 +577,14 @@ chart-header {
     font-size: 1.2rem;
     color: #2d3436;
     font-weight: 800;
+    line-height: 1.1;
+    margin-top: 5px;
+    word-wrap: break-word;
+}
+
+   .meteo-card small {
+    margin-top: 2px;
+    font-weight: normal;
 }
 
 /* Clase especial para la flecha del viento */
@@ -2581,8 +2589,10 @@ function actualizarTabMeteo(estacion) {
         { id: 'temp', label: 'Temperatura', valor: estacion.temp, unidad: '°C', icono: 'fas fa-thermometer-half' },
         { id: 'hum', label: 'Humedad', valor: estacion.hum, unidad: '%', icono: 'fas fa-tint' },
         { id: 'viento', label: 'Viento', valor: estacion.viento, unidad: ' km/h', icono: 'fas fa-wind' },
+        { id: 'pres', label: 'Rad. Solar', valor: estacion.pres, unidad: ' hPa', icono: 'fas fa-tachometer-alt' },
         { id: 'dir', label: 'Dirección', valor: estacion.viento_dir, unidad: '°', icono: 'fas fa-long-arrow-alt-up' },
-        { id: 'rad', label: 'Rad. Solar', valor: estacion.radiacion, unidad: ' W/m²', icono: 'fas fa-sun' }
+        { id: 'rad', label: 'Rad. Solar', valor: estacion.radiacion, unidad: ' W/m²', icono: 'fas fa-sun' },
+
     ];
 
     // 4. Bucle para generar tarjetas solo si el dato es válido
@@ -2591,15 +2601,16 @@ function actualizarTabMeteo(estacion) {
         
         // Verificamos si es un número válido
         if (!isNaN(valNum)) {
-            if (s.id === 'dir') {
-                // Tarjeta especial con flecha rotativa
-                html += `
-                    <div class="meteo-card">
-                        <i class="${s.icono} wind-arrow" style="transform: rotate(${valNum}deg); color: #ff7675;"></i>
-                        <span>${s.label}</span>
-                        <strong>${valNum}${s.unidad}</strong>
-                    </div>`;
-            } else {
+      if (s.id === 'dir') {
+    const direccionTexto = obtenerDireccionTexto(valNum);
+    html += `
+        <div class="meteo-card">
+            <i class="${s.icono} wind-arrow" style="transform: rotate(${valNum}deg);"></i>
+            <span>${s.label}</span>
+            <strong style="font-size: 0.95rem;">${direccionTexto}</strong>
+            <small style="font-size: 0.75em; color: #95a5a6;">${valNum}°</small>
+        </div>`;
+          } else {
                 // Tarjeta estándar
                 html += `
                     <div class="meteo-card">
@@ -2616,9 +2627,27 @@ function actualizarTabMeteo(estacion) {
     // Inyectamos todo el HTML generado en el contenedor
     contenedor.innerHTML = html;
 }
+
+   function obtenerDireccionTexto(grados) {
+    const val = parseFloat(grados);
+    if (isNaN(val)) return "--";
+    
+    // Arreglo de direcciones cada 22.5 grados
+    const direcciones = [
+        "Norte", "Norte-Noreste", "Noreste", "Este-Noreste", 
+        "Este", "Este-Sureste", "Sureste", "Sur-Sureste", 
+        "Sur", "Sur-Sudoeste", "Sudoeste", "Oeste-Sudoeste", 
+        "Oeste", "Oeste-Noroeste", "Noroeste", "Norte-Noroeste"
+    ];
+    
+    // Calculamos el índice (sumamos 11.25 para centrar el rango)
+    const indice = Math.floor(((val + 11.25) % 360) / 22.5);
+    return direcciones[indice];
+}
   </script>
 </body>
 </html>
+
 
 
 
