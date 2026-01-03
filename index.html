@@ -2478,10 +2478,62 @@ function abrirDetalleDesdeMapa(nombreRecibido) {
         console.error("No se encontró la estación:", nombreRecibido);
     }
 }
+
+function actualizarTabMeteo(estacion) {
+    const contenedor = document.getElementById('tab-meteo'); // Verifica que este ID exista en tu HTML
+    if (!contenedor) return;
+
+    // 1. Encabezado con Fecha/Hora
+    let html = `
+        <div style="background: #e0f7f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #00aec3;">
+            <i class="fas fa-clock" style="color: #00aec3;"></i> 
+            <span style="font-size: 0.85em; color: #2d3436;">
+                Último reporte: <strong>${estacion.fechaMeteo || '--'}</strong>
+            </span>
+        </div>
+        <div class="meteo-grid">
+    `;
+
+    // 2. Definición de sensores a mostrar
+    const sensores = [
+        { id: 'temp', label: 'Temperatura', valor: estacion.temp, unidad: '°C', icono: 'fas fa-thermometer-half' },
+        { id: 'hum', label: 'Humedad', valor: estacion.hum, unidad: '%', icono: 'fas fa-tint' },
+        { id: 'viento', label: 'Viento', valor: estacion.viento, unidad: ' km/h', icono: 'fas fa-wind' },
+        { id: 'dir', label: 'Dirección', valor: estacion.viento_dir, unidad: '°', icono: 'fas fa-long-arrow-alt-up' },
+        { id: 'rad', label: 'Rad. Solar', valor: estacion.radiacion, unidad: ' W/m²', icono: 'fas fa-sun' }
+    ];
+
+    // 3. Bucle de detección de datos existentes
+    sensores.forEach(s => {
+        const valNum = parseFloat(s.valor);
+        if (!isNaN(valNum) && s.valor !== "--") {
+            
+            if (s.id === 'dir') {
+                html += `
+                    <div class="meteo-card">
+                        <i class="${s.icono} wind-arrow" style="transform: rotate(${valNum}deg);"></i>
+                        <span>${s.label}</span>
+                        <strong>${valNum}${s.unidad}</strong>
+                    </div>`;
+            } else {
+                html += `
+                    <div class="meteo-card">
+                        <i class="${s.icono}"></i>
+                        <span>${s.label}</span>
+                        <strong>${valNum}${s.unidad}</strong>
+                    </div>`;
+            }
+        }
+    });
+
+    html += '</div>';
+    contenedor.innerHTML = html;
+}
    
   </script>
 </body>
 </html>
+
 
 
 
