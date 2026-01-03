@@ -1728,24 +1728,18 @@ function dibujarRosa(direcciones, velocidades) {
     const contenedor = document.getElementById('rosa-contenedor');
     if (!contenedor) return;
 
-    // 1. VALIDACIÓN: ¿Existen datos de viento?
-    // Verificamos si hay al menos una entrada que no sea nula, vacía o "NaN"
-    const hayDatos = direcciones && direcciones.length > 0 && direcciones.some((d, i) => {
+    // 1. VALIDACIÓN INICIAL: ¿Hay datos no nulos?
+    const hayDatosBrutos = direcciones && direcciones.length > 0 && direcciones.some((d, i) => {
         return d !== null && d !== "" && !isNaN(parseFloat(d)) && 
                velocidades[i] !== null && velocidades[i] !== "" && !isNaN(parseFloat(velocidades[i]));
     });
 
-    if (!hayDatos) {
-        contenedor.style.display = 'none'; // Ocultamos el div para que no ocupe espacio
-        console.warn("Rosa de los vientos: No se encontraron datos válidos de dirección o velocidad.");
+    if (!hayDatosBrutos) {
+        contenedor.style.display = 'none';
         return;
     }
 
-    // Si hay datos, nos aseguramos de que el contenedor sea visible
-    contenedor.style.display = 'block';
-
     const rumbos = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-    
     const rangos = [
         { label: '< 5 km/h', min: 0, max: 5, color: '#95e1d3' },
         { label: '5-15 km/h', min: 5, max: 15, color: '#eaffd0' },
@@ -1754,7 +1748,11 @@ function dibujarRosa(direcciones, velocidades) {
     ];
 
     let datosSeries = rangos.map(r => ({ name: r.label, data: new Array(16).fill(0), color: r.color }));
+    
+    // Contador para verificar si hay datos reales distintos a cero
+    let totalRegistrosContados = 0;
 
+    // Procesamos registros
     direcciones.forEach((deg, i) => {
         let d = parseFloat(deg);
         let v = parseFloat(velocidades[i]);
@@ -1766,12 +1764,22 @@ function dibujarRosa(direcciones, velocidades) {
         for (let j = 0; j < rangos.length; j++) {
             if (v >= rangos[j].min && v < rangos[j].max) {
                 datosSeries[j].data[indiceRumbo]++;
+                totalRegistrosContados++; // Incrementamos el contador global
                 break;
             }
         }
     });
 
-    // 2. RENDERIZADO
+    // 2. SEGUNDA VALIDACIÓN: ¿La suma de registros es mayor a 0?
+    if (totalRegistrosContados === 0) {
+        contenedor.style.display = 'none';
+        console.warn("Rosa de los vientos: Todos los datos son 0 o no entran en los rangos.");
+        return;
+    }
+
+    // Si pasó ambas validaciones, mostramos y renderizamos
+    contenedor.style.display = 'block';
+
     Highcharts.chart('rosa-contenedor', {
         chart: { polar: true, type: 'column' },
         title: { text: 'Distribución de Viento (Dirección y Velocidad)', style: { fontSize: '16px' } },
@@ -1804,7 +1812,6 @@ function dibujarRosa(direcciones, velocidades) {
         credits: { enabled: false }
     });
 }
-
 
 function switchTab(event, tabId) {
   // Ocultar y desactivar todo
@@ -2670,6 +2677,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
