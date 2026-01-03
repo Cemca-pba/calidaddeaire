@@ -1086,13 +1086,15 @@ let chartMensualInstance = null; // Para destruir el gráfico anterior
           if (v <= 35.4) return COLORS.YELLOW;
           if (v <= 55.4) return COLORS.ORANGE;
           if (v <= 150.4) return COLORS.RED;
-          return COLORS.PURPLE;
+          if (v <= 250.4) return COLORS.PURPLE;
+          return COLORS.MAROON;
         case "PM10":
           if (v <= 54) return COLORS.GREEN;
           if (v <= 154) return COLORS.YELLOW;
           if (v <= 254) return COLORS.ORANGE;
           if (v <= 354) return COLORS.RED;
-          return COLORS.PURPLE;
+          if (v <= 424) return COLORS.PURPLE;
+          return COLORS.MAROON;
         case "NO2":
           if (v <= 53) return COLORS.GREEN;
           if (v <= 100) return COLORS.YELLOW;
@@ -2677,6 +2679,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
