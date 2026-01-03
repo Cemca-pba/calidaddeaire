@@ -2588,8 +2588,8 @@ function actualizarTabMeteo(estacion) {
     const sensores = [
         { id: 'temp', label: 'Temperatura', valor: estacion.temp, unidad: '°C', icono: 'fas fa-thermometer-half' },
         { id: 'hum', label: 'Humedad', valor: estacion.hum, unidad: '%', icono: 'fas fa-tint' },
+        { id: 'pres', label: 'Pres. Atm', valor: estacion.pres, unidad: ' hPa', icono: 'fas fa-tachometer-alt' },
         { id: 'viento', label: 'Viento', valor: estacion.viento, unidad: ' km/h', icono: 'fas fa-wind' },
-        { id: 'pres', label: 'Rad. Solar', valor: estacion.pres, unidad: ' hPa', icono: 'fas fa-tachometer-alt' },
         { id: 'dir', label: 'Dirección', valor: estacion.viento_dir, unidad: '°', icono: 'fas fa-long-arrow-alt-up' },
         { id: 'rad', label: 'Rad. Solar', valor: estacion.radiacion, unidad: ' W/m²', icono: 'fas fa-sun' },
 
@@ -2647,6 +2647,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
