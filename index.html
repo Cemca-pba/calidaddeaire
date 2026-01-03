@@ -1326,6 +1326,12 @@ async function abrirDetalles(estacion) {
   // 4. CONFIGURAR PANEL DE DETALLES (GAUGE Y RECOMENDACIONES)
   document.getElementById('details-panel').classList.add('active');
 
+ const rosaCont = document.getElementById('rosa-contenedor');
+    if (rosaCont) {
+        rosaCont.innerHTML = ''; // Borra el gráfico anterior
+        rosaCont.style.display = 'none'; // Lo oculta hasta que carguen los nuevos datos
+    }
+
  try {
       actualizarTabMeteo(estacion); 
   } catch (e) {
@@ -2664,6 +2670,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
