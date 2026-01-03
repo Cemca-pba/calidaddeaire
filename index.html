@@ -1718,10 +1718,34 @@ async function cargarPestanaMeteo(nombreEstacion) {
   }
 }
 
+Para asegurar que el gráfico no se genere si faltan los datos (evitando un cuadro vacío o un error de Highcharts), debemos aplicar un filtro de seguridad al inicio de la función.
+
+Aquí tienes la función optimizada. He añadido una lógica que verifica si hay al menos un registro válido antes de intentar renderizar:
+
+JavaScript
+
 function dibujarRosa(direcciones, velocidades) {
+    const contenedor = document.getElementById('rosa-contenedor');
+    if (!contenedor) return;
+
+    // 1. VALIDACIÓN: ¿Existen datos de viento?
+    // Verificamos si hay al menos una entrada que no sea nula, vacía o "NaN"
+    const hayDatos = direcciones && direcciones.length > 0 && direcciones.some((d, i) => {
+        return d !== null && d !== "" && !isNaN(parseFloat(d)) && 
+               velocidades[i] !== null && velocidades[i] !== "" && !isNaN(parseFloat(velocidades[i]));
+    });
+
+    if (!hayDatos) {
+        contenedor.style.display = 'none'; // Ocultamos el div para que no ocupe espacio
+        console.warn("Rosa de los vientos: No se encontraron datos válidos de dirección o velocidad.");
+        return;
+    }
+
+    // Si hay datos, nos aseguramos de que el contenedor sea visible
+    contenedor.style.display = 'block';
+
     const rumbos = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
     
-    // Definimos los rangos de velocidad (km/h)
     const rangos = [
         { label: '< 5 km/h', min: 0, max: 5, color: '#95e1d3' },
         { label: '5-15 km/h', min: 5, max: 15, color: '#eaffd0' },
@@ -1729,17 +1753,16 @@ function dibujarRosa(direcciones, velocidades) {
         { label: '> 25 km/h', min: 25, max: 999, color: '#f38181' }
     ];
 
-    // Preparamos la matriz de datos: 4 rangos x 16 rumbos
     let datosSeries = rangos.map(r => ({ name: r.label, data: new Array(16).fill(0), color: r.color }));
 
-    // Procesamos cada registro
     direcciones.forEach((deg, i) => {
-        if (deg === null || deg === "" || velocidades[i] === null) return;
+        let d = parseFloat(deg);
+        let v = parseFloat(velocidades[i]);
         
-        let indiceRumbo = Math.round(deg / 22.5) % 16;
-        let v = velocidades[i];
+        if (isNaN(d) || isNaN(v)) return;
+        
+        let indiceRumbo = Math.round(d / 22.5) % 16;
 
-        // Buscamos a qué rango de velocidad pertenece este registro
         for (let j = 0; j < rangos.length; j++) {
             if (v >= rangos[j].min && v < rangos[j].max) {
                 datosSeries[j].data[indiceRumbo]++;
@@ -1748,6 +1771,7 @@ function dibujarRosa(direcciones, velocidades) {
         }
     });
 
+    // 2. RENDERIZADO
     Highcharts.chart('rosa-contenedor', {
         chart: { polar: true, type: 'column' },
         title: { text: 'Distribución de Viento (Dirección y Velocidad)', style: { fontSize: '16px' } },
@@ -1770,17 +1794,16 @@ function dibujarRosa(direcciones, velocidades) {
         },
         plotOptions: {
             column: {
-                stacking: 'normal', // Esto hace que las velocidades se apilen una sobre otra
+                stacking: 'normal',
                 shadow: false,
                 groupPadding: 0,
                 pointPlacement: 'on'
             }
         },
-        series: datosSeries.reverse(), // Invertimos para que la velocidad baja esté en el centro
+        series: datosSeries.reverse(), 
         credits: { enabled: false }
     });
 }
-
 
 
 function switchTab(event, tabId) {
@@ -2647,6 +2670,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
