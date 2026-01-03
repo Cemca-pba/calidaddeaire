@@ -1243,6 +1243,12 @@ async function abrirDetalles(estacion) {
 
   // 4. CONFIGURAR PANEL DE DETALLES (GAUGE Y RECOMENDACIONES)
   document.getElementById('details-panel').classList.add('active');
+
+ try {
+      actualizarTabMeteo(estacion); 
+  } catch (e) {
+      console.error("Error al cargar la pestaña meteo:", e);
+  }
   
   // MOVIMIENTO DEL BOTÓN: 460px (ancho panel) + 25px (margen original)
     document.getElementById('btn-ministerio').style.right = "485px";
@@ -2533,6 +2539,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
