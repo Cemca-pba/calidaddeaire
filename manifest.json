@@ -1,0 +1,16 @@
+{
+  "short_name": "CEMCA",
+  "name": "CEMCA - Monitoreo Aire",
+  "icons": [
+    {
+      "src": "https://lh3.googleusercontent.com/d/1E9BU-seji6PRCrmVUC368s8rJrkqY7-q",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "theme_color": "#00aec3",
+  "orientation": "portrait"
+}
