@@ -1637,7 +1637,7 @@ options: {
 async function cargarPestanaMeteo(nombreEstacion) {
   const area = document.getElementById('meteo-charts-section');
   // Spinner de carga inicial
-  area.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos meteorológicos utimoas 24hs...</div>';
+  area.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos meteorológicos ultimas 24hs...</div>';
 
   try {
     const response = await fetch(`${urlScript}?action=obtenerMeteo&estacion=${encodeURIComponent(nombreEstacion)}`);
@@ -2670,6 +2670,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
