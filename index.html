@@ -831,8 +831,9 @@ chart-header {
       </div>
 
       <div id="tab-meteo" class="tab-pane" style="display:none;">
-        <div id="meteo-cards-container"></div>
-        <h3 style="text-align:center; color: #2d3436; margin-bottom: 20px;">Datos Meteorológicos</h3>
+        <h3 style="text-align:center; margin-bottom:10px;">Datos Meteorológicos</h3>
+    <div id="meteo-cards-container"></div>
+    <div id="meteo-charts-section"></div>
             </div>
 
       <div id="tab-info" class="tab-pane" style="display:none;">
@@ -1555,9 +1556,9 @@ options: {
 }
 
 async function cargarPestanaMeteo(nombreEstacion) {
-  const area = document.getElementById('tab-meteo');
+  const area = document.getElementById('meteo-charts-section');
   // Spinner de carga inicial
-  area.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos meteorológicos...</div>';
+  area.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos meteorológicos utimoas 24hs...</div>';
 
   try {
     const response = await fetch(`${urlScript}?action=obtenerMeteo&estacion=${encodeURIComponent(nombreEstacion)}`);
@@ -2547,6 +2548,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
