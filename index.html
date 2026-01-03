@@ -831,8 +831,9 @@ chart-header {
       </div>
 
       <div id="tab-meteo" class="tab-pane" style="display:none;">
-        <h3 style="text-align:center;">Datos Meteorológicos</h3>
-        </div>
+        <div id="meteo-cards-container"></div>
+        <h3 style="text-align:center; color: #2d3436; margin-bottom: 20px;">Datos Meteorológicos</h3>
+            </div>
 
       <div id="tab-info" class="tab-pane" style="display:none;">
         <h3 style="text-align:center;">Datos de la Estación</h3>
@@ -2484,23 +2485,26 @@ function abrirDetalleDesdeMapa(nombreRecibido) {
         console.error("No se encontró la estación:", nombreRecibido);
     }
 }
-
+   
 function actualizarTabMeteo(estacion) {
-    const contenedor = document.getElementById('tab-meteo'); // Verifica que este ID exista en tu HTML
+    const contenedor = document.getElementById('meteo-cards-container');
     if (!contenedor) return;
 
-    // 1. Encabezado con Fecha/Hora
+    // 1. Limpiamos el contenedor antes de empezar
+    contenedor.innerHTML = '';
+
+    // 2. Encabezado con Fecha/Hora
     let html = `
-        <div style="background: #e0f7f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #00aec3;">
+        <div style="background: #e0f7f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #00aec3; display: flex; align-items: center; gap: 10px;">
             <i class="fas fa-clock" style="color: #00aec3;"></i> 
             <span style="font-size: 0.85em; color: #2d3436;">
-                Último reporte: <strong>${estacion.fechaMeteo || '--'}</strong>
+                Reporte: <strong>${estacion.fechaMeteo || '--'}</strong>
             </span>
         </div>
         <div class="meteo-grid">
     `;
 
-    // 2. Definición de sensores a mostrar
+    // 3. Lista de sensores (Usando los nombres de propiedades que definimos en el Apps Script)
     const sensores = [
         { id: 'temp', label: 'Temperatura', valor: estacion.temp, unidad: '°C', icono: 'fas fa-thermometer-half' },
         { id: 'hum', label: 'Humedad', valor: estacion.hum, unidad: '%', icono: 'fas fa-tint' },
@@ -2509,19 +2513,22 @@ function actualizarTabMeteo(estacion) {
         { id: 'rad', label: 'Rad. Solar', valor: estacion.radiacion, unidad: ' W/m²', icono: 'fas fa-sun' }
     ];
 
-    // 3. Bucle de detección de datos existentes
+    // 4. Bucle para generar tarjetas solo si el dato es válido
     sensores.forEach(s => {
         const valNum = parseFloat(s.valor);
-        if (!isNaN(valNum) && s.valor !== "--") {
-            
+        
+        // Verificamos si es un número válido
+        if (!isNaN(valNum)) {
             if (s.id === 'dir') {
+                // Tarjeta especial con flecha rotativa
                 html += `
                     <div class="meteo-card">
-                        <i class="${s.icono} wind-arrow" style="transform: rotate(${valNum}deg);"></i>
+                        <i class="${s.icono} wind-arrow" style="transform: rotate(${valNum}deg); color: #ff7675;"></i>
                         <span>${s.label}</span>
                         <strong>${valNum}${s.unidad}</strong>
                     </div>`;
             } else {
+                // Tarjeta estándar
                 html += `
                     <div class="meteo-card">
                         <i class="${s.icono}"></i>
@@ -2532,13 +2539,15 @@ function actualizarTabMeteo(estacion) {
         }
     });
 
-    html += '</div>';
+    html += '</div>'; // Cerramos el grid
+    
+    // Inyectamos todo el HTML generado en el contenedor
     contenedor.innerHTML = html;
 }
-   
   </script>
 </body>
 </html>
+
 
 
 
