@@ -1042,7 +1042,7 @@ let chartMensualInstance = null; // Para destruir el gráfico anterior
       let valor = parseFloat(v);
       if (isNaN(valor)) return { label: "Sin Datos", color: COLORS.GRAY, rec: "No disponible." };
       if (valor <= 50) return { label: "Bueno", color: COLORS.GREEN, rec: "Se pueden realizar actividades al aire libre con normalidad" };
-      if (valor <= 100) return { label: "Moderado", color: COLORS.YELLOW, rec: "Se recomienda a las personas sensibles deben reducir el esfuerzo al aire libre." };
+      if (valor <= 100) return { label: "Moderado", color: COLORS.YELLOW, rec: "Se recomienda a las personas sensibles reducir el esfuerzo al aire libre." };
       if (valor <= 150) return { label: "Insalubre Para Grupos Sensibles", color: COLORS.ORANGE, rec: "Ancianos, niños y personas con dificultades respiratorias deben evitar realizar actividades al aire libre" };
       if (valor <= 200) return { label: "Insalubre", color: COLORS.RED, rec: "Toda la población debe evitar realizar actividades al aire libre" };
       if (valor <= 300) return { label: "Muy Insalubre", color: COLORS.PURPLE, rec: "se recomienda permanecer en el interior" };
@@ -2293,7 +2293,7 @@ administradores: {
     },
     "AQI": { 
       desc: "Plataforma global que recopila y presenta datos del Índice de Calidad del Aire (AQI).", 
-      url: "https://aqicn.org",
+      url: "https://aqicn.org/map/world/",
       logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5A3VNrnbd_ONoNT7VXct6-vU2bcuXYo760g&s"
     },
     "PurpleAir": { 
@@ -2482,6 +2482,7 @@ function abrirDetalleDesdeMapa(nombreRecibido) {
   </script>
 </body>
 </html>
+
 
 
 
