@@ -2130,6 +2130,46 @@ async function cargarPestanaMensual(nombreEstacion) {
   }
 }
 
+function actualizarBotonesYVista() {
+  const selectorAño = document.getElementById('select-año-mensual');
+  const containerBotones = document.getElementById('contaminantes-list');
+  const añoSeleccionado = String(selectorAño.value);
+
+  // 1. Filtrar contaminantes que existen solo para ese año
+  const contaminantesDelAño = [...new Set(
+    datosMensualesGlobal
+      .filter(d => String(d.año) === añoSeleccionado)
+      .map(d => d.contaminante)
+  )];
+
+  // 2. Ordenar según tu lista de prioridad
+  contaminantesDelAño.sort((a, b) => {
+    let indexA = ORDEN_CONTAMINANTES.indexOf(a);
+    let indexB = ORDEN_CONTAMINANTES.indexOf(b);
+    // Si no está en la lista, lo manda al final
+    return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
+  });
+
+  // 3. Renderizar botones
+  containerBotones.innerHTML = "";
+  contaminantesDelAño.forEach((contam, index) => {
+    let btn = document.createElement('button');
+    btn.innerText = contam;
+    btn.className = "btn-filtro-contam";
+    if (index === 0) btn.classList.add('active'); // Activa el primero por defecto
+
+    btn.onclick = function() {
+      document.querySelectorAll('.btn-filtro-contam').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      actualizarVistaPorFiltros();
+    };
+    containerBotones.appendChild(btn);
+  });
+
+  // 4. Actualizar el gráfico y tabla con el primer botón activo
+  actualizarVistaPorFiltros();
+}
+
 function actualizarVistaPorFiltros() {
     const selector = document.getElementById('select-año-mensual');
     const btnActivo = document.querySelector('.btn-filtro-contam.active');
@@ -2659,6 +2699,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
