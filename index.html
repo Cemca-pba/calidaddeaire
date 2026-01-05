@@ -2077,78 +2077,56 @@ function pluginLineaLimite(limite) {
 }
 
 let datosMensualesGlobal = []; // Para filtrar sin volver al servidor
+const ORDEN_CONTAMINANTES = ["PM2.5", "PM10", "SO2", "NO2", "CO", "O3"];   
 
 async function cargarPestanaMensual(nombreEstacion) {
   if (!nombreEstacion) {
     nombreEstacion = document.getElementById('det-nombre').dataset.idEstacion;
   }
 
-  const containerBotones = document.getElementById('contaminantes-list');
-  const selectorAño = document.getElementById('select-año-mensual');
   const loader = document.getElementById('mensual-loader');
   const filtros = document.getElementById('mensual-filtros');
   const contenido = document.getElementById('mensual-content');
+  const selectorAño = document.getElementById('select-año-mensual');
 
   loader.style.display = 'block';
   filtros.style.display = 'none';
   contenido.style.display = 'none';
-  
-  containerBotones.innerHTML = "";
   selectorAño.innerHTML = "";
 
   try {
     const respuesta = await fetch(`${urlScript}?action=obtenerMensuales&estacion=${encodeURIComponent(nombreEstacion)}`);
     const res = await respuesta.json();
-
     loader.style.display = 'none';
 
-    // Verificamos si hay datos en la tabla
     if (!res || !res.tabla || res.tabla.length === 0) {
       filtros.style.display = 'block';
-      containerBotones.innerHTML = "<p style='text-align:center; padding:10px;'>No hay datos para esta estación.</p>";
+      document.getElementById('contaminantes-list').innerHTML = "<p>No hay datos.</p>";
       return;
     }
 
-    // --- PROCESAMIENTO AUTOMÁTICO DE DATOS ---
     datosMensualesGlobal = res.tabla;
 
-    // 1. Extraer años únicos y ordenar
-    const listaAños = [...new Set(res.tabla.map(item => item.año))].sort((a, b) => b - a);
-    
-    // 2. Extraer contaminantes únicos
-    const listaContam = [...new Set(res.tabla.map(item => item.contaminante))];
-
-    // Llenar Selector de Años
+    // 1. Llenar Selector de Años (se hace una sola vez)
+    const listaAños = [...new Set(res.tabla.map(item => String(item.año)))].sort((a, b) => b - a);
     listaAños.forEach(a => {
       let opt = document.createElement('option');
       opt.value = a; opt.innerText = a;
       selectorAño.appendChild(opt);
     });
 
-    // Crear Botones de Contaminantes
-    listaContam.forEach((contam, index) => {
-      let btn = document.createElement('button');
-      btn.innerText = contam;
-      btn.className = "btn-filtro-contam";
-      if (index === 0) btn.classList.add('active');
-      
-      btn.onclick = function() {
-        document.querySelectorAll('.btn-filtro-contam').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        actualizarVistaPorFiltros();
-      };
-      containerBotones.appendChild(btn);
-    });
+    // 2. Escuchar cambios en el año para refrescar los botones
+    selectorAño.onchange = actualizarBotonesYVista;
 
     filtros.style.display = 'block';
     contenido.style.display = 'block';
-    actualizarVistaPorFiltros();
+    
+    // Ejecución inicial
+    actualizarBotonesYVista();
 
   } catch (error) {
-    console.error("Error detallado:", error);
+    console.error("Error:", error);
     loader.style.display = 'none';
-    filtros.style.display = 'block';
-    containerBotones.innerHTML = "<p style='color:red; text-align:center;'>Error al procesar los datos recibidos.</p>";
   }
 }
 
@@ -2681,6 +2659,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
