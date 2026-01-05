@@ -2179,13 +2179,10 @@ function actualizarVistaPorFiltros() {
     const añoSeleccionado = String(selector.value);
     const contamSeleccionado = btnActivo.innerText.trim();
 
-    console.log("Filtrando datos para:", añoSeleccionado, contamSeleccionado);
-
-    // Filtramos asegurando que ambos sean tratados como String
     const filtrados = datosMensualesGlobal.filter(d => 
         String(d.año) === añoSeleccionado && 
         String(d.contaminante).toUpperCase() === contamSeleccionado.toUpperCase()
-    );
+    );
 
     renderizarVistaMensual(contamSeleccionado, filtrados);
 }
@@ -2699,6 +2696,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
