@@ -47,9 +47,9 @@ header {
     flex-grow: 1;
     height: 100%;
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
-    padding-right: 50px;      /* Menos padding para que el logo gane espacio */
+    padding-right: 0px;     
 }
 
 /* LOGO CEMCA: Ajuste para que se vea GRANDE */
@@ -64,7 +64,7 @@ header {
 
 /* LOGO MINISTERIO: Ajuste para máxima legibilidad */
 .logo-ministerio {
-    width: 500px;             /* Aumentamos mucho el ancho permitido */
+    width: 400px;             /* Aumentamos mucho el ancho permitido */
     height: 90px;            /* Casi el alto total del header */
     background-image: url("https://lh3.googleusercontent.com/d/1d7U3yQ6OGAORYFk762nozJW8_YbsMYRE");
     background-size: contain; 
@@ -2297,7 +2297,7 @@ function cerrarPanel() {
 const PREGUNTAS_LOCALES = [
  {
   pregunta: "¿Qué es el CEMCA?",
-  respuesta: `<p style="margin: 0; font-size: 1.05em;">El <strong>Centro de Monitoreo de Calidad de Aire (CEMCA)</strong> se constituye dentro de la <strong>Dirección de Evaluación Ambiental en Calidad de Aire y Gestión de Emisiones</strong> del Ministerio de Ambiente de la Provincia de Buenos Aires. Su objetivo estratégico es la centralización, procesamiento y fiscalización de datos provenientes de la <strong>red de estaciones de monitoreo continuo</strong>, integrando aportes tanto del sector público como privado. A través de una infraestructura tecnológica de precisión, el CEMCA supervisa de manera ininterrumpida las concentraciones de contaminantes atmosféricos (<strong>PM<sub>10</sub>, PM<sub>2.5</sub>, SO<sub>2</sub>, NO<sub>2</sub>, CO y O<sub>3</sub></strong>). En cumplimiento con el marco normativo vigente (<strong>Decreto 1074/18</strong>), estos datos técnicos son convertidos en el <strong>Índice de Calidad de Aire (ICA)</strong>. Este proceso de traducción técnica permite al Estado Provincial garantizar el <strong>derecho a la información ambiental</strong>, brindando a la ciudadanía una herramienta <strong>oficial, simplificada y en tiempo real</strong> para el conocimiento del estado del recurso aire en todo el territorio bonaerense.
+  respuesta: `<p style="margin: 0; font-size: 1.05em;">El <strong>Centro de Monitoreo de Calidad de Aire (CEMCA)</strong> se constituye dentro de la <strong>Dirección de Evaluación Ambiental en Calidad de Aire y ón de Emisiones</strong> del Ministerio de Ambiente de la Provincia de Buenos Aires. Su objetivo estratégico es la centralización, procesamiento y fiscalización de datos provenientes de la <strong>red de estaciones de monitoreo continuo</strong>, integrando aportes tanto del sector público como privado. A través de una infraestructura tecnológica de precisión, el CEMCA supervisa de manera ininterrumpida las concentraciones de contaminantes atmosféricos (<strong>PM<sub>10</sub>, PM<sub>2.5</sub>, SO<sub>2</sub>, NO<sub>2</sub>, CO y O<sub>3</sub></strong>). En cumplimiento con el marco normativo vigente (<strong>Decreto 1074/18</strong>), estos datos técnicos son convertidos en el <strong>Índice de Calidad de Aire (ICA)</strong>. Este proceso de traducción técnica permite al Estado Provincial garantizar el <strong>derecho a la información ambiental</strong>, brindando a la ciudadanía una herramienta <strong>oficial, simplificada y en tiempo real</strong> para el conocimiento del estado del recurso aire en todo el territorio bonaerense.
   </p>`
 },
   {
@@ -2463,16 +2463,14 @@ function actualizarTabInfo(estacion) {
         <p style="font-size: 0.95em; color: #636e72; line-height: 1.6; margin-bottom: 15px;">${adminInfo.desc}</p>
         
         ${adminInfo.url !== "#" ? `
-          <a href="${adminInfo.url}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; color: white; background: #00aec3; text-decoration: none; font-weight: bold; font-size: 0.85em; padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,174,0.1);">
+          <a href="${adminInfo.url}" target="_blank" style="display: inline-flex; justify align-items: center;justify-content: center; gap: 8px; color: white; background: #00aec3; text-decoration: none; font-weight: bold; font-size: 0.85em; padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,174,0.1);">
             <i class="fas fa-external-link-alt"></i> Sitio Web Oficial
           </a>
         ` : ''}
       </div>
 
-      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-
       <div style="margin-bottom: 25px;">
-        <h4 style="color: #636e72; font-size: 0.85em; text-transform: uppercase; margin-bottom: 12px;">Especificaciones Técnicas</h4>
+        <h4 style="color: #00aec3; border-bottom: 2px solid #00aec3; padding-bottom: 5px; margin: 0 0 12px 0; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px;">Especificaciones Técnicas</h4>
         <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border: 1px solid #edf2f7; display: flex; flex-direction: column; gap: 8px;">
           <div>
             <small style="color: #00aec3; font-weight: 800; font-size: 0.65em; text-transform: uppercase; display: block;">Contaminantes</small>
@@ -2483,6 +2481,7 @@ function actualizarTabInfo(estacion) {
             <span style="font-size: 0.9em;">Lat: ${parseFloat(estacion.lat).toFixed(2)} | Long: ${parseFloat(estacion.lng).toFixed(2)}</span>
           </div>
         </div>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
       </div>
 
      ${agradecimiento ? `
@@ -2696,6 +2695,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
