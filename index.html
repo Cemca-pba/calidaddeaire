@@ -2369,6 +2369,14 @@ const PREGUNTAS_LOCALES = [
     <a href="https://drive.google.com/file/d/1Msytuorm3nHi4YVfpLrHhlO3uasmUtYB/view?usp=drive_link" style="color: #00b1c9; text-decoration: underline; font-weight: bold;">Descargar archivo técnico aquí</a>.
   </p>`
 }
+ {
+  pregunta: "Instalar Aplicación",
+  respuesta: `<p>Te invitamos a instalar la aplicacion en tu PC o Celular para fulturas consultas sobre la calidad de aire de la provincia</p>
+  
+  <button id="btn-instalar" style="display: none;" onclick="instalarApp()">
+  📲 Instalar App de Calidad de Aire
+</button>`
+}
   // Agrega las demás aquí siguiendo el mismo formato...
 ];
 
@@ -2738,9 +2746,42 @@ function actualizarTabMeteo(estacion) {
     const indice = Math.floor(((val + 11.25) % 360) / 22.5);
     return direcciones[indice];
 }
+
+   let eventoInstalar;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // 1. Evita que el navegador muestre el aviso automático
+  e.preventDefault();
+  
+  // 2. Guarda el evento para usarlo después
+  eventoInstalar = e;
+  
+  // 3. Muestra tu propio botón de instalación (que debe estar oculto por defecto)
+  const btnInstalar = document.getElementById('btn-instalar');
+  btnInstalar.style.display = 'block';
+});
+
+   function instalarApp() {
+  if (!eventoInstalar) return;
+
+  // Muestra el prompt oficial del navegador
+  eventoInstalar.prompt();
+
+  // Espera la respuesta del usuario
+  eventoInstalar.userChoice.then((choiceResult) => {
+    if (choiceResult.outcome === 'accepted') {
+      console.log('El usuario instaló la app');
+    }
+    // Limpiamos la variable, ya no se puede usar de nuevo
+    eventoInstalar = null;
+    document.getElementById('btn-instalar').style.display = 'none';
+  });
+}
+   
   </script>
 </body>
 </html>
+
 
 
 
