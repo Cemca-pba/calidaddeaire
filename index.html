@@ -401,7 +401,7 @@ chart-header {
 
 /* Panel de respuesta (Escondido por defecto) */
 .accordion-panel {
-  padding: 0 15px;
+  padding: 0 14px;
   background-color: white;
   max-height: 0;
   overflow: hidden;
@@ -409,7 +409,13 @@ chart-header {
 }
 
 .accordion-panel p {
-  padding: 15px 0;
+  padding: 5px 0;
+  margin: 0;
+  line-height: 1.6;
+  color: #555;
+}
+ .accordion-panel li {
+  padding: 5px 0;
   margin: 0;
   line-height: 1.6;
   color: #555;
@@ -2297,12 +2303,12 @@ function cerrarPanel() {
 const PREGUNTAS_LOCALES = [
  {
   pregunta: "¿Qué es el CEMCA?",
-  respuesta: `<p style="margin: 0; font-size: 1.05em;">El <strong>Centro de Monitoreo de Calidad de Aire (CEMCA)</strong> se constituye dentro de la <strong>Dirección de Evaluación Ambiental en Calidad de Aire y Gestión de Emisiones</strong> del <strong>Ministerio de Ambiente de la Provincia de Buenos Aires</strong>. Su objetivo estratégico es la centralización, procesamiento y evaluación de datos provenientes de la <strong>Red de Estaciones de Monitoreo Continuo de Calidad de Aire</strong>, formada por equipos tanto del sector público como privado. A través de los datos obtenidos, el CEMCA supervisa de manera ininterrumpida las concentraciones de contaminantes atmosféricos.  Estos datos técnicos son convertidos en el <strong>Índice de Calidad de Aire (ICA)</strong>. Este proceso de traducción técnica permite al Estado Provincial garantizar el <strong>derecho a la información ambiental</strong>, brindando a la ciudadanía una herramienta <strong>oficial, simplificada y en tiempo real</strong> para el conocimiento del estado del recurso aire en todo el territorio bonaerense.
+  respuesta: `<p style="margin: 0; font-size: 14px;">El <strong>Centro de Monitoreo de Calidad de Aire (CEMCA)</strong> se constituye dentro de la <strong>Dirección de Evaluación Ambiental en Calidad de Aire y Gestión de Emisiones</strong> del <strong>Ministerio de Ambiente de la Provincia de Buenos Aires</strong>. Su objetivo estratégico es la centralización, procesamiento y evaluación de datos provenientes de la <strong>Red de Estaciones de Monitoreo Continuo de Calidad de Aire</strong>, formada por equipos tanto del sector público como privado. A través de los datos obtenidos, el CEMCA supervisa de manera ininterrumpida las concentraciones de contaminantes atmosféricos.  Estos datos técnicos son convertidos en el <strong>Índice de Calidad de Aire (ICA)</strong>. Este proceso de traducción técnica permite al Estado Provincial garantizar el <strong>derecho a la información ambiental</strong>, brindando a la ciudadanía una herramienta <strong>oficial, simplificada y en tiempo real</strong> para el conocimiento del estado del recurso aire en todo el territorio bonaerense.
   </p>`
 },
   {
     pregunta: "¿Cuál es su Marco Regulatorio?",
-    respuesta: `<p style="margin-bottom: 5px;">El <strong>CEMCA</strong> opera bajo el marco del <a href='https://normas.gba.gob.ar/documentos/0zWjvSXx.pdf' target='_blank' style='color: #00b1c9; font-weight: bold; text-decoration: underline;'>Decreto 1074/18</a>, el cual crea el Registro Provincial de Monitoreo (RPM-GECA).</p>
+    respuesta: `<p style="margin-bottom: 5px; font-size: 14px;">El <strong>CEMCA</strong> opera bajo el marco del <a href='https://normas.gba.gob.ar/documentos/0zWjvSXx.pdf' target='_blank' style='color: #00b1c9; font-weight: bold; text-decoration: underline;'>Decreto 1074/18</a>, el cual crea el Registro Provincial de Monitoreo (RPM-GECA).</p>
 
 <p style="margin-top: 5px; margin-bottom: 5px;">Este marco legal establece que el Centro debe:</p>
 
@@ -2318,7 +2324,7 @@ const PREGUNTAS_LOCALES = [
   },
  {
   pregunta: "¿Qué Informa un Índice de Calidad de Aire?",
-  respuesta: `<p style="margin: 0 0 5px 0;">El <strong>ICA</strong> es un valor numérico que comunica qué tan limpio o contaminado está el aire y qué efectos podría tener en la salud. Se divide en 6 categorías:</p>
+  respuesta: `<p style="margin: 0 0 5px 0; font-size: 13px;">El <strong>ICA</strong> es un valor numérico que comunica qué tan limpio o contaminado está el aire y qué efectos podría tener en la salud. Se divide en 6 categorías:</p>
   <div style="overflow-x:auto;">
     <table style="width:100%; border-collapse:collapse; font-size:13px; text-align:left; margin: 5px 0;">
       <thead>
@@ -2338,7 +2344,7 @@ const PREGUNTAS_LOCALES = [
       </tbody>
     </table>
   </div>
-  <p style="margin: 5px 0 0 0; font-size: 12px;"><em>A mayor valor, mayor es el riesgo para la salud.</em></p>`
+  <p style="margin: 5px 0 0 0; font-size: 13px;"><em>A mayor valor, mayor es el riesgo para la salud.</em></p>`
 },
 {
   pregunta: "¿Cómo se calcula el Índice de Calidad de Aire?",
@@ -2735,6 +2741,7 @@ function actualizarTabMeteo(estacion) {
   </script>
 </body>
 </html>
+
 
 
 
