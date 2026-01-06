@@ -2380,8 +2380,19 @@ const PREGUNTAS_LOCALES = [
             <i class="	fas fa-download" ></i> Instalar App del Cemca 
   </button>`
 }
-  // Agrega las demás aquí siguiendo el mismo formato...
 ];
+
+function esComputadora() {
+  return !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// Filtramos el array para que NO muestre la opción de instalar si es PC
+const preguntasAMostrar = PREGUNTAS_LOCALES.filter(item => {
+  if (item.pregunta === "Instalar Aplicación" && esComputadora()) {
+    return false; // Si es PC e indica instalar, lo quitamos
+  }
+  return true; // Todo lo demás se queda
+});
 
 function abrirModalPreguntas() {
   const modal = document.getElementById('modal-faq');
@@ -2390,7 +2401,7 @@ function abrirModalPreguntas() {
   modal.style.display = 'block';
 
   let html = "";
-  PREGUNTAS_LOCALES.forEach((p) => {
+  preguntasAMostrar.forEach((p) => {
     html += `
       <div class="accordion-item">
         <button class="accordion-header" onclick="toggleAccordion(this)">
@@ -2784,6 +2795,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   </script>
 </body>
 </html>
+
 
 
 
