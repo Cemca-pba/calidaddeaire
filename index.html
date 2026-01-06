@@ -2372,10 +2372,10 @@ const PREGUNTAS_LOCALES = [
  {
   pregunta: "Instalar Aplicación",
   respuesta: `<p>Te invitamos a instalar la aplicacion en tu PC o Celular para fulturas consultas sobre la calidad de aire de la provincia</p>
-  
-  <button id="btn-instalar" style="class: btn-enviar;" onclick="instalarApp()">
-   Instalar App de Calidad de Aire
-</button>`
+
+  <button id="btn-instalar" style="display: inline-flex; justify align-items: center;justify-content: center; gap: 8px; color: white; background: #00aec3; text-decoration: none; font-weight: bold; font-size: 0.85em; padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,174,0.1);">
+            <i class="	fas fa-download"></i> Instalar App del Cemca
+  </button>`
 }
   // Agrega las demás aquí siguiendo el mismo formato...
 ];
@@ -2518,7 +2518,7 @@ function actualizarTabInfo(estacion) {
         
         ${adminInfo.url !== "#" ? `
           <a href="${adminInfo.url}" target="_blank" style="display: inline-flex; justify align-items: center;justify-content: center; gap: 8px; color: white; background: #00aec3; text-decoration: none; font-weight: bold; font-size: 0.85em; padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,174,0.1);">
-            <i class="fas fa-external-link-alt"></i> Sitio Web Oficial
+            <i class="fas fa-external-link-alt"></i> Sitio Web
           </a>
         ` : ''}
       </div>
@@ -2781,6 +2781,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   </script>
 </body>
 </html>
+
 
 
 
