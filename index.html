@@ -2306,16 +2306,16 @@ function cerrarPanel() {
 const PREGUNTAS_LOCALES = [
  {
   pregunta: "¿Qué es el CEMCA?",
-  respuesta: `<p style="margin: 0; font-size: 14px;">El <strong>Centro de Monitoreo de Calidad de Aire (CEMCA)</strong> se constituye dentro de la <strong>Dirección de Evaluación Ambiental en Calidad de Aire y Gestión de Emisiones</strong> del <strong>Ministerio de Ambiente de la Provincia de Buenos Aires</strong>. Su objetivo estratégico es la centralización, procesamiento y evaluación de datos provenientes de la <strong>Red de Estaciones de Monitoreo Continuo de Calidad de Aire</strong>, formada por equipos tanto del sector público como privado. A través de los datos obtenidos, el CEMCA supervisa de manera ininterrumpida las concentraciones de contaminantes atmosféricos.  Estos datos técnicos son convertidos en el <strong>Índice de Calidad de Aire (ICA)</strong>. Este proceso de traducción técnica permite al Estado Provincial garantizar el <strong>derecho a la información ambiental</strong>, brindando a la ciudadanía una herramienta <strong>oficial, simplificada y en tiempo real</strong> para el conocimiento del estado del recurso aire en todo el territorio bonaerense.
+  respuesta: `<p style="margin: 0; ">El <strong>Centro de Monitoreo de Calidad de Aire (CEMCA)</strong> se constituye dentro de la <strong>Dirección de Evaluación Ambiental en Calidad de Aire y Gestión de Emisiones</strong> del <strong>Ministerio de Ambiente de la Provincia de Buenos Aires</strong>. Su objetivo estratégico es la centralización, procesamiento y evaluación de datos provenientes de la <strong>Red de Estaciones de Monitoreo Continuo de Calidad de Aire</strong>, formada por equipos tanto del sector público como privado. A través de los datos obtenidos, el CEMCA supervisa de manera ininterrumpida las concentraciones de contaminantes atmosféricos.  Estos datos técnicos son convertidos en el <strong>Índice de Calidad de Aire (ICA)</strong>. Este proceso de traducción técnica permite al Estado Provincial garantizar el <strong>derecho a la información ambiental</strong>, brindando a la ciudadanía una herramienta <strong>oficial, simplificada y en tiempo real</strong> para el conocimiento del estado del recurso aire en todo el territorio bonaerense.
   </p>`
 },
   {
     pregunta: "¿Cuál es su Marco Regulatorio?",
-    respuesta: `<p style="margin-bottom: 5px">El <strong>CEMCA</strong> opera bajo el marco del <a href='https://normas.gba.gob.ar/documentos/0zWjvSXx.pdf' target='_blank' style='color: #00b1c9; font-weight: bold; text-decoration: underline;'>Decreto 1074/18</a>, el cual crea el Registro Provincial de Monitoreo (RPM-GECA).</p>
+    respuesta: `<p>El <strong>CEMCA</strong> opera bajo el marco del <a href='https://normas.gba.gob.ar/documentos/0zWjvSXx.pdf' target='_blank' style='color: #00b1c9; font-weight: bold; text-decoration: underline;'>Decreto 1074/18</a>, el cual crea el Registro Provincial de Monitoreo (RPM-GECA).</p>
 
-<p style="margin-top: 5px; margin-bottom: 5px;">Este marco legal establece que el Centro debe:</p>
+<p>Este marco legal establece que el Centro debe:</p>
 
-<ul style="padding-left: 20px; margin-top: 5px; margin-bottom: 5px;">
+<ul style="padding-left: 20px;">
   <li><strong>Centralizar los datos</strong> de Monitoreo Continuo de toda la provincia.</li>
   <li><strong>Identificar y correlacionar</strong> el origen de la contaminación.</li>
   <li><strong>Integrar inventarios de emisiones</strong> para detectar "áreas críticas".</li>
@@ -2327,7 +2327,7 @@ const PREGUNTAS_LOCALES = [
   },
  {
   pregunta: "¿Qué Informa un Índice de Calidad de Aire?",
-  respuesta: `<p style="margin: 0 0 5px 0;">El <strong>ICA</strong> es un valor numérico que comunica qué tan limpio o contaminado está el aire y qué efectos podría tener en la salud. Se divide en 6 categorías:</p>
+  respuesta: `<p>El <strong>ICA</strong> es un valor numérico que comunica qué tan limpio o contaminado está el aire y qué efectos podría tener en la salud. Se divide en 6 categorías:</p>
   <div style="overflow-x:auto;">
     <table style="width:100%; border-collapse:collapse; font-size:13px; text-align:left; margin: 5px 0;">
       <thead>
@@ -2347,34 +2347,34 @@ const PREGUNTAS_LOCALES = [
       </tbody>
     </table>
   </div>
-  <p style="margin: 5px 0 0 0;"><em>A mayor valor, mayor es el riesgo para la salud.</em></p>`
+  <p>A mayor valor, mayor es el riesgo para la salud.</p>`
 },
 {
   pregunta: "¿Cómo se calcula el Índice de Calidad de Aire?",
-  respuesta: `<p style="margin: 0 0 5px 0;">El cálculo del <strong>ICA</strong> convierte mediciones técnicas en una escala de 0 a 500 mediante los siguientes pasos:</p>
+  respuesta: `<p>El cálculo del <strong>ICA</strong> convierte mediciones técnicas en una escala de 0 a 500 mediante los siguientes pasos:</p>
   <ul style="padding-left:20px; margin: 0 0 2px 0;">
     <li style="margin-bottom: 1px;"><strong>Medición:</strong> Sensores captan la concentración de contaminantes.</li>
     <li style="margin-bottom: 1px;"><strong>Cálculo:</strong> Se obtiene el índice individual para cada contaminante.</li>
     <li style="margin-bottom: 1px;"><strong>Información:</strong> Se reporta el valor <strong>más alto</strong> detectado, por ser el de mayor riesgo.</li>
   </ul>
-  <p style="margin: 0 0 5px 0 ;">
+  <p>
      Para más detalles:  de <a href="https://drive.google.com/file/d/141mAkRxizXepIgSY_0Zbw6XCU8tugXno/view?usp=drive_link" style="color: #00b1c9;  text-decoration: underline; "> Descargar cómo se calcula el ICA</a>.
   </p>`
 },
  {
   pregunta: "¿Qué Contaminantes Monitoreamos?",
-  respuesta: `<p style="margin: 0 0 5px 0;">Monitoreamos los principales agentes contaminantes del aire: <strong>Material Particulado (PM2.5 y PM10)</strong>, <strong>Dióxido de Nitrógeno (NO2)</strong>, <strong>Ozono (O3)</strong> y <strong>Monóxido de Carbono (CO)</strong>.</p>
+  respuesta: `<p>Monitoreamos los principales agentes contaminantes del aire: <strong>Material Particulado (PM2.5 y PM10)</strong>, <strong>Dióxido de Nitrógeno (NO2)</strong>, <strong>Ozono (O3)</strong> y <strong>Monóxido de Carbono (CO)</strong>.</p>
   
-  <p style="margin: 0 0 5px 0;">Este seguimiento es clave porque la calidad del aire impacta en la <strong>salud respiratoria y cardiovascular</strong>, permitiendo emitir alertas y reducir la exposición a niveles perjudiciales.</p>
+  <p>Este seguimiento es clave porque la calidad del aire impacta en la <strong>salud respiratoria y cardiovascular</strong>, permitiendo emitir alertas y reducir la exposición a niveles perjudiciales.</p>
 
-  <p style="margin: 5px 0 0 0;">
+  <p>
     Para más detalles: 
     <a href="https://drive.google.com/file/d/1Msytuorm3nHi4YVfpLrHhlO3uasmUtYB/view?usp=drive_link" style="color: #00b1c9; text-decoration: underline; ">Descargar archivo técnico </a>.
   </p>`
 },
   {
   pregunta: "¿Comó Navegar la Aplicación?",
-  respuesta: `<p style="margin: 0 0 5px 0;">La Aplicacion presenta una lista de partidos de la Provincia con sus estaciones. Al cliquear en cada estación se abre una sección con sus detalles. La sección contiene a su vez seis pestañas:</p>
+  respuesta: `<p>La Aplicacion presenta una lista de partidos de la Provincia con sus estaciones. Al cliquear en cada estación se abre una sección con sus detalles. La sección contiene a su vez seis pestañas:</p>
  <ul style="padding-left:20px; margin: 0 0 2px 0;">
     <li style="margin-bottom: 1px;"><strong>Calidad de aire:</strong> Se informa el valor y la categoria del <strong>Indice de Calidad de Aire</strong>. Se informan las recomendaciones a la población. Se adjuntan los graficos de los valores de la concentracion de los contaminantes por hora de los ultimas 24hs. </li>
     <li style="margin-bottom: 1px;"><strong>Meteorologia:</strong> Se informan los <strong>datos meteorológicos a tiempo real</strong> y el registro de las ultimas 24 hs, con su respectiva Rosa de los vientos. </li>
@@ -2807,6 +2807,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   </script>
 </body>
 </html>
+
 
 
 
