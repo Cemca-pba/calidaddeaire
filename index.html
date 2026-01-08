@@ -60,7 +60,13 @@ header {
     background-size: contain; /* Forzamos el ancho al 100% */
     background-repeat: no-repeat;
     background-position: center;
+    cursor: pointer;
+    transition: opacity 0.2s;
 }
+
+  #logo-cemca:active {
+        opacity: 0.7; /* Breve efecto visual al tocarlo */
+    }
 
 /* LOGO MINISTERIO: Ajuste para máxima legibilidad */
 .logo-ministerio {
@@ -808,7 +814,7 @@ chart-header {
 
 <header>
     <div class="header-izq">
-        <div class="logo-cemca"></div>
+        <div class="logo-cemca" id="logito-cemca"></div>
     </div>
  <div class="header-buttons-mobile">
         <i class="fas fa-envelope header-btn-icon" onclick="abrirContacto()" title="Mensaje"></i>
@@ -2803,10 +2809,21 @@ window.addEventListener('beforeinstallprompt', (e) => {
     document.getElementById('btn-instalar').style.display = 'none';
   });
 }
+
+document.getElementById('logito-cemca').addEventListener('click', function() {
+    // Detectamos si es móvil antes de ejecutar la acción
+    const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (esMovil) {
+        // location.reload() actualiza la página completa
+        location.reload();
+    }
+});
    
   </script>
 </body>
 </html>
+
 
 
 
