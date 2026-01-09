@@ -1406,6 +1406,18 @@ async function abrirDetalles(estacion) {
   loader.style.display = 'block';
   sectionHistorico.style.display = 'none';
   areaCharts.innerHTML = ''; 
+
+ function obtenerUrlDirectaDrive(url) {
+    // Si no es un link de drive, lo devuelve tal cual
+    if (!url.includes('drive.google.com')) return url;
+    
+    // Extrae el ID del archivo entre /d/ y /view
+    const match = url.match(/\/d\/(.+?)\/view/);
+    if (match && match[1]) {
+        return `https://lh3.googleusercontent.com/u/0/d/${match[1]}=w1000`;
+    }
+    return url;
+}
   
   // 6. ACTUALIZAR PESTAÑA DE INFORMACIÓN (DATOS LOCALES)
   try {
@@ -2558,14 +2570,21 @@ administradores: {
 };
 
 function actualizarTabInfo(estacion) {
-    const tabInfo = document.getElementById('tab-info');
+const tabInfo = document.getElementById('tab-info');
     if (!tabInfo) return;
 
-    // Procesar fotos: asegurar que sea un array
+    // Procesar el array de fotos
     fotosActuales = [];
-    if (estacion.Fotos) {
-        fotosActuales = Array.isArray(estacion.fotos) ? estacion.fotos : [estacion.fotos];
+    if (estacion.fotos) {
+        // Si viene como un string separado por comas, lo convertimos a array
+        let listaRaw = Array.isArray(estacion.fotos) 
+            ? estacion.fotos 
+            : estacion.fotos.split(',');
+
+        // Limpiamos espacios y convertimos cada URL a enlace directo
+        fotosActuales = listaRaw.map(url => obtenerUrlDirectaDrive(url.trim()));
     }
+    
     indiceActual = 0;
 
     let seccionFotos = '';
@@ -2897,6 +2916,7 @@ function cambiarFoto(direccion) {
   </script>
 </body>
 </html>
+
 
 
 
