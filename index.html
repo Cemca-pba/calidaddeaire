@@ -145,6 +145,37 @@ body, html { height: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', sans-
     box-shadow: 0 0 8px rgba(0, 172, 193, 0.2);
 }
 
+   .carousel-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+}
+.carousel-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+}
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-prev { left: 10px; }
+.btn-next { right: 10px; }
+
 /* Tamaño y color del icono celeste */
 .search-icon {
     width: 20px;
@@ -2527,8 +2558,35 @@ administradores: {
 };
 
 function actualizarTabInfo(estacion) {
-  const tabInfo = document.getElementById('tab-info');
-  if (!tabInfo) return;
+    const tabInfo = document.getElementById('tab-info');
+    if (!tabInfo) return;
+
+    // Procesar fotos: asegurar que sea un array
+    fotosActuales = [];
+    if (estacion.fotos) {
+        fotosActuales = Array.isArray(estacion.fotos) ? estacion.fotos : [estacion.fotos];
+    }
+    indiceActual = 0;
+
+    let seccionFotos = '';
+    if (fotosActuales.length > 0) {
+        const hayVarias = fotosActuales.length > 1;
+        seccionFotos = `
+        <div class="carousel-container">
+            <h4 style="color: #00aec3; border-bottom: 2px solid #00aec3; padding-bottom: 5px; margin: 0 0 12px 0; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px;">Galería de la Estación</h4>
+            <div style="position: relative;">
+                <img id="foto-carousel" src="${fotosActuales[0]}" class="carousel-img" onclick="window.open(this.src, '_blank')">
+                
+                ${hayVarias ? `
+                    <button class="carousel-btn btn-prev" onclick="cambiarFoto(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <button class="carousel-btn btn-next" onclick="cambiarFoto(1)"><i class="fas fa-chevron-right"></i></button>
+                    <div id="foto-contador" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75em;">
+                        1 / ${fotosActuales.length}
+                    </div>
+                ` : ''}
+            </div>
+        </div>`;
+    }
 
   const nombrePuro = estacion.nombre.replace(/Estación:|Estacion:/i, "").trim();
   const adminNombre = estacion.Administrador;
@@ -2819,10 +2877,27 @@ document.getElementById('logito-cemca').addEventListener('click', function() {
         location.reload();
     }
 });
+
+   let fotosActuales = [];
+let indiceActual = 0;
+
+function cambiarFoto(direccion) {
+    indiceActual += direccion;
+    if (indiceActual < 0) indiceActual = fotosActuales.length - 1;
+    if (indiceActual >= fotosActuales.length) indiceActual = 0;
+    
+    const imgElement = document.getElementById('foto-carousel');
+    const contador = document.getElementById('foto-contador');
+    if (imgElement) {
+        imgElement.src = fotosActuales[indiceActual];
+        contador.innerText = `${indiceActual + 1} / ${fotosActuales.length}`;
+    }
+}
    
   </script>
 </body>
 </html>
+
 
 
 
