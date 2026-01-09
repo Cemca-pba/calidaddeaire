@@ -1887,6 +1887,24 @@ function switchTab(event, tabId) {
     cargarPestanaMensual(nombreEstacion);
   }
 }
+
+function cambiarFoto(direccion) {
+    if (fotosActuales.length === 0) return;
+    
+    indiceActual += direccion;
+    if (indiceActual < 0) indiceActual = fotosActuales.length - 1;
+    if (indiceActual >= fotosActuales.length) indiceActual = 0;
+    
+    const imgElement = document.getElementById('foto-carousel');
+    const contador = document.getElementById('foto-contador');
+    
+    if (imgElement) {
+        imgElement.src = fotosActuales[indiceActual];
+    }
+    if (contador) {
+        contador.innerText = `${indiceActual + 1} / ${fotosActuales.length}`;
+    }
+}
  
 
 /**
@@ -2341,15 +2359,17 @@ function cerrarPanel() {
     }
 }
 
-   function obtenerUrlDirectaDrive(url) {
+ function obtenerUrlDirectaDrive(url) {
     if (!url || typeof url !== 'string') return '';
     const cleanUrl = url.trim();
+    
+    // Si no es un enlace de Drive, lo devolvemos tal cual
     if (!cleanUrl.includes('drive.google.com')) return cleanUrl;
     
-    // Extrae el ID del archivo
+    // Extrae el ID del archivo de Google Drive
     const match = cleanUrl.match(/\/d\/(.+?)\/(view|edit|usp)/);
     if (match && match[1]) {
-        // Esta es la URL más confiable para saltear la página de visualización de Drive
+        // CORRECCIÓN: Usar ${match[1]} con el símbolo $ para insertar la variable
         return `https://lh3.googleusercontent.com/u/0/d/${match[1]}=w1000`;
     }
     return cleanUrl;
@@ -2576,17 +2596,18 @@ function actualizarTabInfo(estacion) {
 const tabInfo = document.getElementById('tab-info');
     if (!tabInfo) return;
 
-    // 1. Procesar Fotos (Nota: Usamos 'Fotos' con F mayúscula según tu mapeo)
+    // 1. Procesar el array de fotos (Usamos 'Fotos' con F mayúscula)
     fotosActuales = [];
     if (estacion.Fotos && estacion.Fotos !== "") {
-        let listaRaw = [];
-        if (Array.isArray(estacion.Fotos)) {
-            listaRaw = estacion.Fotos;
-        } else {
-            // Divide por coma y limpia espacios
-            listaRaw = estacion.Fotos.split(',').map(s => s.trim()).filter(s => s !== "");
-        }
-        fotosActuales = listaRaw.map(url => obtenerUrlDirectaDrive(url));
+        let listaRaw = Array.isArray(estacion.Fotos) 
+            ? estacion.Fotos 
+            : estacion.Fotos.split(',');
+
+        // Limpiamos espacios y convertimos cada URL
+        fotosActuales = listaRaw
+            .map(url => url.trim())
+            .filter(url => url !== "") // Quitamos strings vacíos
+            .map(url => obtenerUrlDirectaDrive(url));
     }
     
     indiceActual = 0;
@@ -2595,16 +2616,14 @@ const tabInfo = document.getElementById('tab-info');
     if (fotosActuales.length > 0) {
         const hayVarias = fotosActuales.length > 1;
         seccionFotos = `
-        <div class="carousel-container" style="margin-bottom: 20px;">
+        <div class="carousel-container">
             <h4 style="color: #00aec3; border-bottom: 2px solid #00aec3; padding-bottom: 5px; margin: 0 0 12px 0; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px;">Galería de la Estación</h4>
-            <div style="position: relative; border-radius: 12px; overflow: hidden; background: #eee;">
-                <img id="foto-carousel" src="${fotosActuales[0]}" class="carousel-img" 
-                     style="width: 100%; height: 200px; object-fit: cover; cursor: pointer;"
-                     onclick="window.open(this.src, '_blank')">
+            <div style="position: relative; background: #f0f0f0; border-radius: 12px; overflow: hidden;">
+                <img id="foto-carousel" src="${fotosActuales[0]}" class="carousel-img" onclick="window.open(this.src, '_blank')" style="cursor: pointer; width: 100%; height: 200px; object-fit: cover;">
                 
                 ${hayVarias ? `
-                    <button class="carousel-btn btn-prev" onclick="cambiarFoto(-1)" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;"><i class="fas fa-chevron-left"></i></button>
-                    <button class="carousel-btn btn-next" onclick="cambiarFoto(1)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;"><i class="fas fa-chevron-right"></i></button>
+                    <button class="carousel-btn btn-prev" onclick="cambiarFoto(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <button class="carousel-btn btn-next" onclick="cambiarFoto(1)"><i class="fas fa-chevron-right"></i></button>
                     <div id="foto-contador" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75em;">
                         1 / ${fotosActuales.length}
                     </div>
@@ -2612,7 +2631,6 @@ const tabInfo = document.getElementById('tab-info');
             </div>
         </div>`;
     }
-  
 
   const nombrePuro = estacion.nombre.replace(/Estación:|Estacion:/i, "").trim();
   const adminNombre = estacion.Administrador;
@@ -2907,22 +2925,12 @@ document.getElementById('logito-cemca').addEventListener('click', function() {
    let fotosActuales = [];
 let indiceActual = 0;
 
-function cambiarFoto(direccion) {
-    indiceActual += direccion;
-    if (indiceActual < 0) indiceActual = fotosActuales.length - 1;
-    if (indiceActual >= fotosActuales.length) indiceActual = 0;
-    
-    const imgElement = document.getElementById('foto-carousel');
-    const contador = document.getElementById('foto-contador');
-    if (imgElement) {
-        imgElement.src = fotosActuales[indiceActual];
-        if (contador) contador.innerText = `${indiceActual + 1} / ${fotosActuales.length}`;
-    }
-}
+
    
   </script>
 </body>
 </html>
+
 
 
 
