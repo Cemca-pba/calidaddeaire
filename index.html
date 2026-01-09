@@ -2575,11 +2575,11 @@ const tabInfo = document.getElementById('tab-info');
 
     // Procesar el array de fotos
     fotosActuales = [];
-    if (estacion.fotos) {
+    if (estacion.Fotos) {
         // Si viene como un string separado por comas, lo convertimos a array
-        let listaRaw = Array.isArray(estacion.fotos) 
-            ? estacion.fotos 
-            : estacion.fotos.split(',');
+        let listaRaw = Array.isArray(estacion.Fotos) 
+            ? estacion.Fotos 
+            : estacion.Fotos.split(',');
 
         // Limpiamos espacios y convertimos cada URL a enlace directo
         fotosActuales = listaRaw.map(url => obtenerUrlDirectaDrive(url.trim()));
@@ -2916,6 +2916,7 @@ function cambiarFoto(direccion) {
   </script>
 </body>
 </html>
+
 
 
 
