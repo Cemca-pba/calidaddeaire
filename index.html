@@ -2359,18 +2359,16 @@ function cerrarPanel() {
     }
 }
 
- function obtenerUrlDirectaDrive(url) {
+function obtenerUrlDirectaDrive(url) {
     if (!url || typeof url !== 'string') return '';
     const cleanUrl = url.trim();
-    
-    // Si no es un enlace de Drive, lo devolvemos tal cual
     if (!cleanUrl.includes('drive.google.com')) return cleanUrl;
     
-    // Extrae el ID del archivo de Google Drive
+    // Esta expresión regular extrae el ID correctamente de tus links
     const match = cleanUrl.match(/\/d\/(.+?)\/(view|edit|usp)/);
     if (match && match[1]) {
-        // CORRECCIÓN: Usar ${match[1]} con el símbolo $ para insertar la variable
-        return `https://lh3.googleusercontent.com/u/0/d/${match[1]}=w1000`;
+        // Usamos el servidor de contenido de Google que es más rápido para miniaturas
+        return `https://lh3.googleusercontent.com/d/${match[1]}=w1000`;
     }
     return cleanUrl;
 }
@@ -2596,22 +2594,19 @@ function actualizarTabInfo(estacion) {
 const tabInfo = document.getElementById('tab-info');
     if (!tabInfo) return;
 
-    // 1. Procesar el array de fotos (Usamos 'Fotos' con F mayúscula)
-    fotosActuales = [];
+ fotosActuales = [];
     if (estacion.Fotos && estacion.Fotos !== "") {
-        let listaRaw = Array.isArray(estacion.Fotos) 
-            ? estacion.Fotos 
-            : estacion.Fotos.split(',');
-
-        // Limpiamos espacios y convertimos cada URL
-        fotosActuales = listaRaw
-            .map(url => url.trim())
-            .filter(url => url !== "") // Quitamos strings vacíos
-            .map(url => obtenerUrlDirectaDrive(url));
+        let listaRaw = [];
+        if (Array.isArray(estacion.Fotos)) {
+            listaRaw = estacion.Fotos;
+        } else {
+            // Esto separa por coma y limpia espacios extra de cada link
+            listaRaw = estacion.Fotos.split(',').map(s => s.trim()).filter(s => s !== "");
+        }
+        // Convertimos cada link de Drive a link directo
+        fotosActuales = listaRaw.map(url => obtenerUrlDirectaDrive(url));
     }
-    
-    indiceActual = 0;
-
+  
     let seccionFotos = '';
     if (fotosActuales.length > 0) {
         const hayVarias = fotosActuales.length > 1;
@@ -2930,6 +2925,7 @@ let indiceActual = 0;
   </script>
 </body>
 </html>
+
 
 
 
