@@ -1119,7 +1119,8 @@ let barCharts = [];
 let meteoCharts = [];
 let promedioCharts = [];
 let chartMensualInstance = null; // Para destruir el gráfico anterior
-
+let layerEstaciones = L.layerGroup().addTo(map);
+   
     // Colores estándar por nivel de riesgo
     const COLORS = { GREEN: "#2ecc71", YELLOW: "#f1c40f", ORANGE: "#e67e22", RED: "#e74c3c", PURPLE: "#9b59b6", MAROON: "#8e44ad", GRAY: "#b2bec3", MAROON: "#7e0023" };
 
@@ -1181,172 +1182,212 @@ let chartMensualInstance = null; // Para destruir el gráfico anterior
       return { label: "Peligroso", color: COLORS.MAROON, rec: "Permanezca en interiores." };
     }
 
+Para implementar esto, necesitamos un pequeño cambio estructural: los marcadores ya no se añaden directamente al mapa uno por uno, sino que se gestionan a través de una función actualizarVistaMarcadores. Esta función se ejecutará al cargar los datos y cada vez que el usuario haga zoom (zoomend).
+
+Aquí tienes el código completo con la lógica de etiquetas con valor ICA cuando el zoom es alto (nivel 12 o superior):
+
+JavaScript
+
 async function cargarEstacionesIniciales() {
   try {
-    // Llamamos a la API de Google con el parámetro action=obtenerEstaciones
+    // 1. Llamamos a la API
     const response = await fetch(`${urlScript}?action=obtenerEstaciones`);
     const estaciones = await response.json();
-
-   // 2. GUARDAR LOS DATOS EN LA VARIABLE GLOBAL
     window.estacionesGlobal = estaciones;
 
-    // --- AQUÍ EMPIEZA TU LÓGICA ORIGINAL ---
     const listDiv = document.getElementById('station-list');
     const grupos = {};
-    
+    const zoomUmbral = 12; // Nivel de zoom donde aparece el número
+
     // Ordenamos las estaciones por calidad
     estaciones.sort((a, b) => (parseFloat(a.calidad) || 0) - (parseFloat(b.calidad) || 0));
 
+    // --- FUNCIÓN PARA DIBUJAR MARCADORES SEGÚN EL ZOOM ---
+    function actualizarVistaMarcadores() {
+      const currentZoom = map.getZoom();
+
+      estaciones.forEach(est => {
+        const info = getICAInfo(est.calidad);
+        const tieneIca = !isNaN(parseFloat(est.calidad));
+        const valorMostrar = tieneIca ? Math.round(est.calidad) : "";
+
+        // Si el marcador ya existe, lo quitamos para redibujarlo con el nuevo estilo
+        if (marcadoresEstaciones[est.nombre]) {
+          map.removeLayer(marcadoresEstaciones[est.nombre]);
+        }
+
+        let marcador;
+
+        if (currentZoom >= zoomUmbral && tieneIca) {
+          // MODO ETIQUETA (Zoom Alto)
+          const htmlContent = `
+            <div style="
+              background-color: ${info.color};
+              color: white;
+              border: 2px solid white;
+              border-radius: 50%;
+              width: 28px;
+              height: 28px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: bold;
+              font-size: 10px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+              font-family: Arial, sans-serif;
+            ">
+              ${valorMostrar}
+            </div>`;
+
+          marcador = L.marker([est.lat, est.lng], {
+            icon: L.divIcon({
+              html: htmlContent,
+              className: '', 
+              iconSize: [28, 28],
+              iconAnchor: [14, 14]
+            }),
+            zIndexOffset: 1000
+          });
+        } else {
+          // MODO PUNTO (Zoom Bajo - Tu lógica original)
+          const radioDinamic = tieneIca ? 11 : 5;
+          marcador = L.circleMarker([est.lat, est.lng], {
+            radius: radioDinamic,
+            fillColor: tieneIca ? info.color : "#bdc3c7",
+            color: "#fff",
+            weight: tieneIca ? 2 : 1,
+            fillOpacity: tieneIca ? 0.95 : 0.6,
+            zIndexOffset: tieneIca ? 1000 : 0
+          });
+        }
+
+        // --- CONFIGURACIÓN DE POPUP Y EVENTOS (Común a ambos estilos) ---
+        const resumenMeteo = `
+          <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 8px; color: #2d3436; font-size: 0.9em;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span><i class="fas fa-thermometer-half" style="width: 15px;"></i> Temp:</span>
+              <strong>${est.temp != "NaN" ? est.temp + " °C" : "--"}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span><i class="fas fa-tint" style="width: 15px;"></i> Hum:</span>
+              <strong>${est.hum != "NaN" ? est.hum + " %" : "--"}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span><i class="fas fa-wind" style="width: 15px;"></i> Viento:</span>
+              <strong>${est.viento != "NaN" ? est.viento + " km/h" : "--"}</strong>
+            </div>
+          </div>
+        `;
+
+        const contenidoPopup = `
+          <div style="text-align: center; font-family: 'Segoe UI', sans-serif; min-width: 160px;">
+              <strong style="font-size: 1.1em; color: #2d3436;">${est.nombre}</strong><br>
+              <div style="margin: 8px 0; padding: 6px; background: ${info.color}; color: white; border-radius: 4px; font-weight: bold; font-size: 0.9em;">
+                  ICA: ${est.calidad}
+              </div>
+              ${resumenMeteo}
+              <button class="btn-detalle-mobile" 
+                      onclick="abrirDetalleDesdeMapa('${est.nombre.replace(/'/g, "\\'")}')" 
+                      style="background: #00acc1; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px;">
+                  <i class="fas fa-chart-bar"></i> Ver Detalles
+              </button>
+          </div>
+        `;
+
+        marcador.bindPopup(contenidoPopup);
+        marcador.on('click', () => abrirDetalles(est));
+        
+        // Guardar referencia y añadir al mapa
+        marcadoresEstaciones[est.nombre] = marcador;
+        marcador.addTo(map);
+      });
+    }
+
+    // Ejecutar la creación de marcadores inicial
+    actualizarVistaMarcadores();
+
+    // ESCUCHAR EL ZOOM para cambiar entre puntos y etiquetas
+    map.on('zoomend', actualizarVistaMarcadores);
+
+    // --- PROCESAMIENTO DE GRUPOS Y LISTA LATERAL ---
     estaciones.forEach(est => {
-      const info = getICAInfo(est.calidad);
       const tieneIca = !isNaN(parseFloat(est.calidad));
-
-
-  const radioDinamic = tieneIca ? 11 : 5;
-
-  const marcador = L.circleMarker([est.lat, est.lng], { 
-    radius: radioDinamic, 
-    fillColor: tieneIca ? info.color : "#bdc3c7", // Gris si no tiene datos para diferenciarlo más
-    color: "#fff", 
-    weight: tieneIca ? 2 : 1, // Borde más fino para los pequeños
-    fillOpacity: tieneIca ? 0.95 : 0.6, // Más transparente si no tiene datos
-    zIndexOffset: tieneIca ? 1000 : 0 
-  });
-
-
-      const resumenMeteo = `
-        <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 8px; color: #2d3436; font-size: 0.9em;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span><i class="fas fa-thermometer-half" style="width: 15px;"></i> Temp:</span>
-            <strong>${est.temp != "NaN" ? est.temp + " °C" : "--"}</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span><i class="fas fa-tint" style="width: 15px;"></i> Hum:</span>
-            <strong>${est.hum != "NaN" ? est.hum + " %" : "--"}</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span><i class="fas fa-wind" style="width: 15px;"></i> Viento:</span>
-            <strong>${est.viento != "NaN" ? est.viento + " km/h" : "--"}</strong>
-          </div>
-        </div>
-      `;
-
-const contenidoPopup = `
-    <div style="text-align: center; font-family: 'Segoe UI', sans-serif; min-width: 160px;">
-        <strong style="font-size: 1.1em; color: #2d3436;">${est.nombre}</strong><br>
-        <div style="margin: 8px 0; padding: 6px; background: ${info.color}; color: white; border-radius: 4px; font-weight: bold; font-size: 0.9em;">
-            ICA: ${est.calidad}
-        </div>
-        ${resumenMeteo}
-       <button class="btn-detalle-mobile" 
-                onclick="abrirDetalleDesdeMapa('${est.nombre.replace(/'/g, "\\'")}')" 
-                style="background: #00acc1; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px;">
-            <i class="fas fa-chart-bar"></i> Ver Detalles
-        </button>
-    </div>
-`;
-      
-      marcador.bindPopup(contenidoPopup);
-      marcadoresEstaciones[est.nombre] = marcador; 
-
-      marcador.on('click', () => abrirDetalles(est));
-      marcador.addTo(map);
-
       if (tieneIca) {
         if (!grupos[est.partido]) grupos[est.partido] = [];
         grupos[est.partido].push(est);
       }
     });
 
-    // Crear la lista lateral por partidos
-Object.keys(grupos).sort().forEach(partido => {
-  const gDiv = document.createElement('div');
-  gDiv.innerHTML = `<div class="partido-title">${partido}</div>`;
+    Object.keys(grupos).sort().forEach(partido => {
+      const gDiv = document.createElement('div');
+      gDiv.innerHTML = `<div class="partido-title">${partido}</div>`;
 
-  // ORDENAR ALFABÉTICAMENTE LAS ESTACIONES DENTRO DEL PARTIDO
-  grupos[partido].sort((a, b) => {
-    return a.nombre.localeCompare(b.nombre);
-  });
+      grupos[partido].sort((a, b) => a.nombre.localeCompare(b.nombre));
 
-  grupos[partido].forEach(est => {
-    const info = getICAInfo(est.calidad);
-    const card = document.createElement('div');
-    card.className = 'station-card'; 
-    card.style.borderLeftColor = info.color;
-    card.innerHTML = `
-      <div><strong>${est.nombre}</strong></div>
-      <div class="ica-badge" style="background:${info.color}22; color:${info.color}">ICA ${est.calidad}</div>
-    `;
-    
-card.onclick = () => {
-    const panel = document.getElementById('details-panel');
-    
-    if (window.innerWidth <= 768) {
-        // MÓVIL
-        panel.style.display = 'flex'; // Aseguramos que sea visible
-        panel.classList.add('active-mobile');
-        panel.classList.remove('active');
-        abrirDetalles(est); 
-    } else {
-        // ESCRITORIO
-        panel.style.display = 'block'; // Aseguramos que sea visible en PC
-        panel.classList.add('active'); 
-        panel.classList.remove('active-mobile'); 
-        
-        map.flyTo([est.lat, est.lng], 13);
-        if (marcadoresEstaciones[est.nombre]) {
-            marcadoresEstaciones[est.nombre].openPopup();
+      grupos[partido].forEach(est => {
+        const info = getICAInfo(est.calidad);
+        const card = document.createElement('div');
+        card.className = 'station-card';
+        card.style.borderLeftColor = info.color;
+        card.innerHTML = `
+          <div><strong>${est.nombre}</strong></div>
+          <div class="ica-badge" style="background:${info.color}22; color:${info.color}">ICA ${est.calidad}</div>
+        `;
+
+        card.onclick = () => {
+          const panel = document.getElementById('details-panel');
+          if (window.innerWidth <= 768) {
+            panel.style.display = 'flex';
+            panel.classList.add('active-mobile');
+            panel.classList.remove('active');
+            abrirDetalles(est);
+          } else {
+            panel.style.display = 'block';
+            panel.classList.add('active');
+            panel.classList.remove('active-mobile');
+            map.flyTo([est.lat, est.lng], 13);
+            if (marcadoresEstaciones[est.nombre]) {
+              marcadoresEstaciones[est.nombre].openPopup();
+            }
+            abrirDetalles(est);
+          }
+        };
+        gDiv.appendChild(card);
+      });
+      listDiv.appendChild(gDiv);
+    });
+
+    // --- LÓGICA DE BÚSQUEDA ---
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase().trim();
+      const bloquesPartidos = document.querySelectorAll('#station-list > div');
+
+      bloquesPartidos.forEach(bloque => {
+        const tituloElemento = bloque.querySelector('.partido-title');
+        if (tituloElemento) {
+          const nombrePartido = tituloElemento.innerText.toLowerCase();
+          bloque.style.display = nombrePartido.includes(term) ? 'block' : 'none';
         }
-        abrirDetalles(est);
-    }
-};
-    gDiv.appendChild(card);
-  });
-  listDiv.appendChild(gDiv);
-});
-   const searchInput = document.getElementById('search-input');
+      });
 
-searchInput.addEventListener('input', (e) => {
-  const term = e.target.value.toLowerCase().trim();
-  const bloquesPartidos = document.querySelectorAll('#station-list > div');
-
-  // 1. Filtrar la Lista Lateral
-  bloquesPartidos.forEach(bloque => {
-    const tituloElemento = bloque.querySelector('.partido-title');
-    if (tituloElemento) {
-      const nombrePartido = tituloElemento.innerText.toLowerCase();
-      const coincide = nombrePartido.includes(term);
-      
-      bloque.style.display = coincide ? 'block' : 'none';
-    }
-  });
-
-  // 2. Filtrar los Marcadores en el Mapa
-  // Recorremos todas las estaciones que cargaste originalmente
-  estaciones.forEach(est => {
-    const marcador = marcadoresEstaciones[est.nombre];
-    if (marcador) {
-      const nombrePartido = est.partido.toLowerCase();
-      
-      if (nombrePartido.includes(term)) {
-        // Si el partido coincide o el buscador está vacío, asegurar que esté en el mapa
-        if (!map.hasLayer(marcador)) {
-          marcador.addTo(map);
+      estaciones.forEach(est => {
+        const marcador = marcadoresEstaciones[est.nombre];
+        if (marcador) {
+          const nombrePartido = est.partido.toLowerCase();
+          if (nombrePartido.includes(term)) {
+            if (!map.hasLayer(marcador)) marcador.addTo(map);
+          } else {
+            map.removeLayer(marcador);
+          }
         }
-      } else {
-        // Si no coincide, quitarlo del mapa
-        map.removeLayer(marcador);
-      }
-    }
-  });
-});
+      });
+    });
 
-    // --- ESTO QUITA EL CARTEL DE CARGANDO ---
     document.getElementById('main-loader').style.display = 'none';
 
   } catch (error) {
     console.error("Error al obtener estaciones:", error);
-    // Opcional: mostrar un mensaje de error en el cargador si falla
     document.getElementById('main-loader').innerHTML = "<p>Error al cargar datos.</p>";
   }
 }
@@ -2928,6 +2969,7 @@ let indiceActual = 0;
   </script>
 </body>
 </html>
+
 
 
 
