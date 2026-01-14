@@ -1182,12 +1182,6 @@ let layerEstaciones = L.layerGroup().addTo(map);
       return { label: "Peligroso", color: COLORS.MAROON, rec: "Permanezca en interiores." };
     }
 
-Para implementar esto, necesitamos un pequeño cambio estructural: los marcadores ya no se añaden directamente al mapa uno por uno, sino que se gestionan a través de una función actualizarVistaMarcadores. Esta función se ejecutará al cargar los datos y cada vez que el usuario haga zoom (zoomend).
-
-Aquí tienes el código completo con la lógica de etiquetas con valor ICA cuando el zoom es alto (nivel 12 o superior):
-
-JavaScript
-
 async function cargarEstacionesIniciales() {
   try {
     // 1. Llamamos a la API
@@ -2969,6 +2963,7 @@ let indiceActual = 0;
   </script>
 </body>
 </html>
+
 
 
 
