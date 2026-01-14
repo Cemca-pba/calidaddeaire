@@ -1191,7 +1191,7 @@ async function cargarEstacionesIniciales() {
 
     const listDiv = document.getElementById('station-list');
     const grupos = {};
-    const zoomUmbral = 12; // Nivel de zoom donde aparece el número
+    const zoomUmbral = 8; // Nivel de zoom donde aparece el número
 
     // Ordenamos las estaciones por calidad
     estaciones.sort((a, b) => (parseFloat(a.calidad) || 0) - (parseFloat(b.calidad) || 0));
@@ -2963,6 +2963,7 @@ let indiceActual = 0;
   </script>
 </body>
 </html>
+
 
 
 
