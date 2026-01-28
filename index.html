@@ -1038,6 +1038,31 @@ chart-header {
 <div id="btn-ayuda" class="fab-btn-simple" onclick="abrirModalPreguntas()" title="Preguntas Frecuentes" style="bottom: 200px;">
   <i class="fas fa-question" style="font-size: 1.6em;"></i>
 </div>
+
+ <div id="btn-comparador" class="fab-btn-simple" onclick="abrirComparador()" title="Comparador de Estaciones" style="bottom: 270px; background-color: #2d3436;">
+  <i class="fas fa-balance-scale" style="font-size: 1.6em;"></i>
+</div>
+
+<div id="modal-comparador" class="faq-modal">
+  <div class="faq-content" style="width: 90%; max-width: 1200px;">
+    <span class="close-faq" onclick="cerrarComparador()">×</span>
+    <h2 style="text-align:center;"><i class="fas fa-chart-area"></i> Comparador de Estaciones</h2>
+    
+    <div style="background: #f1f2f6; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 15px;">
+        <label><strong>Periodo a comparar:</strong></label>
+        <select id="select-periodo-comparador" onchange="actualizarComparativa()" style="padding: 8px; border-radius: 5px; border: 1px solid #dfe6e9; min-width: 200px;">
+        </select>
+    </div>
+
+    <div id="comparador-loader" style="display:none; text-align: center; padding: 40px;">
+        <div class="spinner"></div>
+        <p>Procesando datos de todas las estaciones...</p>
+    </div>
+
+    <div id="comparador-charts-area" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px;">
+        </div>
+  </div>
+</div>
  
 </div>
 <div id="modal-faq" class="faq-modal">
@@ -2958,11 +2983,120 @@ document.getElementById('logito-cemca').addEventListener('click', function() {
    let fotosActuales = [];
 let indiceActual = 0;
 
+let comparativaCharts = [];
 
+function abrirComparador() {
+    document.getElementById('modal-comparador').style.display = 'block';
+    
+    // Llenar el selector de periodos si está vacío (usamos los de estacionesGlobal[0])
+    const selector = document.getElementById('select-periodo-comparador');
+    if (selector.options.length === 0 && estacionesGlobal.length > 0) {
+        // Obtenemos periodos únicos de todas las estaciones por seguridad
+        let periodosSet = new Set();
+        estacionesGlobal.forEach(est => {
+            if(est.periodos_diarios) est.periodos_diarios.forEach(p => periodosSet.add(p));
+        });
+        
+        Array.from(periodosSet).sort().reverse().forEach(p => {
+            let opt = document.createElement('option');
+            opt.value = p;
+            opt.text = p;
+            selector.add(opt);
+        });
+    }
+    actualizarComparativa();
+}
+
+function cerrarComparador() {
+    document.getElementById('modal-comparador').style.display = 'none';
+}
+
+async function actualizarComparativa() {
+    const periodo = document.getElementById('select-periodo-comparador').value;
+    const loader = document.getElementById('comparador-loader');
+    const container = document.getElementById('comparador-charts-area');
+    
+    if (!periodo) return;
+
+    loader.style.display = 'block';
+    container.innerHTML = ''; // Limpiar gráficos anteriores
+    comparativaCharts = [];
+
+    // Orden solicitado
+    const contaminantes = ["PM2.5", "PM10", "SO2", "NO2", "CO", "O3"];
+    
+    // Preparar el área de gráficos
+    contaminantes.forEach(contam => {
+        const div = document.createElement('div');
+        div.id = `chart-comp-${contam}`;
+        div.style.height = "350px";
+        div.style.background = "#fff";
+        div.style.padding = "10px";
+        div.style.borderRadius = "8px";
+        div.style.border = "1px solid #eee";
+        container.appendChild(div);
+    });
+
+    try {
+        // Por cada contaminante, creamos un gráfico que contenga series de todas las estaciones
+        contaminantes.forEach(contam => {
+            let seriesData = [];
+
+            estacionesGlobal.forEach(estacion => {
+                // Buscamos los datos del periodo seleccionado para esta estación
+                const datosPeriodo = estacion.datos_diarios ? estacion.datos_diarios.filter(d => d.periodo === periodo) : [];
+                
+                if (datosPeriodo.length > 0) {
+                    const dataPoints = datosPeriodo.map(d => {
+                        const valor = parseFloat(d[contam]);
+                        return [new Date(d.fecha).getTime(), isNaN(valor) ? null : valor];
+                    }).sort((a, b) => a[0] - b[0]);
+
+                    seriesData.push({
+                        name: estacion.nombre,
+                        data: dataPoints,
+                        lineWidth: 2,
+                        marker: { enabled: false },
+                        tooltip: { valueSuffix: ' µg/m³' }
+                    });
+                }
+            });
+
+            // Crear el gráfico de Highcharts
+            Highcharts.chart(`chart-comp-${contam}`, {
+                chart: { type: 'line', zoomType: 'x' },
+                title: { text: `Comparativa: ${contam}` },
+                xAxis: { type: 'datetime', title: { text: 'Fecha' } },
+                yAxis: { title: { text: 'Concentración (µg/m³)' } },
+                legend: {
+                    enabled: true,
+                    align: 'center',
+                    verticalAlign: 'bottom',
+                    layout: 'horizontal'
+                },
+                plotOptions: {
+                    series: {
+                        connectNulls: true,
+                        states: { hover: { lineWidthPlus: 2 } }
+                    }
+                },
+                tooltip: { xDateFormat: '%d/%m/%Y', shared: true },
+                series: seriesData,
+                credits: { enabled: false }
+            });
+        });
+
+    } catch (error) {
+        console.error("Error al generar comparativa:", error);
+    } finally {
+        loader.style.display = 'none';
+    }
+}
    
   </script>
 </body>
 </html>
+
 
 
 
