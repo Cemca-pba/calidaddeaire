@@ -2983,119 +2983,125 @@ document.getElementById('logito-cemca').addEventListener('click', function() {
    let fotosActuales = [];
 let indiceActual = 0;
 
-let comparativaCharts = [];
+let promediosGlobalesCargados = false;
 
-function abrirComparador() {
-    document.getElementById('modal-comparador').style.display = 'block';
+async function cargarDatosTodasLasEstaciones(forzar = false) {
+    if (promediosGlobalesCargados && !forzar) return;
     
-    // Llenar el selector de periodos si está vacío (usamos los de estacionesGlobal[0])
-    const selector = document.getElementById('select-periodo-comparador');
-    if (selector.options.length === 0 && estacionesGlobal.length > 0) {
-        // Obtenemos periodos únicos de todas las estaciones por seguridad
-        let periodosSet = new Set();
-        estacionesGlobal.forEach(est => {
-            if(est.periodos_diarios) est.periodos_diarios.forEach(p => periodosSet.add(p));
-        });
-        
-        Array.from(periodosSet).sort().reverse().forEach(p => {
-            let opt = document.createElement('option');
-            opt.value = p;
-            opt.text = p;
-            selector.add(opt);
-        });
+    const loader = document.getElementById('comparador-loader');
+    const loaderText = document.getElementById('comparador-loader-text');
+    loader.style.display = 'block';
+    
+    try {
+        for (let i = 0; i < estacionesGlobal.length; i++) {
+            let est = estacionesGlobal[i];
+            loaderText.innerText = `Cargando datos de: ${est.nombre} (${i+1}/${estacionesGlobal.length})`;
+            
+            // Llamamos a tu función de promedios existente (ajustada para devolver datos)
+            const response = await fetch(`${urlScript}?comando=getPromediosDiarios&estacion=${encodeURIComponent(est.nombre)}`);
+            const data = await response.json();
+            
+            if (data.exito) {
+                // Guardamos los datos en el objeto global de la estación
+                est.datos_diarios = data.datos;
+                est.periodos_diarios = data.periodos;
+            }
+        }
+        promediosGlobalesCargados = true;
+        poblarSelectorPeriodos();
+    } catch (error) {
+        console.error("Error cargando datos globales:", error);
+        alert("Error al obtener datos de algunas estaciones.");
+    } finally {
+        loader.style.display = 'none';
     }
-    actualizarComparativa();
+}
+
+function poblarSelectorPeriodos() {
+    const selector = document.getElementById('select-periodo-comparador');
+    const todosLosPeriodos = new Set();
+    
+    estacionesGlobal.forEach(est => {
+        if (est.periodos_diarios) est.periodos_diarios.forEach(p => todosLosPeriodos.add(p));
+    });
+
+    selector.innerHTML = '';
+    Array.from(todosLosPeriodos).sort().reverse().forEach(p => {
+        let opt = document.createElement('option');
+        opt.value = p; opt.text = p;
+        selector.add(opt);
+    });
+}
+
+async function abrirComparador() {
+    document.getElementById('modal-comparador').style.display = 'block';
+    await cargarDatosTodasLasEstaciones();
+    actualizarGraficosComparativa();
 }
 
 function cerrarComparador() {
     document.getElementById('modal-comparador').style.display = 'none';
 }
 
-async function actualizarComparativa() {
+function actualizarGraficosComparativa() {
     const periodo = document.getElementById('select-periodo-comparador').value;
-    const loader = document.getElementById('comparador-loader');
     const container = document.getElementById('comparador-charts-area');
-    
+    container.innerHTML = ''; 
+
     if (!periodo) return;
 
-    loader.style.display = 'block';
-    container.innerHTML = ''; // Limpiar gráficos anteriores
-    comparativaCharts = [];
-
-    // Orden solicitado
+    // Orden solicitado: PM2.5 PM10 SO2 NO2 CO y O3
     const contaminantes = ["PM2.5", "PM10", "SO2", "NO2", "CO", "O3"];
-    
-    // Preparar el área de gráficos
+
     contaminantes.forEach(contam => {
+        const divId = `chart-comp-${contam.replace('.','')}`;
         const div = document.createElement('div');
-        div.id = `chart-comp-${contam}`;
-        div.style.height = "350px";
-        div.style.background = "#fff";
-        div.style.padding = "10px";
-        div.style.borderRadius = "8px";
-        div.style.border = "1px solid #eee";
+        div.id = divId;
+        div.style.height = "380px";
+        div.className = "chart-box";
         container.appendChild(div);
-    });
 
-    try {
-        // Por cada contaminante, creamos un gráfico que contenga series de todas las estaciones
-        contaminantes.forEach(contam => {
-            let seriesData = [];
+        const seriesEstaciones = estacionesGlobal.map(est => {
+            const datosFiltrados = (est.datos_diarios || [])
+                .filter(d => d.periodo === periodo)
+                .map(d => [new Date(d.fecha).getTime(), parseFloat(d[contam]) || null])
+                .sort((a, b) => a[0] - b[0]);
 
-            estacionesGlobal.forEach(estacion => {
-                // Buscamos los datos del periodo seleccionado para esta estación
-                const datosPeriodo = estacion.datos_diarios ? estacion.datos_diarios.filter(d => d.periodo === periodo) : [];
-                
-                if (datosPeriodo.length > 0) {
-                    const dataPoints = datosPeriodo.map(d => {
-                        const valor = parseFloat(d[contam]);
-                        return [new Date(d.fecha).getTime(), isNaN(valor) ? null : valor];
-                    }).sort((a, b) => a[0] - b[0]);
+            return {
+                name: est.nombre,
+                data: datosFiltrados,
+                visible: true // Permite interactuar con la leyenda
+            };
+        }).filter(s => s.data.length > 0);
 
-                    seriesData.push({
-                        name: estacion.nombre,
-                        data: dataPoints,
-                        lineWidth: 2,
-                        marker: { enabled: false },
-                        tooltip: { valueSuffix: ' µg/m³' }
-                    });
-                }
-            });
-
-            // Crear el gráfico de Highcharts
-            Highcharts.chart(`chart-comp-${contam}`, {
-                chart: { type: 'line', zoomType: 'x' },
-                title: { text: `Comparativa: ${contam}` },
-                xAxis: { type: 'datetime', title: { text: 'Fecha' } },
-                yAxis: { title: { text: 'Concentración (µg/m³)' } },
-                legend: {
-                    enabled: true,
-                    align: 'center',
-                    verticalAlign: 'bottom',
-                    layout: 'horizontal'
-                },
-                plotOptions: {
-                    series: {
-                        connectNulls: true,
-                        states: { hover: { lineWidthPlus: 2 } }
+        Highcharts.chart(divId, {
+            chart: { type: 'line', zoomType: 'x' },
+            title: { text: `Comparativa ${contam} - ${periodo}` },
+            xAxis: { type: 'datetime', title: { text: 'Día del mes' } },
+            yAxis: { title: { text: 'Concentración (µg/m³)' } },
+            tooltip: { shared: true, xDateFormat: '%d/%m/%Y' },
+            plotOptions: {
+                series: { 
+                    connectNulls: true,
+                    cursor: 'pointer',
+                    events: {
+                        legendItemClick: function () {
+                            // La interactividad de la leyenda viene por defecto en Highcharts
+                            return true; 
+                        }
                     }
-                },
-                tooltip: { xDateFormat: '%d/%m/%Y', shared: true },
-                series: seriesData,
-                credits: { enabled: false }
-            });
+                }
+            },
+            series: seriesEstaciones,
+            credits: { enabled: false }
         });
-
-    } catch (error) {
-        console.error("Error al generar comparativa:", error);
-    } finally {
-        loader.style.display = 'none';
-    }
+    });
 }
    
   </script>
 </body>
 </html>
+
 
 
 
