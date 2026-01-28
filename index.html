@@ -2,7 +2,7 @@
 <html>
 <head>
  <link rel="icon" type="image/jpeg" href="https://lh3.googleusercontent.com/d/1E9BU-seji6PRCrmVUC368s8rJrkqY7-q">
-  <meta charset="utf-8">
+  <meta charset="utf-8">com
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CEMCA - Monitoreo de Calidad de Aire</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1039,7 +1039,7 @@ chart-header {
   <i class="fas fa-question" style="font-size: 1.6em;"></i>
 </div>
 
- <div id="btn-comparador" class="fab-btn-simple" onclick="abrirComparador()" title="Comparador de Estaciones" style="bottom: 270px; background-color: #2d3436;">
+ <div id="btn-comparador" class="fab-btn-simple" onclick="abrirComparador()" title="Comparador de Estaciones" style="bottom: 270px;">
   <i class="fas fa-balance-scale" style="font-size: 1.6em;"></i>
 </div>
 
@@ -3007,7 +3007,17 @@ async function cargarComparativaConjunta() {
     try {
       // Usamos la primera estación disponible como referencia para los meses
       const estRef = estacionesGlobal[0].nombre;
-      const resP = await fetch(`${urlScript}?action=obtenerPeriodos&estacion=${encodeURIComponent(estRef)}`);
+      const resP = awaitfetch(`${urlScript}?action=obtenerPromedioDiario&estacion=${encodeURIComponent(est.nombre)}&periodo=${encodeURIComponent(periodo)}`)
+  .then(r => r.text()) // IMPORTANTE: Usar .text() en lugar de .json() primero
+  .then(textoBruto => {
+    // Usamos el procesador para extraer el JSON correcto del bloque de texto
+    const dataLimpia = procesarDatosBrutos(textoBruto, periodo);
+    
+    return { 
+      estacion: est.nombre, 
+      data: dataLimpia 
+    };
+  })
       const periodos = await resP.json();
 
       if (periodos && periodos.length > 0) {
@@ -3131,9 +3141,31 @@ function crearGraficoComparativo(contam, resultados, container) {
   });
   window.compCharts.push(nuevoGrafico);
 }
+
+   function procesarDatosBrutos(textoBruto, periodoBuscado) {
+    // 1. Dividir el texto por el patrón "TMB-" (o el nombre de la estación)
+    // Usamos una expresión regular para separar cada bloque
+    const bloques = textoBruto.split(/(?=TMB-)/); 
+    
+    for (let bloque of bloques) {
+        // Verificar si este bloque corresponde al periodo que queremos (ej: "Enero 2016")
+        if (bloque.includes(periodoBuscado)) {
+            try {
+                // Extraer el JSON: buscamos desde el primer '{' hasta el final
+                const inicioJson = bloque.indexOf('{');
+                const cadenaJson = bloque.substring(inicioJson);
+                return JSON.parse(cadenaJson);
+            } catch (e) {
+                console.error("Error al parsear el JSON del bloque:", e);
+            }
+        }
+    }
+    return null; // Si no encuentra el periodo
+}
   </script>
 </body>
 </html>
+
 
 
 
