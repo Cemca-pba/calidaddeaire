@@ -2983,124 +2983,158 @@ document.getElementById('logito-cemca').addEventListener('click', function() {
    let fotosActuales = [];
 let indiceActual = 0;
 
-let promediosGlobalesCargados = false;
+// Variable global para persistir los gráficos y poder destruirlos al actualizar
+window.compCharts = [];
 
-async function cargarDatosTodasLasEstaciones(forzar = false) {
-    if (promediosGlobalesCargados && !forzar) return;
-    
-    const loader = document.getElementById('comparador-loader');
-    const loaderText = document.getElementById('comparador-loader-text');
-    loader.style.display = 'block';
-    
-    try {
-        for (let i = 0; i < estacionesGlobal.length; i++) {
-            let est = estacionesGlobal[i];
-            loaderText.innerText = `Cargando datos de: ${est.nombre} (${i+1}/${estacionesGlobal.length})`;
-            
-            // Llamamos a tu función de promedios existente (ajustada para devolver datos)
-            const response = await fetch(`${urlScript}?comando=getPromediosDiarios&estacion=${encodeURIComponent(est.nombre)}`);
-            const data = await response.json();
-            
-            if (data.exito) {
-                // Guardamos los datos en el objeto global de la estación
-                est.datos_diarios = data.datos;
-                est.periodos_diarios = data.periodos;
-            }
-        }
-        promediosGlobalesCargados = true;
-        poblarSelectorPeriodos();
-    } catch (error) {
-        console.error("Error cargando datos globales:", error);
-        alert("Error al obtener datos de algunas estaciones.");
-    } finally {
-        loader.style.display = 'none';
-    }
-}
-
-function poblarSelectorPeriodos() {
-    const selector = document.getElementById('select-periodo-comparador');
-    const todosLosPeriodos = new Set();
-    
-    estacionesGlobal.forEach(est => {
-        if (est.periodos_diarios) est.periodos_diarios.forEach(p => todosLosPeriodos.add(p));
-    });
-
-    selector.innerHTML = '';
-    Array.from(todosLosPeriodos).sort().reverse().forEach(p => {
-        let opt = document.createElement('option');
-        opt.value = p; opt.text = p;
-        selector.add(opt);
-    });
-}
-
-async function abrirComparador() {
+function abrirComparador() {
     document.getElementById('modal-comparador').style.display = 'block';
-    await cargarDatosTodasLasEstaciones();
-    actualizarGraficosComparativa();
+    // Iniciamos la carga
+    cargarComparativaConjunta();
 }
 
 function cerrarComparador() {
     document.getElementById('modal-comparador').style.display = 'none';
 }
 
-function actualizarGraficosComparativa() {
-    const periodo = document.getElementById('select-periodo-comparador').value;
-    const container = document.getElementById('comparador-charts-area');
-    container.innerHTML = ''; 
+async function cargarComparativaConjunta() {
+  const select = document.getElementById('select-periodo-comparador');
+  const area = document.getElementById('comparador-charts-area');
+  const loader = document.getElementById('comparador-loader');
 
-    if (!periodo) return;
+  // 1. Cargar Periodos si el select está vacío
+  if (select.options.length === 0) {
+    loader.style.display = 'block';
+    try {
+      // Usamos la primera estación disponible como referencia para los meses
+      const estRef = estacionesGlobal[0].nombre;
+      const resP = await fetch(`${urlScript}?action=obtenerPeriodos&estacion=${encodeURIComponent(estRef)}`);
+      const periodos = await resP.json();
 
-    // Orden solicitado: PM2.5 PM10 SO2 NO2 CO y O3
-    const contaminantes = ["PM2.5", "PM10", "SO2", "NO2", "CO", "O3"];
-
-    contaminantes.forEach(contam => {
-        const divId = `chart-comp-${contam.replace('.','')}`;
-        const div = document.createElement('div');
-        div.id = divId;
-        div.style.height = "380px";
-        div.className = "chart-box";
-        container.appendChild(div);
-
-        const seriesEstaciones = estacionesGlobal.map(est => {
-            const datosFiltrados = (est.datos_diarios || [])
-                .filter(d => d.periodo === periodo)
-                .map(d => [new Date(d.fecha).getTime(), parseFloat(d[contam]) || null])
-                .sort((a, b) => a[0] - b[0]);
-
-            return {
-                name: est.nombre,
-                data: datosFiltrados,
-                visible: true // Permite interactuar con la leyenda
-            };
-        }).filter(s => s.data.length > 0);
-
-        Highcharts.chart(divId, {
-            chart: { type: 'line', zoomType: 'x' },
-            title: { text: `Comparativa ${contam} - ${periodo}` },
-            xAxis: { type: 'datetime', title: { text: 'Día del mes' } },
-            yAxis: { title: { text: 'Concentración (µg/m³)' } },
-            tooltip: { shared: true, xDateFormat: '%d/%m/%Y' },
-            plotOptions: {
-                series: { 
-                    connectNulls: true,
-                    cursor: 'pointer',
-                    events: {
-                        legendItemClick: function () {
-                            // La interactividad de la leyenda viene por defecto en Highcharts
-                            return true; 
-                        }
-                    }
-                }
-            },
-            series: seriesEstaciones,
-            credits: { enabled: false }
+      if (periodos && periodos.length > 0) {
+        periodos.forEach(p => {
+          let opt = document.createElement('option');
+          opt.value = p; opt.text = p;
+          select.appendChild(opt);
         });
+        // Una vez llenado el select, volvemos a llamar para cargar los datos del primer mes
+        cargarComparativaConjunta();
+      }
+    } catch (err) {
+      console.error("Error al obtener periodos para comparador:", err);
+    }
+    return;
+  }
+
+  // 2. Carga de Datos Multi-estación (Paralelo)
+  const periodo = select.value;
+  area.innerHTML = '';
+  loader.style.display = 'block';
+
+  // Limpiamos gráficos existentes
+  if (window.compCharts) {
+    window.compCharts.forEach(c => c.destroy());
+    window.compCharts = [];
+  }
+
+  try {
+    // Disparamos todos los fetch al mismo tiempo para que sea rápido
+    const promesas = estacionesGlobal.map(est => 
+      fetch(`${urlScript}?action=obtenerPromedioDiario&estacion=${encodeURIComponent(est.nombre)}&periodo=${encodeURIComponent(periodo)}`)
+      .then(r => r.json())
+      .then(data => ({ estacion: est.nombre, data: data }))
+      .catch(e => ({ estacion: est.nombre, data: null }))
+    );
+
+    const resultados = await Promise.all(promesas);
+    loader.style.display = 'none';
+
+    // Orden solicitado: PM2.5, PM10, SO2, NO2, CO, O3
+    const contaminantes = [
+      { key: "PM2.5", label: "PM2.5", color: "#81ecec" },
+      { key: "PM10", label: "PM10", color: "#fab1a0" },
+      { key: "SO2", label: "SO2", color: "#a29bfe" },
+      { key: "NO2", label: "NO2", color: "#ffeaa7" },
+      { key: "CO", label: "CO", color: "#dfe6e9" },
+      { key: "O3", label: "O3", color: "#55efc4" }
+    ];
+
+    contaminantes.forEach(c => {
+      crearGraficoComparativo(c, resultados, area);
     });
+
+  } catch (err) {
+    console.error("Error en carga conjunta:", err);
+    loader.style.display = 'none';
+    area.innerHTML = '<p style="text-align:center; color:red;">Error al conectar con el servidor.</p>';
+  }
 }
-   
+
+function crearGraficoComparativo(contam, resultados, container) {
+  const box = document.createElement('div');
+  box.className = 'chart-box'; // Reutilizamos tu clase existente
+  const canvasId = `canv-comp-${contam.key.replace('.', '')}`;
+  
+  box.innerHTML = `
+    <div class="chart-header">
+      <h5 style="margin:0; font-size:14px;">Comparativa: ${contam.label}</h5>
+    </div>
+    <div style="height:250px; position:relative; margin-top:10px;">
+      <canvas id="${canvasId}"></canvas>
+    </div>
+  `;
+  container.appendChild(box);
+
+  // Colores para las distintas líneas (estaciones)
+  const coloresEstaciones = ['#0984e3', '#e17055', '#6c5ce7', '#00b894', '#fdcb6e', '#d63031', '#2d3436'];
+
+  const datasets = resultados
+    .filter(r => r.data && r.data.datasets && r.data.datasets[contam.key])
+    .map((r, idx) => ({
+      label: r.estacion,
+      data: r.data.datasets[contam.key],
+      borderColor: coloresEstaciones[idx % coloresEstaciones.length],
+      backgroundColor: coloresEstaciones[idx % coloresEstaciones.length],
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: 2,
+      fill: false
+    }));
+
+  if (datasets.length === 0) {
+    box.innerHTML += `<p style="font-size:11px; color:gray; text-align:center;">Sin datos en este periodo</p>`;
+    return;
+  }
+
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  const nuevoGrafico = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: resultados.find(r => r.data)?.data.labels || [],
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { 
+            display: true, 
+            position: 'bottom',
+            labels: { boxWidth: 10, font: { size: 10 } }
+        },
+        tooltip: { mode: 'index', intersect: false }
+      },
+      scales: {
+        y: { beginAtZero: true, title: { display: true, text: 'µg/m³', font: { size: 10 } } },
+        x: { ticks: { font: { size: 9 } } }
+      }
+    }
+  });
+  window.compCharts.push(nuevoGrafico);
+}
   </script>
 </body>
 </html>
+
 
 
 
