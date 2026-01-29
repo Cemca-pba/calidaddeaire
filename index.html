@@ -3177,7 +3177,7 @@ function actualizarComparativa() {
             tension: 0.3, spanGaps: true
         }));
      
-        const ctx = document.getElementById(`chart-${conf.id}`).getContext('2d');
+const ctx = document.getElementById(`chart-${conf.id}`).getContext('2d');
 graficosInstancias.push(new Chart(ctx, {
     type: 'line',
     data: { 
@@ -3219,7 +3219,7 @@ graficosInstancias.push(new Chart(ctx, {
     }
 }));
 }
-                                 }
+ }
 // 5. Función para filtrar todos los gráficos a la vez
 function alternarEstacionEnTodosLosGraficos(datasetIndex, elementoLeyenda) {
     graficosInstancias.forEach(chart => {
@@ -3247,6 +3247,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
