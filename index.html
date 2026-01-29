@@ -3081,12 +3081,6 @@ async function abrirComparador() {
     actualizarComparativa();
 }
 
-El problema principal es que en el código que pegaste falta definir la variable contaminantesEnDatos dentro de la función. El script intenta preguntar if (!contaminantesEnDatos.includes...) pero esa lista no existe en ese momento, lo que detiene la ejecución.
-
-Aquí tienes la función corregida y completa, incluyendo el Botón Maestro (Desmarcar Todo) y la Línea Roja integrados:
-
-Función actualizarComparativa Corregida
-JavaScript
 function actualizarComparativa() {
     const periodoSeleccionado = document.getElementById('select-periodo-comparador').value;
     const areaGraficos = document.getElementById('comparador-charts-area');
@@ -3222,6 +3216,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
