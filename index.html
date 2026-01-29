@@ -1057,7 +1057,8 @@ chart-header {
         <div class="spinner"></div>
         <p>Procesando datos de todas las estaciones...</p>
     </div>
-
+    <div id="comparador-legend-container" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
+    </div>
     <div id="comparador-charts-area" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px;">
         </div>
   </div>
@@ -3083,71 +3084,110 @@ async function abrirComparador() {
  function actualizarComparativa() {
     const periodoSeleccionado = document.getElementById('select-periodo-comparador').value;
     const areaGraficos = document.getElementById('comparador-charts-area');
+    const contenedorLeyenda = document.getElementById('comparador-legend-container');
     
+    // Limpieza
     areaGraficos.innerHTML = "";
+    contenedorLeyenda.innerHTML = "";
     graficosInstancias.forEach(chart => chart.destroy());
     graficosInstancias = [];
 
     const datosDelPeriodo = datosGlobales.filter(d => d.periodo === periodoSeleccionado);
     if (datosDelPeriodo.length === 0) return;
 
-    // --- NUEVA LÓGICA DE UNIFICACIÓN DE LABELS ---
-    // Extraemos todos los días posibles de todas las estaciones y los ordenamos numéricamente
+    // 1. Unificar Labels (días del mes)
     const todosLosLabels = datosDelPeriodo.flatMap(estacion => estacion.datos.labels);
-    const labelsUnicosValidos = [...new Set(todosLosLabels)]
-        .map(Number) // Convertir a número para ordenar bien (1, 2, 10 en lugar de 1, 10, 2)
-        .sort((a, b) => a - b)
-        .map(String); // Volver a string para el gráfico
+    const labelsUnicosValidos = [...new Set(todosLosLabels)].map(Number).sort((a, b) => a - b).map(String);
 
+    // 2. Definir Colores Fijos para cada estación para que coincidan en todos los gráficos
+    const coloresEstaciones = {
+        "TMB": "#0984e3",
+        "CENTRO": "#e17055",
+        "NORTE": "#00b894",
+        "SUR": "#6c5ce7"
+        // Agrega más si conoces los nombres, o usa un generador dinámico
+    };
+    const listaColores = ['#0984e3', '#e17055', '#00b894', '#6c5ce7', '#fab1a0', '#fdcb6e'];
+
+    // 3. Crear la Leyenda Maestra Superior
+    datosDelPeriodo.forEach((estacionData, index) => {
+        const nombre = estacionData.estacion;
+        const color = coloresEstaciones[nombre] || listaColores[index % listaColores.length];
+        
+        const item = document.createElement('div');
+        item.style.cursor = "pointer";
+        item.style.display = "flex";
+        item.style.alignItems = "center";
+        item.style.gap = "8px";
+        item.style.padding = "5px 12px";
+        item.style.border = `2px solid ${color}`;
+        item.style.borderRadius = "20px";
+        item.innerHTML = `<span style="width:12px; height:12px; background:${color}; border-radius:50%; display:inline-block;"></span> <strong>${nombre}</strong>`;
+        
+        item.onclick = () => alternarEstacionEnTodosLosGraficos(index, item);
+        contenedorLeyenda.appendChild(item);
+    });
+
+    // 4. Crear Gráficos por Contaminante
     const contaminantes = Object.keys(datosDelPeriodo[0].datos.datasets);
 
     contaminantes.forEach(contaminante => {
         const card = document.createElement('div');
-        card.className = "chart-card"; // Puedes añadir estilos aquí
-        card.style.background = "white";
-        card.style.padding = "15px";
-        card.style.borderRadius = "8px";
+        card.style.background = "white"; card.style.padding = "15px"; card.style.borderRadius = "8px";
         card.innerHTML = `<h3 style="text-align:center;">${contaminante}</h3><canvas id="chart-${contaminante}"></canvas>`;
         areaGraficos.appendChild(card);
 
         const ctx = document.getElementById(`chart-${contaminante}`).getContext('2d');
 
         const datasets = datosDelPeriodo.map((estacionData, index) => {
-            const colores = ['#0984e3', '#e17055', '#00b894', '#6c5ce7', '#fab1a0'];
+            const color = coloresEstaciones[estacionData.estacion] || listaColores[index % listaColores.length];
             
-            // --- ALINEACIÓN DE DATOS ---
-            // Mapeamos los labels únicos. Si la estación tiene dato para ese día, lo pone, si no, null.
             const dataAlineada = labelsUnicosValidos.map(label => {
-                const indexLabelOriginal = estacionData.datos.labels.indexOf(label);
-                return indexLabelOriginal !== -1 ? estacionData.datos.datasets[contaminante][indexLabelOriginal] : null;
+                const idx = estacionData.datos.labels.indexOf(label);
+                return idx !== -1 ? estacionData.datos.datasets[contaminante][idx] : null;
             });
 
             return {
                 label: estacionData.estacion,
                 data: dataAlineada,
-                borderColor: colores[index % colores.length],
+                borderColor: color,
+                backgroundColor: color,
                 tension: 0.3,
-                spanGaps: true // Esto conecta los puntos aunque haya huecos (días sin datos)
+                spanGaps: true
             };
         });
 
         const nuevoGrafico = new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: labelsUnicosValidos,
-                datasets: datasets
-            },
+            data: { labels: labelsUnicosValidos, datasets: datasets },
             options: {
                 responsive: true,
-                plugins: { legend: { position: 'bottom' } },
-                scales: {
-                    y: { beginAtZero: true },
-                    x: { title: { display: true, text: 'Día del Mes' } }
+                plugins: { 
+                    legend: { display: false } // OCULTAMOS LA LEYENDA INDIVIDUAL
                 }
             }
         });
         graficosInstancias.push(nuevoGrafico);
     });
+}
+
+// 5. Función para filtrar todos los gráficos a la vez
+function alternarEstacionEnTodosLosGraficos(datasetIndex, elementoLeyenda) {
+    graficosInstancias.forEach(chart => {
+        const meta = chart.getDatasetMeta(datasetIndex);
+        // Alternar visibilidad
+        meta.hidden = meta.hidden === null ? !chart.data.datasets[datasetIndex].hidden : null;
+        chart.update();
+    });
+
+    // Efecto visual en la leyenda superior
+    if (elementoLeyenda.style.opacity === "0.3") {
+        elementoLeyenda.style.opacity = "1";
+        elementoLeyenda.style.textDecoration = "none";
+    } else {
+        elementoLeyenda.style.opacity = "0.3";
+        elementoLeyenda.style.textDecoration = "line-through";
+    }
 }
       
 
@@ -3158,6 +3198,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
