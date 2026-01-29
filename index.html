@@ -1114,7 +1114,7 @@ chart-header {
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-const urlScript = "https://script.google.com/macros/s/AKfycbz5F3qNj-yskM_RsLLgbQnM16AsmJkVHlqBn5cWyT3xhF6kRMpHw6dFhjyrmVhQGmCZ/exec";
+const urlScript = "https://script.google.com/macros/s/AKfycbzO82sWWCMyxj9egP36rq3NIV0N0fxYcLs9Q1OiN6Sja7cQWu42828CbZsLEcZv4153/exec";
 var map = L.map('map').setView([-36.60, -60.10], 6); // Coordenadas de la provincia
 
 // 2. Definimos el proveedor principal (OSM)
@@ -2996,175 +2996,155 @@ function cerrarComparador() {
     document.getElementById('modal-comparador').style.display = 'none';
 }
 
-async function cargarComparativaConjunta() {
-  const select = document.getElementById('select-periodo-comparador');
-  const area = document.getElementById('comparador-charts-area');
-  const loader = document.getElementById('comparador-loader');
-
-  // 1. Cargar Periodos si el select está vacío
-  if (select.options.length === 0) {
-    loader.style.display = 'block';
-    try {
-      // Usamos la primera estación disponible como referencia para los meses
-      const estRef = estacionesGlobal[0].nombre;
-      const resP = awaitfetch(`${urlScript}?action=obtenerPromedioDiario&estacion=${encodeURIComponent(est.nombre)}&periodo=${encodeURIComponent(periodo)}`)
-  .then(r => r.text()) // IMPORTANTE: Usar .text() en lugar de .json() primero
-  .then(textoBruto => {
-    // Usamos el procesador para extraer el JSON correcto del bloque de texto
-    const dataLimpia = procesarDatosBrutos(textoBruto, periodo);
-    
-    return { 
-      estacion: est.nombre, 
-      data: dataLimpia 
-    };
-  })
-      const periodos = await resP.json();
-
-      if (periodos && periodos.length > 0) {
-        periodos.forEach(p => {
-          let opt = document.createElement('option');
-          opt.value = p; opt.text = p;
-          select.appendChild(opt);
-        });
-        // Una vez llenado el select, volvemos a llamar para cargar los datos del primer mes
-        cargarComparativaConjunta();
-      }
-    } catch (err) {
-      console.error("Error al obtener periodos para comparador:", err);
-    }
-    return;
-  }
-
-  // 2. Carga de Datos Multi-estación (Paralelo)
-  const periodo = select.value;
-  area.innerHTML = '';
-  loader.style.display = 'block';
-
-  // Limpiamos gráficos existentes
-  if (window.compCharts) {
-    window.compCharts.forEach(c => c.destroy());
-    window.compCharts = [];
-  }
-
+async function traerDatosCache() {
   try {
-    // Disparamos todos los fetch al mismo tiempo para que sea rápido
-    const promesas = estacionesGlobal.map(est => 
-      fetch(`${urlScript}?action=obtenerPromedioDiario&estacion=${encodeURIComponent(est.nombre)}&periodo=${encodeURIComponent(periodo)}`)
-      .then(r => r.json())
-      .then(data => ({ estacion: est.nombre, data: data }))
-      .catch(e => ({ estacion: est.nombre, data: null }))
-    );
+    // Construimos la URL con el parámetro de acción
+    const urlFinal = `${urlScript}?action=obtenerCacheGraficos`;
 
-    const resultados = await Promise.all(promesas);
-    loader.style.display = 'none';
+    const respuesta = await fetch(urlFinal);
+    
+if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
 
-    // Orden solicitado: PM2.5, PM10, SO2, NO2, CO, O3
-    const contaminantes = [
-      { key: "PM2.5", label: "PM2.5", color: "#81ecec" },
-      { key: "PM10", label: "PM10", color: "#fab1a0" },
-      { key: "SO2", label: "SO2", color: "#a29bfe" },
-      { key: "NO2", label: "NO2", color: "#ffeaa7" },
-      { key: "CO", label: "CO", color: "#dfe6e9" },
-      { key: "O3", label: "O3", color: "#55efc4" }
-    ];
+    const dataRaw = await respuesta.json();
 
-    contaminantes.forEach(c => {
-      crearGraficoComparativo(c, resultados, area);
+    // Procesamos y separamos los campos
+    const datosProcesados = dataRaw.map(item => {
+      // Separamos "TMB-Enero 2016" en ["TMB", "Enero 2016"]
+      const partes = item.ID.split("-");
+      const estacion = partes[0] || "Desconocida";
+      const periodo = partes[1] || "Sin periodo";
+
+      return {
+        estacion: estacion,
+        periodo: periodo,
+        idOriginal: item.ID, // Mantenemos el original por si acaso
+        // Convertimos el JSON interno en objeto si viene como texto
+        datos: typeof item.JSON_DATA === 'string' 
+               ? JSON.parse(item.JSON_DATA) 
+               : item.JSON_DATA
+      };
     });
 
-  } catch (err) {
-    console.error("Error en carga conjunta:", err);
-    loader.style.display = 'none';
-    area.innerHTML = '<p style="text-align:center; color:red;">Error al conectar con el servidor.</p>';
+    console.log("Datos organizados:", datosProcesados);
+    return datosProcesados;
+
+  } catch (error) {
+    console.error("Error al procesar los datos:", error);
+    return null;
   }
 }
 
-function crearGraficoComparativo(contam, resultados, container) {
-  const box = document.createElement('div');
-  box.className = 'chart-box'; // Reutilizamos tu clase existente
-  const canvasId = `canv-comp-${contam.key.replace('.', '')}`;
-  
-  box.innerHTML = `
-    <div class="chart-header">
-      <h5 style="margin:0; font-size:14px;">Comparativa: ${contam.label}</h5>
-    </div>
-    <div style="height:250px; position:relative; margin-top:10px;">
-      <canvas id="${canvasId}"></canvas>
-    </div>
-  `;
-  container.appendChild(box);
 
-  // Colores para las distintas líneas (estaciones)
-  const coloresEstaciones = ['#0984e3', '#e17055', '#6c5ce7', '#00b894', '#fdcb6e', '#d63031', '#2d3436'];
+let datosGlobales = []; // Aquí guardaremos lo que devuelva traerDatosCache()
+let graficosInstancias = []; // Para destruir gráficos viejos al actualizar
 
-  const datasets = resultados
-    .filter(r => r.data && r.data.datasets && r.data.datasets[contam.key])
-    .map((r, idx) => ({
-      label: r.estacion,
-      data: r.data.datasets[contam.key],
-      borderColor: coloresEstaciones[idx % coloresEstaciones.length],
-      backgroundColor: coloresEstaciones[idx % coloresEstaciones.length],
-      borderWidth: 2,
-      tension: 0.3,
-      pointRadius: 2,
-      fill: false
-    }));
+async function abrirComparador() {
+    document.getElementById('modal-comparador').style.display = 'block';
+    const loader = document.getElementById('comparador-loader');
+    const select = document.getElementById('select-periodo-comparador');
 
-  if (datasets.length === 0) {
-    box.innerHTML += `<p style="font-size:11px; color:gray; text-align:center;">Sin datos en este periodo</p>`;
-    return;
-  }
-
-  const ctx = document.getElementById(canvasId).getContext('2d');
-  const nuevoGrafico = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: resultados.find(r => r.data)?.data.labels || [],
-      datasets: datasets
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { 
-            display: true, 
-            position: 'bottom',
-            labels: { boxWidth: 10, font: { size: 10 } }
-        },
-        tooltip: { mode: 'index', intersect: false }
-      },
-      scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'µg/m³', font: { size: 10 } } },
-        x: { ticks: { font: { size: 9 } } }
-      }
+    if (datosGlobales.length === 0) {
+        loader.style.display = 'block';
+        datosGlobales = await traerDatosCache();
+        loader.style.display = 'none';
     }
-  });
-  window.compCharts.push(nuevoGrafico);
-}
 
-   function procesarDatosBrutos(textoBruto, periodoBuscado) {
-    // 1. Dividir el texto por el patrón "TMB-" (o el nombre de la estación)
-    // Usamos una expresión regular para separar cada bloque
-    const bloques = textoBruto.split(/(?=TMB-)/); 
+    // 1. Extraer periodos únicos y ordenarlos (asumiendo formato "Mes Año")
+    const periodosUnicos = [...new Set(datosGlobales.map(d => d.periodo))];
     
-    for (let bloque of bloques) {
-        // Verificar si este bloque corresponde al periodo que queremos (ej: "Enero 2016")
-        if (bloque.includes(periodoBuscado)) {
-            try {
-                // Extraer el JSON: buscamos desde el primer '{' hasta el final
-                const inicioJson = bloque.indexOf('{');
-                const cadenaJson = bloque.substring(inicioJson);
-                return JSON.parse(cadenaJson);
-            } catch (e) {
-                console.error("Error al parsear el JSON del bloque:", e);
-            }
-        }
+    // 2. Llenar el Select
+    select.innerHTML = "";
+    periodosUnicos.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p;
+        option.textContent = p;
+        select.appendChild(option);
+    });
+
+    // 3. Seleccionar por defecto el último periodo y graficar
+    if (periodosUnicos.length > 0) {
+        const ultimoPeriodo = periodosUnicos[periodosUnicos.length - 1];
+        select.value = ultimoPeriodo;
+        actualizarComparativa();
     }
-    return null; // Si no encuentra el periodo
 }
+
+  function actualizarComparativa() {
+    const periodoSeleccionado = document.getElementById('select-periodo-comparador').value;
+    const areaGraficos = document.getElementById('comparador-charts-area');
+    
+    // Limpiar área y destruir instancias previas de Chart.js
+    areaGraficos.innerHTML = "";
+    graficosInstancias.forEach(chart => chart.destroy());
+    graficosInstancias = [];
+
+    // 1. Filtrar datos por el periodo elegido
+    const datosDelPeriodo = datosGlobales.filter(d => d.periodo === periodoSeleccionado);
+
+    if (datosDelPeriodo.length === 0) return;
+
+    // 2. Identificar qué contaminantes existen (mirando la primera estación encontrada)
+    const contaminantes = Object.keys(datosDelPeriodo[0].datos.datasets);
+
+    // 3. Crear un gráfico por cada contaminante
+    contaminantes.forEach(contaminante => {
+        // Crear contenedor para el gráfico
+        const card = document.createElement('div');
+        card.style.background = "white";
+        card.style.padding = "15px";
+        card.style.borderRadius = "8px";
+        card.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
+        card.innerHTML = `<h3 style="text-align:center; color:#2d3436;">${contaminante}</h3><canvas id="chart-${contaminante}"></canvas>`;
+        areaGraficos.appendChild(card);
+
+        const ctx = document.getElementById(`chart-${contaminante}`).getContext('2d');
+
+        // Preparar los datasets (uno por cada estación)
+        const datasets = datosDelPeriodo.map((estacionData, index) => {
+            const colores = ['#0984e3', '#e17055', '#00b894', '#6c5ce7', '#fab1a0']; // Colores para distinguir estaciones
+            return {
+                label: estacionData.estacion,
+                data: estacionData.datos.datasets[contaminante],
+                borderColor: colores[index % colores.length],
+                backgroundColor: colores[index % colores.length] + "22", // color con transparencia
+                borderWidth: 2,
+                tension: 0.3,
+                fill: false
+            };
+        });
+
+        // Crear el gráfico
+        const nuevoGrafico = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: datosDelPeriodo[0].datos.labels, // Los días del mes
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Concentración' } },
+                    x: { title: { display: true, text: 'Día del Mes' } }
+                }
+            }
+        });
+
+        graficosInstancias.push(nuevoGrafico);
+    });
+}
+
+function cerrarComparador() {
+    document.getElementById('modal-comparador').style.display = 'none';
+}
+   
   </script>
 </body>
 </html>
+
 
 
 
