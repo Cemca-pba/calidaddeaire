@@ -3081,42 +3081,40 @@ async function abrirComparador() {
     actualizarComparativa();
 }
 
-function actualizarComparativa() {
+   function actualizarComparativa() {
     const periodoSeleccionado = document.getElementById('select-periodo-comparador').value;
     const areaGraficos = document.getElementById('comparador-charts-area');
     const contenedorLeyenda = document.getElementById('comparador-legend-container');
     
-    // Limpieza inicial
+    // 1. Limpieza total de contenedores e instancias de gráficos previas
     areaGraficos.innerHTML = "";
     contenedorLeyenda.innerHTML = "";
     graficosInstancias.forEach(chart => chart.destroy());
     graficosInstancias = [];
 
-    // 1. Filtrar datos por periodo
+    // 2. Filtrar datos por el periodo seleccionado
     let datosDelPeriodo = datosGlobales.filter(d => d.periodo === periodoSeleccionado);
     if (datosDelPeriodo.length === 0) return;
 
-    // 2. Ordenar estaciones alfabéticamente
+    // 3. Ordenar estaciones alfabéticamente (A-Z)
     datosDelPeriodo.sort((a, b) => a.estacion.localeCompare(b.estacion));
 
-    // 3. Unificar Labels (días) y definir contaminantes disponibles
+    // 4. Unificar etiquetas del eje X (Días) y detectar contaminantes presentes
     const todosLosLabels = datosDelPeriodo.flatMap(estacion => estacion.datos.labels);
     const labelsUnicosValidos = [...new Set(todosLosLabels)].map(Number).sort((a, b) => a - b).map(String);
-    
-    // ESTA LÍNEA FALTABA:
     const contaminantesEnDatos = Object.keys(datosDelPeriodo[0].datos.datasets);
 
-    // 4. Mapa de colores
+    // 5. Configuración de Colores por Estación
     const paletaColores = ['#0984e3', '#e17055', '#00b894', '#6c5ce7', '#fdcb6e', '#d63031', '#00cec9', '#e84393', '#2d3436', '#ffeaa7'];
     const mapaColoresEstacion = {};
     datosDelPeriodo.forEach((item, index) => {
         mapaColoresEstacion[item.estacion] = paletaColores[index % paletaColores.length];
     });
 
-    // 5. Crear Leyenda Superior con BOTÓN MAESTRO
+    // 6. Crear Leyenda Maestra Superior con BOTÓN MAESTRO
     const btnMaestro = document.createElement('div');
-    btnMaestro.style.cssText = `cursor:pointer; display:flex; align-items:center; gap:8px; padding:6px 14px; border:2px solid #636e72; border-radius:20px; font-size: 14px; font-weight: bold; background: #dfe6e9;`;
-    btnMaestro.innerHTML = `<span>Desmarcar Todo</span>`;
+    btnMaestro.style.cssText = `cursor:pointer; display:flex; align-items:center; gap:8px; padding:8px 16px; border:2px solid #636e72; border-radius:20px; font-size: 14px; font-weight: bold; background: #dfe6e9; transition: 0.2s;`;
+    btnMaestro.innerHTML = `<i class="fas fa-toggle-on"></i> <span>Desmarcar Todo</span>`;
     
     let todasVisibles = true;
     btnMaestro.onclick = () => {
@@ -3132,41 +3130,56 @@ function actualizarComparativa() {
             el.style.textDecoration = todasVisibles ? "none" : "line-through";
         });
         btnMaestro.querySelector('span').textContent = todasVisibles ? "Desmarcar Todo" : "Seleccionar Todo";
+        btnMaestro.style.background = todasVisibles ? "#dfe6e9" : "#ffffff";
     };
     contenedorLeyenda.appendChild(btnMaestro);
 
-    // Botones de estaciones
+    // Generar botones individuales de estaciones
     datosDelPeriodo.forEach((estacionData, index) => {
         const color = mapaColoresEstacion[estacionData.estacion];
         const item = document.createElement('div');
         item.className = "legend-item legend-item-estacion";
-        item.style.cssText = `cursor:pointer; display:flex; align-items:center; gap:8px; padding:6px 14px; border:2px solid ${color}; border-radius:20px; font-size: 14px; font-weight: bold; background: white; margin-left:10px;`;
+        item.style.cssText = `cursor:pointer; display:flex; align-items:center; gap:8px; padding:8px 16px; border:2px solid ${color}; border-radius:20px; font-size: 14px; font-weight: bold; background: white; margin-left:8px; transition: 0.2s;`;
         item.innerHTML = `<span style="width:12px; height:12px; background:${color}; border-radius:50%; display:inline-block;"></span> ${estacionData.estacion}`;
+        
         item.onclick = () => alternarEstacionEnTodosLosGraficos(index, item);
         contenedorLeyenda.appendChild(item);
     });
 
-    // 6. Configuración de Gráficos (Orden y Límites)
+    // 7. Configuración de Gráficos (Orden, Límites y Títulos)
     const CONFIG_CONTAMINANTES = [
-        { id: "PM2.5", limite: 35 }, { id: "PM10", limite: 150 },
-        { id: "SO2", limite: 125 }, { id: "NO2", limite: 188 },
-        { id: "O3", limite: 100 }, { id: "CO", limite: 10000 }
+        { id: "PM2.5", limite: 35 },
+        { id: "PM10",  limite: 150 },
+        { id: "SO2",   limite: 125 },
+        { id: "NO2",   limite: 188 },
+        { id: "O3",    limite: 100 },
+        { id: "CO",    limite: 10000 }
     ];
 
     CONFIG_CONTAMINANTES.forEach(conf => {
         if (!contaminantesEnDatos.includes(conf.id)) return;
 
+        // Crear contenedor (Card) del gráfico
         const card = document.createElement('div');
-        card.style.cssText = "background:white; padding:20px; border-radius:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 350px;";
-        card.innerHTML = `<h3 style="text-align:center; margin-top:0;">${conf.id}</h3><canvas id="chart-${conf.id}"></canvas>`;
+        card.className = "chart-card";
+        card.style.cssText = "background:white; padding:20px; border-radius:12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); height: 400px; border: 1px solid #eee;";
+        card.innerHTML = `<canvas id="chart-${conf.id}"></canvas>`;
         areaGraficos.appendChild(card);
 
+        // Dataset de la Línea Roja de Límite
         const datasetLimite = {
-            label: 'Límite',
+            label: 'Límite Normativo',
             data: labelsUnicosValidos.map(() => conf.limite),
-            borderColor: 'red', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, isLimitLine: true
+            borderColor: 'rgba(255, 0, 0, 0.7)',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            pointRadius: 0,
+            fill: false,
+            isLimitLine: true,
+            order: -1 // Siempre encima de las demás líneas
         };
 
+        // Datasets de las Estaciones
         const datasetsEstaciones = datosDelPeriodo.map(estacionData => ({
             label: estacionData.estacion,
             data: labelsUnicosValidos.map(l => {
@@ -3174,52 +3187,53 @@ function actualizarComparativa() {
                 return idx !== -1 ? estacionData.datos.datasets[conf.id][idx] : null;
             }),
             borderColor: mapaColoresEstacion[estacionData.estacion],
-            tension: 0.3, spanGaps: true
+            backgroundColor: mapaColoresEstacion[estacionData.estacion] + "10",
+            borderWidth: 2.5,
+            pointRadius: 3,
+            tension: 0.3,
+            spanGaps: true
         }));
-     
-const ctx = document.getElementById(`chart-${conf.id}`).getContext('2d');
-graficosInstancias.push(new Chart(ctx, {
-    type: 'line',
-    data: { 
-        labels: labelsUnicosValidos, 
-        datasets: [...datasetsEstaciones, datasetLimite] 
-    },
-    options: {
-        responsive: true, 
-        maintainAspectRatio: false,
-        plugins: { 
-            // Título principal del gráfico
-            title: {
-                display: true,
-                text: `Concentración de ${conf.id}`,
-                font: { size: 18, weight: 'bold' },
-                padding: { bottom: 10 }
-            },
-            legend: { display: false }, 
-            tooltip: { filter: (item) => !item.dataset.isLimitLine } 
-        },
-        scales: { 
-            y: { 
-                beginAtZero: true, 
-                suggestedMax: conf.limite * 1.2,
-                title: { 
-                    display: true, 
-                    text: 'Unidad: ug/m³', // Unidad solicitada
-                    font: { weight: 'bold' }
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Día del Mes', // Eje X solicitado
-                    font: { weight: 'bold' }
+
+        const ctx = document.getElementById(`chart-${conf.id}`).getContext('2d');
+        const nuevoGrafico = new Chart(ctx, {
+            type: 'line',
+            data: { labels: labelsUnicosValidos, datasets: [...datasetsEstaciones, datasetLimite] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `Concentración de ${conf.id}`,
+                        font: { size: 18, weight: 'bold' },
+                        color: '#2d3436',
+                        padding: { bottom: 15 }
+                    },
+                    legend: { display: false },
+                    tooltip: {
+                        filter: (item) => !item.dataset.isLimitLine, // No mostrar valor del límite en tooltip
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        suggestedMax: conf.limite * 1.2,
+                        title: { display: true, text: 'Unidad: ug/m³', font: { weight: 'bold' } },
+                        grid: { color: '#f0f0f0' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Día del Mes', font: { weight: 'bold' } },
+                        grid: { display: false }
+                    }
                 }
             }
-        }
-    }
-}));
+        });
+        graficosInstancias.push(nuevoGrafico);
+    });
 }
- }
+
 // 5. Función para filtrar todos los gráficos a la vez
 function alternarEstacionEnTodosLosGraficos(datasetIndex, elementoLeyenda) {
     graficosInstancias.forEach(chart => {
@@ -3247,6 +3261,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
