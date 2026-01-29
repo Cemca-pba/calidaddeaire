@@ -3138,24 +3138,28 @@ function actualizarComparativa() {
     ];
 const contaminantesEnDatos = Object.keys(datosDelPeriodo[0].datos.datasets);
 
-    // 3. Crear los gráficos siguiendo el ORDEN de CONFIG_CONTAMINANTES
-    CONFIG_CONTAMINANTES.forEach(conf => {
-        // Solo creamos el gráfico si el contaminante existe en los datos recibidos
-        if (!contaminantesEnDatos.includes(conf.id)) return;
-
+CONFIG_CONTAMINANTES.forEach(conf => {
         const contaminante = conf.id;
-        const limiteEspecífico = conf.limite;
+        const limiteValor = conf.limite;
 
-        // Crear contenedor HTML (Card)
-        const card = document.createElement('div');
-        card.style.cssText = "background:white; padding:20px; border-radius:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 350px;";
-        card.innerHTML = `<h3 style="text-align:center; margin-top:0; color:#2d3436;">${contaminante}</h3><canvas id="chart-${contaminante}"></canvas>`;
-        areaGraficos.appendChild(card);
+        if (!contaminantesEnDatos.includes(contaminante)) return;
 
-        const ctx = document.getElementById(`chart-${contaminante}`).getContext('2d');
+        // 1. Crear el dataset de la Línea Roja (Límite)
+        const datasetLimite = {
+            label: `Límite Normativo (${limiteValor})`,
+            // Llenamos un array con el valor del límite para cada label (día)
+            data: labelsUnicosValidos.map(() => limiteValor),
+            borderColor: 'rgba(255, 0, 0, 0.8)',
+            borderWidth: 3,
+            borderDash: [5, 5], // Línea punteada para que no se confunda con datos
+            pointRadius: 0,     // Sin puntos, solo la línea
+            fill: false,
+            order: -1,          // Asegura que la línea roja esté al frente
+            isLimitLine: true   // Marca personalizada para nuestra lógica
+        };
 
-        // Preparar datasets (Alineados alfabéticamente por la lógica previa)
-        const datasets = datosDelPeriodo.map((estacionData) => {
+        // 2. Preparar los datasets de las estaciones
+        const datasetsEstaciones = datosDelPeriodo.map((estacionData) => {
             const color = mapaColoresEstacion[estacionData.estacion];
             const dataAlineada = labelsUnicosValidos.map(label => {
                 const idx = estacionData.datos.labels.indexOf(label);
@@ -3173,27 +3177,30 @@ const contaminantesEnDatos = Object.keys(datosDelPeriodo[0].datos.datasets);
             };
         });
 
-        // Crear el gráfico con su límite correspondiente
+        // 3. Unir ambos (El límite primero para que sea el índice 0 de los datasets de datos)
+        const todosLosDatasets = [...datasetsEstaciones, datasetLimite];
+
+        const ctx = document.getElementById(`chart-${contaminante}`).getContext('2d');
         const nuevoGrafico = new Chart(ctx, {
             type: 'line',
-            data: { labels: labelsUnicosValidos, datasets: datasets },
+            data: { 
+                labels: labelsUnicosValidos, 
+                datasets: todosLosDatasets 
+            },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        filter: (tooltipItem) => !tooltipItem.dataset.isLimitLine // Ocultar límite del tooltip
+                    }
+                },
                 scales: {
                     y: { 
                         beginAtZero: true,
-                        suggestedMax: limiteEspecífico,
-                        title: { 
-                            display: true, 
-                            text: `Límite: ${limiteEspecífico}`,
-                            font: { weight: 'bold' }
-                        },
-                        grid: {
-                            color: (context) => (context.tick.value === limiteEspecífico ? 'rgba(255, 0, 0, 0.4)' : '#f0f0f0'),
-                            lineWidth: (context) => (context.tick.value === limiteEspecífico ? 2 : 1)
-                        }
+                        suggestedMax: limiteValor * 1.1, // Margen del 10% sobre el límite
+                        title: { display: true, text: 'Concentración' }
                     }
                 }
             }
@@ -3201,7 +3208,6 @@ const contaminantesEnDatos = Object.keys(datosDelPeriodo[0].datos.datasets);
         graficosInstancias.push(nuevoGrafico);
     });
 }
-
 // 5. Función para filtrar todos los gráficos a la vez
 function alternarEstacionEnTodosLosGraficos(datasetIndex, elementoLeyenda) {
     graficosInstancias.forEach(chart => {
@@ -3229,6 +3235,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
