@@ -3081,67 +3081,66 @@ async function abrirComparador() {
     actualizarComparativa();
 }
 
- function actualizarComparativa() {
+function actualizarComparativa() {
     const periodoSeleccionado = document.getElementById('select-periodo-comparador').value;
     const areaGraficos = document.getElementById('comparador-charts-area');
     const contenedorLeyenda = document.getElementById('comparador-legend-container');
     
-    // Limpieza
     areaGraficos.innerHTML = "";
     contenedorLeyenda.innerHTML = "";
     graficosInstancias.forEach(chart => chart.destroy());
     graficosInstancias = [];
 
-    const datosDelPeriodo = datosGlobales.filter(d => d.periodo === periodoSeleccionado);
+    // 1. Filtrar datos por periodo
+    let datosDelPeriodo = datosGlobales.filter(d => d.periodo === periodoSeleccionado);
     if (datosDelPeriodo.length === 0) return;
 
-    // 1. Unificar Labels (días del mes)
+    // --- NUEVO: Ordenar estaciones alfabéticamente por nombre ---
+    datosDelPeriodo.sort((a, b) => a.estacion.localeCompare(b.estacion));
+
+    // 2. Unificar Labels (días)
     const todosLosLabels = datosDelPeriodo.flatMap(estacion => estacion.datos.labels);
     const labelsUnicosValidos = [...new Set(todosLosLabels)].map(Number).sort((a, b) => a - b).map(String);
 
-    // 2. Definir Colores Fijos para cada estación para que coincidan en todos los gráficos
-    const coloresEstaciones = {
-        "TMB": "#0984e3",
-        "CENTRO": "#e17055",
-        "NORTE": "#00b894",
-        "SUR": "#6c5ce7"
-        // Agrega más si conoces los nombres, o usa un generador dinámico
-    };
-    const listaColores = ['#0984e3', '#e17055', '#00b894', '#6c5ce7', '#fab1a0', '#fdcb6e'];
+    // 3. Paleta de colores extendida
+    const paletaColores = [
+        '#0984e3', '#e17055', '#00b894', '#6c5ce7', '#fdcb6e', 
+        '#d63031', '#00cec9', '#e84393', '#2d3436', '#ffeaa7'
+    ];
 
-    // 3. Crear la Leyenda Maestra Superior
+    // 4. Crear mapa de colores (ahora las estaciones siempre recibirán el mismo color por orden alfabético)
+    const mapaColoresEstacion = {};
+    datosDelPeriodo.forEach((item, index) => {
+        mapaColoresEstacion[item.estacion] = paletaColores[index % paletaColores.length];
+    });
+
+    // 5. Crear la Leyenda Maestra Superior (Ya saldrá ordenada de A a Z)
     datosDelPeriodo.forEach((estacionData, index) => {
         const nombre = estacionData.estacion;
-        const color = coloresEstaciones[nombre] || listaColores[index % listaColores.length];
+        const color = mapaColoresEstacion[nombre];
         
         const item = document.createElement('div');
-        item.style.cursor = "pointer";
-        item.style.display = "flex";
-        item.style.alignItems = "center";
-        item.style.gap = "8px";
-        item.style.padding = "5px 12px";
-        item.style.border = `2px solid ${color}`;
-        item.style.borderRadius = "20px";
-        item.innerHTML = `<span style="width:12px; height:12px; background:${color}; border-radius:50%; display:inline-block;"></span> <strong>${nombre}</strong>`;
+        item.className = "legend-item";
+        item.style.cssText = `cursor:pointer; display:flex; align-items:center; gap:8px; padding:6px 14px; border:2px solid ${color}; border-radius:20px; font-size: 14px; font-weight: bold; transition: 0.3s; background: white;`;
+        item.innerHTML = `<span style="width:12px; height:12px; background:${color}; border-radius:50%; display:inline-block;"></span> ${nombre}`;
         
         item.onclick = () => alternarEstacionEnTodosLosGraficos(index, item);
         contenedorLeyenda.appendChild(item);
     });
 
-    // 4. Crear Gráficos por Contaminante
+    // 6. Crear Gráficos por Contaminante
     const contaminantes = Object.keys(datosDelPeriodo[0].datos.datasets);
 
     contaminantes.forEach(contaminante => {
         const card = document.createElement('div');
-        card.style.background = "white"; card.style.padding = "15px"; card.style.borderRadius = "8px";
-        card.innerHTML = `<h3 style="text-align:center;">${contaminante}</h3><canvas id="chart-${contaminante}"></canvas>`;
+        card.style.cssText = "background:white; padding:20px; border-radius:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 350px;";
+        card.innerHTML = `<h3 style="text-align:center; margin-top:0; color:#2d3436;">${contaminante}</h3><canvas id="chart-${contaminante}"></canvas>`;
         areaGraficos.appendChild(card);
 
         const ctx = document.getElementById(`chart-${contaminante}`).getContext('2d');
 
-        const datasets = datosDelPeriodo.map((estacionData, index) => {
-            const color = coloresEstaciones[estacionData.estacion] || listaColores[index % listaColores.length];
-            
+        const datasets = datosDelPeriodo.map((estacionData) => {
+            const color = mapaColoresEstacion[estacionData.estacion];
             const dataAlineada = labelsUnicosValidos.map(label => {
                 const idx = estacionData.datos.labels.indexOf(label);
                 return idx !== -1 ? estacionData.datos.datasets[contaminante][idx] : null;
@@ -3151,7 +3150,8 @@ async function abrirComparador() {
                 label: estacionData.estacion,
                 data: dataAlineada,
                 borderColor: color,
-                backgroundColor: color,
+                backgroundColor: color + "15",
+                pointRadius: 3,
                 tension: 0.3,
                 spanGaps: true
             };
@@ -3162,15 +3162,17 @@ async function abrirComparador() {
             data: { labels: labelsUnicosValidos, datasets: datasets },
             options: {
                 responsive: true,
-                plugins: { 
-                    legend: { display: false } // OCULTAMOS LA LEYENDA INDIVIDUAL
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true }
                 }
             }
         });
         graficosInstancias.push(nuevoGrafico);
     });
 }
-
+}
 // 5. Función para filtrar todos los gráficos a la vez
 function alternarEstacionEnTodosLosGraficos(datasetIndex, elementoLeyenda) {
     graficosInstancias.forEach(chart => {
@@ -3198,6 +3200,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
