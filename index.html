@@ -3081,11 +3081,18 @@ async function abrirComparador() {
     actualizarComparativa();
 }
 
+El problema principal es que en el código que pegaste falta definir la variable contaminantesEnDatos dentro de la función. El script intenta preguntar if (!contaminantesEnDatos.includes...) pero esa lista no existe en ese momento, lo que detiene la ejecución.
+
+Aquí tienes la función corregida y completa, incluyendo el Botón Maestro (Desmarcar Todo) y la Línea Roja integrados:
+
+Función actualizarComparativa Corregida
+JavaScript
 function actualizarComparativa() {
     const periodoSeleccionado = document.getElementById('select-periodo-comparador').value;
     const areaGraficos = document.getElementById('comparador-charts-area');
     const contenedorLeyenda = document.getElementById('comparador-legend-container');
     
+    // Limpieza inicial
     areaGraficos.innerHTML = "";
     contenedorLeyenda.innerHTML = "";
     graficosInstancias.forEach(chart => chart.destroy());
@@ -3095,116 +3102,97 @@ function actualizarComparativa() {
     let datosDelPeriodo = datosGlobales.filter(d => d.periodo === periodoSeleccionado);
     if (datosDelPeriodo.length === 0) return;
 
-    // --- NUEVO: Ordenar estaciones alfabéticamente por nombre ---
+    // 2. Ordenar estaciones alfabéticamente
     datosDelPeriodo.sort((a, b) => a.estacion.localeCompare(b.estacion));
 
-    // 2. Unificar Labels (días)
+    // 3. Unificar Labels (días) y definir contaminantes disponibles
     const todosLosLabels = datosDelPeriodo.flatMap(estacion => estacion.datos.labels);
     const labelsUnicosValidos = [...new Set(todosLosLabels)].map(Number).sort((a, b) => a - b).map(String);
+    
+    // ESTA LÍNEA FALTABA:
+    const contaminantesEnDatos = Object.keys(datosDelPeriodo[0].datos.datasets);
 
-    // 3. Paleta de colores extendida
-    const paletaColores = [
-        '#0984e3', '#e17055', '#00b894', '#6c5ce7', '#fdcb6e', 
-        '#d63031', '#00cec9', '#e84393', '#2d3436', '#ffeaa7'
-    ];
-
-    // 4. Crear mapa de colores (ahora las estaciones siempre recibirán el mismo color por orden alfabético)
+    // 4. Mapa de colores
+    const paletaColores = ['#0984e3', '#e17055', '#00b894', '#6c5ce7', '#fdcb6e', '#d63031', '#00cec9', '#e84393', '#2d3436', '#ffeaa7'];
     const mapaColoresEstacion = {};
     datosDelPeriodo.forEach((item, index) => {
         mapaColoresEstacion[item.estacion] = paletaColores[index % paletaColores.length];
     });
 
-    // 5. Crear la Leyenda Maestra Superior (Ya saldrá ordenada de A a Z)
+    // 5. Crear Leyenda Superior con BOTÓN MAESTRO
+    const btnMaestro = document.createElement('div');
+    btnMaestro.style.cssText = `cursor:pointer; display:flex; align-items:center; gap:8px; padding:6px 14px; border:2px solid #636e72; border-radius:20px; font-size: 14px; font-weight: bold; background: #dfe6e9;`;
+    btnMaestro.innerHTML = `<span>Desmarcar Todo</span>`;
+    
+    let todasVisibles = true;
+    btnMaestro.onclick = () => {
+        todasVisibles = !todasVisibles;
+        graficosInstancias.forEach(chart => {
+            chart.data.datasets.forEach((ds, i) => {
+                if (!ds.isLimitLine) chart.getDatasetMeta(i).hidden = !todasVisibles;
+            });
+            chart.update();
+        });
+        document.querySelectorAll('.legend-item-estacion').forEach(el => {
+            el.style.opacity = todasVisibles ? "1" : "0.3";
+            el.style.textDecoration = todasVisibles ? "none" : "line-through";
+        });
+        btnMaestro.querySelector('span').textContent = todasVisibles ? "Desmarcar Todo" : "Seleccionar Todo";
+    };
+    contenedorLeyenda.appendChild(btnMaestro);
+
+    // Botones de estaciones
     datosDelPeriodo.forEach((estacionData, index) => {
-        const nombre = estacionData.estacion;
-        const color = mapaColoresEstacion[nombre];
-        
+        const color = mapaColoresEstacion[estacionData.estacion];
         const item = document.createElement('div');
-        item.className = "legend-item";
-        item.style.cssText = `cursor:pointer; display:flex; align-items:center; gap:8px; padding:6px 14px; border:2px solid ${color}; border-radius:20px; font-size: 14px; font-weight: bold; transition: 0.3s; background: white;`;
-        item.innerHTML = `<span style="width:12px; height:12px; background:${color}; border-radius:50%; display:inline-block;"></span> ${nombre}`;
-        
+        item.className = "legend-item legend-item-estacion";
+        item.style.cssText = `cursor:pointer; display:flex; align-items:center; gap:8px; padding:6px 14px; border:2px solid ${color}; border-radius:20px; font-size: 14px; font-weight: bold; background: white; margin-left:10px;`;
+        item.innerHTML = `<span style="width:12px; height:12px; background:${color}; border-radius:50%; display:inline-block;"></span> ${estacionData.estacion}`;
         item.onclick = () => alternarEstacionEnTodosLosGraficos(index, item);
         contenedorLeyenda.appendChild(item);
     });
 
- const CONFIG_CONTAMINANTES = [
-        { id: "PM2.5", limite: 35 },
-        { id: "PM10",  limite: 150 },
-        { id: "SO2",   limite: 125 },
-        { id: "NO2",   limite: 188 },
-        { id: "O3",    limite: 100 },
-        { id: "CO",    limite: 10000 }
+    // 6. Configuración de Gráficos (Orden y Límites)
+    const CONFIG_CONTAMINANTES = [
+        { id: "PM2.5", limite: 35 }, { id: "PM10", limite: 150 },
+        { id: "SO2", limite: 125 }, { id: "NO2", limite: 188 },
+        { id: "O3", limite: 100 }, { id: "CO", limite: 10000 }
     ];
 
-CONFIG_CONTAMINANTES.forEach(conf => {
-        const contaminante = conf.id;
-        const limiteValor = conf.limite;
+    CONFIG_CONTAMINANTES.forEach(conf => {
+        if (!contaminantesEnDatos.includes(conf.id)) return;
 
-        if (!contaminantesEnDatos.includes(contaminante)) return;
+        const card = document.createElement('div');
+        card.style.cssText = "background:white; padding:20px; border-radius:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 350px;";
+        card.innerHTML = `<h3 style="text-align:center; margin-top:0;">${conf.id}</h3><canvas id="chart-${conf.id}"></canvas>`;
+        areaGraficos.appendChild(card);
 
-        // 1. Crear el dataset de la Línea Roja (Límite)
         const datasetLimite = {
-            label: `Límite Normativo (${limiteValor})`,
-            // Llenamos un array con el valor del límite para cada label (día)
-            data: labelsUnicosValidos.map(() => limiteValor),
-            borderColor: 'rgba(255, 0, 0, 0.8)',
-            borderWidth: 3,
-            borderDash: [5, 5], // Línea punteada para que no se confunda con datos
-            pointRadius: 0,     // Sin puntos, solo la línea
-            fill: false,
-            order: -1,          // Asegura que la línea roja esté al frente
-            isLimitLine: true   // Marca personalizada para nuestra lógica
+            label: 'Límite',
+            data: labelsUnicosValidos.map(() => conf.limite),
+            borderColor: 'red', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, isLimitLine: true
         };
 
-        // 2. Preparar los datasets de las estaciones
-        const datasetsEstaciones = datosDelPeriodo.map((estacionData) => {
-            const color = mapaColoresEstacion[estacionData.estacion];
-            const dataAlineada = labelsUnicosValidos.map(label => {
-                const idx = estacionData.datos.labels.indexOf(label);
-                return idx !== -1 ? estacionData.datos.datasets[contaminante][idx] : null;
-            });
+        const datasetsEstaciones = datosDelPeriodo.map(estacionData => ({
+            label: estacionData.estacion,
+            data: labelsUnicosValidos.map(l => {
+                const idx = estacionData.datos.labels.indexOf(l);
+                return idx !== -1 ? estacionData.datos.datasets[conf.id][idx] : null;
+            }),
+            borderColor: mapaColoresEstacion[estacionData.estacion],
+            tension: 0.3, spanGaps: true
+        }));
 
-            return {
-                label: estacionData.estacion,
-                data: dataAlineada,
-                borderColor: color,
-                backgroundColor: color + "10",
-                pointRadius: 3,
-                tension: 0.3,
-                spanGaps: true
-            };
-        });
-
-        // 3. Unir ambos (El límite primero para que sea el índice 0 de los datasets de datos)
-        const todosLosDatasets = [...datasetsEstaciones, datasetLimite];
-
-        const ctx = document.getElementById(`chart-${contaminante}`).getContext('2d');
-        const nuevoGrafico = new Chart(ctx, {
+        const ctx = document.getElementById(`chart-${conf.id}`).getContext('2d');
+        graficosInstancias.push(new Chart(ctx, {
             type: 'line',
-            data: { 
-                labels: labelsUnicosValidos, 
-                datasets: todosLosDatasets 
-            },
+            data: { labels: labelsUnicosValidos, datasets: [...datasetsEstaciones, datasetLimite] },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                        filter: (tooltipItem) => !tooltipItem.dataset.isLimitLine // Ocultar límite del tooltip
-                    }
-                },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        suggestedMax: limiteValor * 1.1, // Margen del 10% sobre el límite
-                        title: { display: true, text: 'Concentración' }
-                    }
-                }
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { filter: (item) => !item.dataset.isLimitLine } },
+                scales: { y: { beginAtZero: true, suggestedMax: conf.limite * 1.2 } }
             }
-        });
-        graficosInstancias.push(nuevoGrafico);
+        }));
     });
 }
 // 5. Función para filtrar todos los gráficos a la vez
@@ -3234,6 +3222,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
