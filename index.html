@@ -3176,18 +3176,48 @@ function actualizarComparativa() {
             borderColor: mapaColoresEstacion[estacionData.estacion],
             tension: 0.3, spanGaps: true
         }));
-
+     
         const ctx = document.getElementById(`chart-${conf.id}`).getContext('2d');
-        graficosInstancias.push(new Chart(ctx, {
-            type: 'line',
-            data: { labels: labelsUnicosValidos, datasets: [...datasetsEstaciones, datasetLimite] },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { filter: (item) => !item.dataset.isLimitLine } },
-                scales: { y: { beginAtZero: true, suggestedMax: conf.limite * 1.2 } }
+graficosInstancias.push(new Chart(ctx, {
+    type: 'line',
+    data: { 
+        labels: labelsUnicosValidos, 
+        datasets: [...datasetsEstaciones, datasetLimite] 
+    },
+    options: {
+        responsive: true, 
+        maintainAspectRatio: false,
+        plugins: { 
+            // Título principal del gráfico
+            title: {
+                display: true,
+                text: `Concentración de ${conf.id}`,
+                font: { size: 18, weight: 'bold' },
+                padding: { bottom: 10 }
+            },
+            legend: { display: false }, 
+            tooltip: { filter: (item) => !item.dataset.isLimitLine } 
+        },
+        scales: { 
+            y: { 
+                beginAtZero: true, 
+                suggestedMax: conf.limite * 1.2,
+                title: { 
+                    display: true, 
+                    text: 'Unidad: ug/m³', // Unidad solicitada
+                    font: { weight: 'bold' }
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Día del Mes', // Eje X solicitado
+                    font: { weight: 'bold' }
+                }
             }
-        }));
-    });
+        }
+    }
+}));
 }
 // 5. Función para filtrar todos los gráficos a la vez
 function alternarEstacionEnTodosLosGraficos(datasetIndex, elementoLeyenda) {
@@ -3216,6 +3246,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
