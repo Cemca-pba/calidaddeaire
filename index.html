@@ -3030,7 +3030,7 @@ if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
 let datosGlobales = []; // Aquí guardaremos lo que devuelva traerDatosCache()
 let graficosInstancias = []; // Para destruir gráficos viejos al actualizar
 
-asasync function abrirComparador() {
+async function abrirComparador() {
     document.getElementById('modal-comparador').style.display = 'block';
     const loader = document.getElementById('comparador-loader');
     const select = document.getElementById('select-periodo-comparador');
@@ -3154,6 +3154,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
