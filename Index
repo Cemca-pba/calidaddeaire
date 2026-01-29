@@ -241,9 +241,7 @@ chart-header {
     padding-bottom: 5px;
     border-bottom: 1px solid #eee;
 }
-   
-
-   
+  
 .status-badge {
     display: flex;
     align-items: center;
@@ -362,7 +360,8 @@ chart-header {
 /* Colores institucionales */
 #btn-ministerio { background-color: #00aec3; } /* Gris oscuro */
 #btn-email { background-color: #00aec3; }      /* Azul */
-#btn-ayuda { background-color: #00aec3; }      /* Turquesa */
+#btn-ayuda { background-color: #00aec3; }     /* Turquesa */
+#btn-comparador { background-color: #00aec3; } 
 
 .fab-btn-simple:hover {
   transform: scale(1.1);
@@ -704,7 +703,7 @@ chart-header {
     }
  
   /* Ocultar botones flotantes originales */
-    #btn-ministerio, #btn-email, #btn-ayuda {
+    #btn-ministerio, #btn-email, #btn-ayuda, #btn-comparador {
         display: none !important;
     }
 
@@ -3079,73 +3078,76 @@ async function abrirComparador() {
     actualizarComparativa();
 }
 
-  function actualizarComparativa() {
+ function actualizarComparativa() {
     const periodoSeleccionado = document.getElementById('select-periodo-comparador').value;
     const areaGraficos = document.getElementById('comparador-charts-area');
     
-    // Limpiar área y destruir instancias previas de Chart.js
     areaGraficos.innerHTML = "";
     graficosInstancias.forEach(chart => chart.destroy());
     graficosInstancias = [];
 
-    // 1. Filtrar datos por el periodo elegido
     const datosDelPeriodo = datosGlobales.filter(d => d.periodo === periodoSeleccionado);
-
     if (datosDelPeriodo.length === 0) return;
 
-    // 2. Identificar qué contaminantes existen (mirando la primera estación encontrada)
+    // --- NUEVA LÓGICA DE UNIFICACIÓN DE LABELS ---
+    // Extraemos todos los días posibles de todas las estaciones y los ordenamos numéricamente
+    const todosLosLabels = datosDelPeriodo.flatMap(estacion => estacion.datos.labels);
+    const labelsUnicosValidos = [...new Set(todosLosLabels)]
+        .map(Number) // Convertir a número para ordenar bien (1, 2, 10 en lugar de 1, 10, 2)
+        .sort((a, b) => a - b)
+        .map(String); // Volver a string para el gráfico
+
     const contaminantes = Object.keys(datosDelPeriodo[0].datos.datasets);
 
-    // 3. Crear un gráfico por cada contaminante
     contaminantes.forEach(contaminante => {
-        // Crear contenedor para el gráfico
         const card = document.createElement('div');
+        card.className = "chart-card"; // Puedes añadir estilos aquí
         card.style.background = "white";
         card.style.padding = "15px";
         card.style.borderRadius = "8px";
-        card.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
-        card.innerHTML = `<h3 style="text-align:center; color:#2d3436;">${contaminante}</h3><canvas id="chart-${contaminante}"></canvas>`;
+        card.innerHTML = `<h3 style="text-align:center;">${contaminante}</h3><canvas id="chart-${contaminante}"></canvas>`;
         areaGraficos.appendChild(card);
 
         const ctx = document.getElementById(`chart-${contaminante}`).getContext('2d');
 
-        // Preparar los datasets (uno por cada estación)
         const datasets = datosDelPeriodo.map((estacionData, index) => {
-            const colores = ['#0984e3', '#e17055', '#00b894', '#6c5ce7', '#fab1a0']; // Colores para distinguir estaciones
+            const colores = ['#0984e3', '#e17055', '#00b894', '#6c5ce7', '#fab1a0'];
+            
+            // --- ALINEACIÓN DE DATOS ---
+            // Mapeamos los labels únicos. Si la estación tiene dato para ese día, lo pone, si no, null.
+            const dataAlineada = labelsUnicosValidos.map(label => {
+                const indexLabelOriginal = estacionData.datos.labels.indexOf(label);
+                return indexLabelOriginal !== -1 ? estacionData.datos.datasets[contaminante][indexLabelOriginal] : null;
+            });
+
             return {
                 label: estacionData.estacion,
-                data: estacionData.datos.datasets[contaminante],
+                data: dataAlineada,
                 borderColor: colores[index % colores.length],
-                backgroundColor: colores[index % colores.length] + "22", // color con transparencia
-                borderWidth: 2,
                 tension: 0.3,
-                fill: false
+                spanGaps: true // Esto conecta los puntos aunque haya huecos (días sin datos)
             };
         });
 
-        // Crear el gráfico
         const nuevoGrafico = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: datosDelPeriodo[0].datos.labels, // Los días del mes
+                labels: labelsUnicosValidos,
                 datasets: datasets
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { position: 'bottom' }
-                },
+                plugins: { legend: { position: 'bottom' } },
                 scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'Concentración' } },
+                    y: { beginAtZero: true },
                     x: { title: { display: true, text: 'Día del Mes' } }
                 }
             }
         });
-
         graficosInstancias.push(nuevoGrafico);
     });
 }
+      
 
 function cerrarComparador() {
     document.getElementById('modal-comparador').style.display = 'none';
@@ -3154,6 +3156,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
