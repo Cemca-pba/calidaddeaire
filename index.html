@@ -3128,10 +3128,25 @@ function actualizarComparativa() {
         contenedorLeyenda.appendChild(item);
     });
 
-    // 6. Crear Gráficos por Contaminante
-    const contaminantes = Object.keys(datosDelPeriodo[0].datos.datasets);
+ const CONFIG_CONTAMINANTES = [
+        { id: "PM2.5", limite: 35 },
+        { id: "PM10",  limite: 150 },
+        { id: "SO2",   limite: 125 },
+        { id: "NO2",   limite: 188 },
+        { id: "O3",    limite: 100 },
+        { id: "CO",    limite: 10000 }
+    ];
+const contaminantesEnDatos = Object.keys(datosDelPeriodo[0].datos.datasets);
 
-    contaminantes.forEach(contaminante => {
+    // 3. Crear los gráficos siguiendo el ORDEN de CONFIG_CONTAMINANTES
+    CONFIG_CONTAMINANTES.forEach(conf => {
+        // Solo creamos el gráfico si el contaminante existe en los datos recibidos
+        if (!contaminantesEnDatos.includes(conf.id)) return;
+
+        const contaminante = conf.id;
+        const limiteEspecífico = conf.limite;
+
+        // Crear contenedor HTML (Card)
         const card = document.createElement('div');
         card.style.cssText = "background:white; padding:20px; border-radius:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 350px;";
         card.innerHTML = `<h3 style="text-align:center; margin-top:0; color:#2d3436;">${contaminante}</h3><canvas id="chart-${contaminante}"></canvas>`;
@@ -3139,6 +3154,7 @@ function actualizarComparativa() {
 
         const ctx = document.getElementById(`chart-${contaminante}`).getContext('2d');
 
+        // Preparar datasets (Alineados alfabéticamente por la lógica previa)
         const datasets = datosDelPeriodo.map((estacionData) => {
             const color = mapaColoresEstacion[estacionData.estacion];
             const dataAlineada = labelsUnicosValidos.map(label => {
@@ -3150,13 +3166,14 @@ function actualizarComparativa() {
                 label: estacionData.estacion,
                 data: dataAlineada,
                 borderColor: color,
-                backgroundColor: color + "15",
+                backgroundColor: color + "10",
                 pointRadius: 3,
                 tension: 0.3,
                 spanGaps: true
             };
         });
 
+        // Crear el gráfico con su límite correspondiente
         const nuevoGrafico = new Chart(ctx, {
             type: 'line',
             data: { labels: labelsUnicosValidos, datasets: datasets },
@@ -3165,7 +3182,19 @@ function actualizarComparativa() {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true }
+                    y: { 
+                        beginAtZero: true,
+                        suggestedMax: limiteEspecífico,
+                        title: { 
+                            display: true, 
+                            text: `Límite: ${limiteEspecífico}`,
+                            font: { weight: 'bold' }
+                        },
+                        grid: {
+                            color: (context) => (context.tick.value === limiteEspecífico ? 'rgba(255, 0, 0, 0.4)' : '#f0f0f0'),
+                            lineWidth: (context) => (context.tick.value === limiteEspecífico ? 2 : 1)
+                        }
+                    }
                 }
             }
         });
@@ -3200,6 +3229,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
