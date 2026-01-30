@@ -3180,24 +3180,32 @@ async function abrirComparador() {
         };
 
         // Datasets de las Estaciones
-        const datasetsEstaciones = datosDelPeriodo.map(estacionData => ({
+const datasetsEstaciones = datosDelPeriodo.map(estacionData => ({
             label: estacionData.estacion,
             data: labelsUnicosValidos.map(l => {
                 const idx = estacionData.datos.labels.indexOf(l);
-                return idx !== -1 ? estacionData.datos.datasets[conf.id][idx] : null;
+                if (idx !== -1) {
+                    const valor = estacionData.datos.datasets[conf.id][idx];
+                    // FILTRO: Solo valores mayores a 0, de lo contrario null
+                    return valor > 0 ? valor : null; 
+                }
+                return null;
             }),
             borderColor: mapaColoresEstacion[estacionData.estacion],
             backgroundColor: mapaColoresEstacion[estacionData.estacion] + "10",
             borderWidth: 2.5,
             pointRadius: 3,
-            tension: 0.3,
-            spanGaps: true
+            tension: 0, // LINEAS RECTAS (sin curvatura)
+            spanGaps: false // Cambiado a false para que no una puntos si hay datos filtrados (menores a 0) en medio
         }));
 
-        const ctx = document.getElementById(`chart-${conf.id}`).getContext('2d');
+       const ctx = document.getElementById(`chart-${conf.id}`).getContext('2d');
         const nuevoGrafico = new Chart(ctx, {
             type: 'line',
-            data: { labels: labelsUnicosValidos, datasets: [...datasetsEstaciones, datasetLimite] },
+            data: { 
+                labels: labelsUnicosValidos, 
+                datasets: [...datasetsEstaciones, datasetLimite] 
+            },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -3211,7 +3219,7 @@ async function abrirComparador() {
                     },
                     legend: { display: false },
                     tooltip: {
-                        filter: (item) => !item.dataset.isLimitLine, // No mostrar valor del límite en tooltip
+                        filter: (item) => !item.dataset.isLimitLine,
                         mode: 'index',
                         intersect: false
                     }
@@ -3261,6 +3269,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
