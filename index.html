@@ -3070,12 +3070,7 @@ async function abrirComparador() {
     });
 
     // 5. Intentar seleccionar "Enero 2026", si no existe, elegir el último disponible
-    const periodoDeseado = "Enero 2026";
-    if (periodosUnicos.includes(periodoDeseado)) {
-        select.value = periodoDeseado;
-    } else if (periodosUnicos.length > 0) {
-        select.value = periodosUnicos[periodosUnicos.length - 1];
-    }
+    const periodoDeseado = periodosUnicos[periodosUnicos.length - 1];
 
     // 6. Graficar
     actualizarComparativa();
@@ -3269,6 +3264,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
