@@ -3043,24 +3043,20 @@ async function abrirComparador() {
         loader.style.display = 'none';
     }
 
-    // 1. Extraer periodos únicos
     const periodosUnicos = [...new Set(datosGlobales.map(d => d.periodo))];
 
-    // 2. Función auxiliar para convertir "Mes Año" en un valor numérico comparable
     const obtenerValorFecha = (periodoStr) => {
         const meses = {
             "Enero": 0, "Febrero": 1, "Marzo": 2, "Abril": 3, "Mayo": 4, "Junio": 5,
             "Julio": 6, "Agosto": 7, "Septiembre": 8, "Octubre": 9, "Noviembre": 10, "Diciembre": 11
         };
         const [mes, anio] = periodoStr.split(" ");
-        // Retorna un número tipo 202600 para Enero 2026, facilitando el orden
         return (parseInt(anio) * 100) + meses[mes];
     };
 
-    // 3. Ordenar cronológicamente (de más antiguo a más reciente)
-    periodosUnicos.sort((a, b) => obtenerValorFecha(a) - obtenerValorFecha(b));
+    // --- CAMBIO 1: Ordenar de más reciente a más antiguo (Descendente) ---
+    periodosUnicos.sort((a, b) => obtenerValorFecha(b) - obtenerValorFecha(a));
 
-    // 4. Llenar el Select
     select.innerHTML = "";
     periodosUnicos.forEach(p => {
         const option = document.createElement('option');
@@ -3069,10 +3065,12 @@ async function abrirComparador() {
         select.appendChild(option);
     });
 
-    // 5. Intentar seleccionar "Enero 2026", si no existe, elegir el último disponible
-    const periodoDeseado = periodosUnicos[periodosUnicos.length - 1];
+    // --- CAMBIO 2: Seleccionar el más reciente ---
+    // Como ordenamos de mayor a menor, el más reciente es el índice 0
+    if (periodosUnicos.length > 0) {
+        select.value = periodosUnicos[0];
+    }
 
-    // 6. Graficar
     actualizarComparativa();
 }
 
@@ -3264,6 +3262,7 @@ function cerrarComparador() {
   </script>
 </body>
 </html>
+
 
 
 
