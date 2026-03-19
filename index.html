@@ -3265,69 +3265,7 @@ function cerrarComparador() {
     document.getElementById('modal-comparador').style.display = 'none';
 }
 
-var flyoverCorriendo = false;
-var indiceActual = 0;
 
-async function toggleFlyover() {
-    const btnIcono = document.getElementById('icon-flyover');
-    
-    if (flyoverCorriendo) {
-        // Acción: PARAR
-        flyoverCorriendo = false;
-        btnIcono.className = 'fas fa-play';
-        console.log("Flyover detenido.");
-    } else {
-        // Validación: ¿Hay datos cargados?
-        if (!window.estacionesGlobal || window.estacionesGlobal.length === 0) {
-            alert("Cargando datos del CEMCA... por favor espere un segundo.");
-            return;
-        }
-        // Acción: INICIAR
-        flyoverCorriendo = true;
-        btnIcono.className = 'fas fa-pause';
-        ejecutarFlyover();
-    }
-}
-
-async function ejecutarFlyover() {
-    // 1. Extraer nombres de estaciones únicas (Bahía Blanca, Campana, etc.)
-    const listaEstaciones = [...new Set(window.estacionesGlobal.map(e => e.Estacion))];
-    
-    while (flyoverCorriendo) {
-        let nombreEst = listaEstaciones[indiceActual];
-        let dataEst = window.estacionesGlobal.find(e => e.Estacion === nombreEst);
-
-        if (dataEst && dataEst.Latitud) {
-            // A. Mover el mapa suavemente
-            window.map.flyTo([dataEst.Latitud, dataEst.Longitud], 14, {
-                animate: true,
-                duration: 2.5
-            });
-
-            // Esperar a que el mapa llegue
-            await new Promise(r => setTimeout(r, 3000));
-            if (!flyoverCorriendo) break;
-
-            // B. EJECUTAR TU FUNCIÓN: Abrir el panel lateral y cargar gráficos
-            if (typeof window.abrirDetalles === "function") {
-                window.abrirDetalles(nombreEst);
-            }
-
-            // C. Abrir el popup del marcador en el mapa
-            if (window.marcadoresEstaciones && window.marcadoresEstaciones[nombreEst]) {
-                window.marcadoresEstaciones[nombreEst].openPopup();
-            }
-
-            // D. Esperar 7 segundos para que el usuario vea los detalles y la temperatura
-            // (Damos tiempo a que Google Apps Script responda con los gráficos)
-            await new Promise(r => setTimeout(r, 7000));
-            if (!flyoverCorriendo) break;
-        }
-
-        // Pasar a la siguiente estación (Loop infinito)
-        indiceActual = (indiceActual + 1) % listaEstaciones.length;
-    }
-}
    
   </script>
 </body>
