@@ -1044,7 +1044,8 @@ chart-header {
   <i class="fas fa-calendar" style="font-size: 1.6em;"></i>
 </div>
 
-<div id="btn-flyover" class="fab-btn-simple" onclick="toggleFlyover()" title="Recorrer Estaciones" style="bottom: 340px;">
+<div id="btn-flyover" class="fab-btn-simple" onclick="toggleFlyover()" title="Recorrer Estaciones" 
+     style="bottom: 340px; z-index: 9999; cursor: pointer; display: flex; align-items: center; justify-content: center;">
   <i id="icon-flyover" class="fas fa-play" style="font-size: 1.6em;"></i>
 </div>
 
@@ -3265,72 +3266,85 @@ function cerrarComparador() {
     document.getElementById('modal-comparador').style.display = 'none';
 }
 
-let flyoverActivo = false;
-let indiceActualFlyover = 0;
+var flyoverEnCurso = false;
+var indiceFlyover = 0;
 
 async function toggleFlyover() {
-    const btnIcono = document.getElementById('icon-flyover');
+    console.log("Iniciando verificación de Flyover...");
     
-    if (flyoverActivo) {
-        flyoverActivo = false;
-        btnIcono.classList.remove('fa-pause');
-        btnIcono.classList.add('fa-play');
-        console.log("Flyover pausado por el usuario");
+    // 1. Verificar si hay datos cargados
+    if (!window.estacionesGlobal || window.estacionesGlobal.length === 0) {
+        alert("Los datos aún se están cargando desde el servidor. Reintente en un momento.");
+        return;
+    }
+
+    const icono = document.getElementById('icon-flyover');
+    const boton = document.getElementById('btn-flyover');
+
+    if (flyoverEnCurso) {
+        // DETENER
+        flyoverEnCurso = false;
+        icono.className = 'fas fa-play';
+        boton.style.backgroundColor = "#00aec3";
+        console.log("Flyover detenido por el usuario.");
     } else {
-        flyoverActivo = true;
-        btnIcono.classList.remove('fa-play');
-        btnIcono.classList.add('fa-pause');
-        console.log("Iniciando recorrido detallado...");
-        ejecutarCicloFlyover();
+        // INICIAR
+        flyoverEnCurso = true;
+        icono.className = 'fas fa-pause';
+        boton.style.backgroundColor = "#ff4444"; // Cambia a rojo mientras corre
+        console.log("Flyover iniciado.");
+        ejecutarRecorrido();
     }
 }
 
-async function ejecutarCicloFlyover() {
-    // Obtenemos la lista de estaciones desde tus datos globales
-    const estacionesUnicas = [...new Set(estacionesGlobal.map(e => e.Estacion))];
+async function ejecutarRecorrido() {
+    // Obtenemos las estaciones únicas (Bahía Blanca, Campana, etc.)
+    const listaEstaciones = [...new Set(window.estacionesGlobal.map(e => e.Estacion))];
     
-    while (flyoverActivo) {
-        let nombreEstacion = estacionesUnicas[indiceActualFlyover];
-        const datos = estacionesGlobal.find(e => e.Estacion === nombreEstacion);
+    while (flyoverEnCurso) {
+        let nombreEst = listaEstaciones[indiceFlyover];
+        let dataEst = window.estacionesGlobal.find(e => e.Estacion === nombreEst);
 
-        if (datos && datos.Latitud && datos.Longitud) {
-            // 1. Volar a la ubicación (Fly)
-            map.flyTo([datos.Latitud, datos.Longitud], 14, {
+        if (dataEst && dataEst.Latitud) {
+            console.log("Volando a: " + nombreEst);
+            
+            // 1. Movimiento del mapa
+            window.map.flyTo([dataEst.Latitud, dataEst.Longitud], 14, {
                 animate: true,
-                duration: 2.5
+                duration: 2
             });
 
-            // 2. Esperar a que la cámara llegue
-            await new Promise(res => setTimeout(res, 2800));
-            if (!flyoverActivo) break;
+            // Esperar a que llegue la cámara
+            await new Promise(r => setTimeout(r, 2500));
+            if (!flyoverEnCurso) break;
 
-            // 3. Ejecutar la función nativa de tu App para abrir el panel lateral
-            // Esto cargará automáticamente el Gauge y los gráficos recientes
-            abrirDetalles(nombreEstacion);
-
-            // 4. Cambiar a la pestaña de Meteorología (donde están los datos de temperatura)
-            // Simulamos un click en el icono de la nube/sol
-            setTimeout(() => {
-                const tabMeteo = document.querySelector('.menu-item[title="Meteorología"]');
-                if (tabMeteo) tabMeteo.click();
-            }, 500);
-
-            // 5. Abrir el popup en el mapa para resaltar la ubicación
-            if (marcadoresEstaciones[nombreEstacion]) {
-                marcadoresEstaciones[nombreEstacion].openPopup();
+            // 2. Abrir el panel lateral (tu función nativa)
+            if (typeof window.abrirDetalles === "function") {
+                window.abrirDetalles(nombreEst);
             }
 
-            // 6. Tiempo de espera para que el usuario vea los datos (Temperatura, Humedad, etc.)
-            // Damos 6 segundos porque la carga de gráficos puede tardar un poco
-            await new Promise(res => setTimeout(res, 6000));
-            if (!flyoverActivo) break;
+            // 3. Forzar click en la pestaña de Meteorología (Temperatura)
+            setTimeout(() => {
+                const tabs = document.querySelectorAll('.menu-item');
+                tabs.forEach(t => {
+                    if(t.innerText.includes('cloud') || t.title.includes('Meteo')) t.click();
+                });
+            }, 600);
+
+            // 4. Abrir popup en el mapa
+            if (window.marcadoresEstaciones && window.marcadoresEstaciones[nombreEst]) {
+                window.marcadoresEstaciones[nombreEst].openPopup();
+            }
+
+            // 5. Tiempo de visualización (ajustable)
+            await new Promise(r => setTimeout(r, 5000));
+            if (!flyoverEnCurso) break;
         }
 
-        // Pasar a la siguiente estación
-        indiceActualFlyover = (indiceActualFlyover + 1) % estacionesUnicas.length;
+        // Incrementar índice
+        indiceFlyover = (indiceFlyover + 1) % listaEstaciones.length;
     }
 }
-
    
   </script>
 </body>
