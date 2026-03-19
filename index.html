@@ -3263,71 +3263,7 @@ function cerrarComparador() {
     document.getElementById('modal-comparador').style.display = 'none';
 }
 
-let flyoverActivo = false;
-let indiceActualFlyover = 0;
 
-async function toggleFlyover() {
-    const btnIcono = document.getElementById('icon-flyover');
-    
-    if (flyoverActivo) {
-        // Lógica para PAUSAR
-        flyoverActivo = false;
-        btnIcono.classList.remove('fa-pause');
-        btnIcono.classList.add('fa-play');
-        console.log("Flyover pausado");
-    } else {
-        // Lógica para INICIAR/REANUDAR
-        flyoverActivo = true;
-        btnIcono.classList.remove('fa-play');
-        btnIcono.classList.add('fa-pause');
-        ejecutarCicloFlyover();
-    }
-}
-
-async function ejecutarCicloFlyover() {
-    // Cerramos paneles para despejar la vista
-    cerrarPanel();
-    
-    // Obtenemos la lista de estaciones únicas
-    const estacionesUnicas = [...new Set(estacionesGlobal.map(e => e.Estacion))];
-    
-    while (flyoverActivo) {
-        let nombreEstacion = estacionesUnicas[indiceActualFlyover];
-        const datos = estacionesGlobal.find(e => e.Estacion === nombreEstacion);
-
-        if (datos && datos.Latitud && datos.Longitud) {
-            // 1. Volar a la estación
-            map.flyTo([datos.Latitud, datos.Longitud], 14, {
-                animate: true,
-                duration: 2.5
-            });
-
-            // Esperar el vuelo (ajustar según duración)
-            await esperar(3000);
-            if (!flyoverActivo) break;
-
-            // 2. Abrir el popup
-            if (marcadoresEstaciones[nombreEstacion]) {
-                marcadoresEstaciones[nombreEstacion].openPopup();
-            }
-
-            // 3. Tiempo de espera para observar los datos
-            await esperar(3000);
-            if (!flyoverActivo) break;
-        }
-
-        // 4. Calcular siguiente índice (Loop infinito)
-        indiceActualFlyover++;
-        if (indiceActualFlyover >= estacionesUnicas.length) {
-            indiceActualFlyover = 0; // Reinicia el ciclo al llegar al final
-        }
-    }
-}
-
-// Función auxiliar para pausas asíncronas
-function esperar(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
    
   </script>
 </body>
